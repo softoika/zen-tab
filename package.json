@@ -4,6 +4,9 @@
   "description": "The tab management tool for Chrome",
   "author": "softoika <zwgntz@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "webpack"
+  },
   "dependencies": {
     "react": "^16.14.0",
     "react-dom": "^16.14.0"
