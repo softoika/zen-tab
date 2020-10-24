@@ -21,7 +21,8 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: "static", to: "." }
+        { from: "static", to: "." },
+        { from: "node_modules/webextension-polyfill/dist/browser-polyfill.js" }
       ]
     })
   ],
