@@ -25,12 +25,39 @@ chrome.tabs.onActivated.addListener((tab) => {
   console.log("onActivated", tab);
 });
 
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") {
+    const value = await browser.storage.local.get("tabs");
+    let tabs: chrome.tabs.Tab[] = value.tabs ?? [];
+    tabs = tabs.map((t) => {
+      if (tabId === t.id) {
+        return tab;
+      } else {
+        return t;
+      }
+    });
+    chrome.storage.local.set({ tabs });
+    // console.log("onUpdated", tabs);
+  }
+});
+
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   chrome.alarms.clear(`${tabId}`);
-  const value = await browser.storage.local.get("tabs");
+  const value = await browser.storage.local.get(["tabs", "history"]);
   let tabs: chrome.tabs.Tab[] = value.tabs ?? [];
+  let history: { title?: string; url?: string; faviconUrl?: string }[] =
+    value.history ?? [];
+  const removedTab = tabs.find((tab) => tab.id === tabId);
+  history = [
+    {
+      title: removedTab?.title,
+      url: removedTab?.url ?? removedTab?.pendingUrl,
+      faviconUrl: removedTab?.favIconUrl,
+    },
+    ...history,
+  ];
   tabs = tabs.filter((tab) => tab.id !== tabId);
-  chrome.storage.local.set({ tabs });
+  chrome.storage.local.set({ tabs, history });
   console.log("onRemoved", tabId, tabs);
 });
 
