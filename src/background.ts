@@ -1,5 +1,8 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
+import { TabStorageService } from "./tab-storage-service";
+
+const tabStorageService = new TabStorageService(browser.storage.local);
 
 const countStart = async (tabId: number) => {
   chrome.alarms.clear(`${tabId}`);
@@ -12,12 +15,9 @@ const countStart = async (tabId: number) => {
   chrome.storage.local.set({ lastTabId: tabId });
 };
 
-chrome.tabs.onCreated.addListener(async (tab) => {
-  const value = await browser.storage.local.get("tabs");
-  const tabs: chrome.tabs.Tab[] = value.tabs ?? [];
-  tabs.push(tab);
-  chrome.storage.local.set({ tabs });
-  console.log("onCreated", tabs);
+chrome.tabs.onCreated.addListener((tab) => {
+  console.log("onCreated", tab);
+  tabStorageService.add(tab);
 });
 
 chrome.tabs.onActivated.addListener((tab) => {
@@ -42,23 +42,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
+  console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
-  const value = await browser.storage.local.get(["tabs", "history"]);
-  let tabs: chrome.tabs.Tab[] = value.tabs ?? [];
-  let history: { title?: string; url?: string; faviconUrl?: string }[] =
-    value.history ?? [];
-  const removedTab = tabs.find((tab) => tab.id === tabId);
-  history = [
-    {
-      title: removedTab?.title,
-      url: removedTab?.url ?? removedTab?.pendingUrl,
-      faviconUrl: removedTab?.favIconUrl,
-    },
-    ...history,
-  ];
-  tabs = tabs.filter((tab) => tab.id !== tabId);
-  chrome.storage.local.set({ tabs, history });
-  console.log("onRemoved", tabId, tabs);
+  tabStorageService.remove(tabId);
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
