@@ -25,19 +25,10 @@ chrome.tabs.onActivated.addListener((tab) => {
   console.log("onActivated", tab);
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    const value = await browser.storage.local.get("tabs");
-    let tabs: chrome.tabs.Tab[] = value.tabs ?? [];
-    tabs = tabs.map((t) => {
-      if (tabId === t.id) {
-        return tab;
-      } else {
-        return t;
-      }
-    });
-    chrome.storage.local.set({ tabs });
-    // console.log("onUpdated", tabs);
+    // console.log("onUpdated", tab);
+    tabStorageService.update(tab);
   }
 });
 

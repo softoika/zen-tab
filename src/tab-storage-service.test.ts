@@ -105,4 +105,35 @@ describe("TabStorageService", () => {
       done();
     });
   });
+
+  describe(".update(tab)", () => {
+    test("update the tab that matches the tab's id ", async (done) => {
+      const tab1 = { ...DEFAULT_TAB, id: 1 };
+      const oldTab2 = {
+        ...DEFAULT_TAB,
+        id: 2,
+        title: "New Tab",
+        pendingUrl: "chrome::/newtab",
+      };
+      const newTab2 = {
+        ...DEFAULT_TAB,
+        id: 2,
+        title: "Google",
+        pendingUrl: "https://google.com",
+      };
+      localStorage.get.mockResolvedValue({ tabs: [tab1, oldTab2] });
+      await service.update(newTab2);
+      expect(localStorage.set.mock.calls[0][0]?.tabs).toEqual([tab1, newTab2]);
+      done();
+    });
+
+    test("doesn't update if the provided tab's id is undefined", async (done) => {
+      const tab1 = { ...DEFAULT_TAB, id: undefined };
+      const tab2 = { ...DEFAULT_TAB, id: undefined, title: "abnormal case" };
+      localStorage.get.mockResolvedValue({ tabs: [tab1] });
+      await service.update(tab2);
+      expect(localStorage.set).toBeCalledTimes(0);
+      done();
+    });
+  });
 });

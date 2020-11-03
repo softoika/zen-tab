@@ -48,4 +48,16 @@ export class TabStorageService {
     ];
     this.localStorage.set({ tabs, history });
   }
+
+  async update(newTab: chrome.tabs.Tab) {
+    if (!newTab.id) {
+      return;
+    }
+    const storage: Pick<TabStorage, "tabs"> = await this.localStorage.get(
+      "tabs"
+    );
+    const tabs =
+      storage.tabs?.map((tab) => (newTab.id === tab.id ? newTab : tab)) ?? [];
+    this.localStorage.set({ tabs });
+  }
 }
