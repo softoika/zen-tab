@@ -60,4 +60,17 @@ export class TabStorageService {
       storage.tabs?.map((tab) => (newTab.id === tab.id ? newTab : tab)) ?? [];
     this.localStorage.set({ tabs });
   }
+
+  async getLastTabId(): Promise<TabId> {
+    return this.localStorage
+      .get("lastTabId")
+      .then((storage: Pick<TabStorage, "lastTabId">) => storage.lastTabId);
+  }
+
+  upateLastTabId(tabId: TabId) {
+    if (!tabId) {
+      return;
+    }
+    this.localStorage.set({ lastTabId: tabId });
+  }
 }

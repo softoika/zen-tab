@@ -136,4 +136,25 @@ describe("TabStorageService", () => {
       done();
     });
   });
+
+  describe(".getLastTabId()", () => {
+    test("get lastTabId from local storage", async (done) => {
+      localStorage.get.mockResolvedValue({ lastTabId: 1 });
+      const id = await service.getLastTabId();
+      expect(id).toBe(1);
+      done();
+    });
+  });
+
+  describe(".updateLastTabId(tabId)", () => {
+    test("update lastTabId with the given tabId", () => {
+      service.upateLastTabId(1);
+      expect(localStorage.set).toBeCalledWith({ lastTabId: 1 });
+    });
+
+    test("doesn't update if the given tabId is undefined", () => {
+      service.upateLastTabId(undefined);
+      expect(localStorage.set).toBeCalledTimes(0);
+    });
+  });
 });

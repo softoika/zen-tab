@@ -6,13 +6,13 @@ const tabStorageService = new TabStorageService(browser.storage.local);
 
 const countStart = async (tabId: number) => {
   chrome.alarms.clear(`${tabId}`);
-  const value = await browser.storage.local.get("lastTabId");
-  if (value.lastTabId != null) {
-    console.log(`${value.lastTabId} count start!`);
+  const lastTabId = await tabStorageService.getLastTabId();
+  if (lastTabId != null) {
+    console.log(`${lastTabId} count start!`);
     const when = dayjs().add(30, "second").valueOf();
-    chrome.alarms.create(`${value.lastTabId}`, { when });
+    chrome.alarms.create(`${lastTabId}`, { when });
   }
-  chrome.storage.local.set({ lastTabId: tabId });
+  tabStorageService.upateLastTabId(tabId);
 };
 
 chrome.tabs.onCreated.addListener((tab) => {
