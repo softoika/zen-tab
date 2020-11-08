@@ -1,6 +1,6 @@
 import type { Storage } from "webextension-polyfill-ts";
 
-type TabId = chrome.tabs.Tab["id"];
+export type TabId = chrome.tabs.Tab["id"];
 
 type ClosedTab = Pick<chrome.tabs.Tab, "title" | "url" | "favIconUrl">;
 
