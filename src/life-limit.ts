@@ -1,7 +1,7 @@
 import type { Alarms } from "webextension-polyfill-ts";
 import { TabId, TabStorageService } from "./tab-storage-service";
 
-export class Counter {
+export class LifeLimit {
   constructor(
     private tabStorageService: TabStorageService,
     private alarms: Alarms.Static
