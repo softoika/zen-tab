@@ -1,19 +1,10 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
+import { LifeLimit } from "./life-limit";
 import { TabStorageService } from "./tab-storage-service";
 
 const tabStorageService = new TabStorageService(browser.storage.local);
-
-const countStart = async (tabId: number) => {
-  chrome.alarms.clear(`${tabId}`);
-  const lastTabId = await tabStorageService.getLastTabId();
-  if (lastTabId != null) {
-    console.log(`${lastTabId} count start!`);
-    const when = dayjs().add(30, "second").valueOf();
-    chrome.alarms.create(`${lastTabId}`, { when });
-  }
-  tabStorageService.upateLastTabId(tabId);
-};
+const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
 
 chrome.tabs.onCreated.addListener((tab) => {
   console.log("onCreated", tab);
@@ -21,7 +12,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onActivated.addListener((tab) => {
-  countStart(tab.tabId);
+  lifeLimit.countDown(tab.tabId, dayjs().add(30, "second").valueOf());
   console.log("onActivated", tab);
 });
 
