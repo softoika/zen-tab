@@ -48,8 +48,10 @@ chrome.runtime.onInstalled.addListener((details) => {
   chrome.alarms.clear();
 });
 
-chrome.runtime.onSuspend.addListener(() => {
-  console.log("onSuspend");
-  chrome.storage.local.clear();
-  chrome.alarms.clear();
+chrome.management.onEnabled.addListener((info) => {
+  console.log("onEnabled", info);
+  if (chrome.runtime.id === info.id) {
+    chrome.storage.local.clear();
+    chrome.alarms.clear();
+  }
 });
