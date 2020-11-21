@@ -1,5 +1,7 @@
 import type { Alarms } from "webextension-polyfill-ts";
-import { TabId, TabStorageService } from "./tab-storage-service";
+import { TabStorageService } from "./tab-storage-service";
+
+type Tab = chrome.tabs.Tab;
 
 export class LifeLimit {
   constructor(
@@ -11,7 +13,7 @@ export class LifeLimit {
    * @param tabId
    * @param when Unix timestamps (milliseconds)
    */
-  async countDown(tabId: TabId, when: number) {
+  async countDown(tabId: Tab["id"], when: number) {
     if (!tabId) {
       return;
     }

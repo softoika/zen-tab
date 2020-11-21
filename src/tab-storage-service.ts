@@ -1,19 +1,20 @@
 import type { Storage } from "webextension-polyfill-ts";
 
-export type TabId = chrome.tabs.Tab["id"];
+type Tab = chrome.tabs.Tab;
+type TabId = Tab["id"];
 
-type ClosedTab = Pick<chrome.tabs.Tab, "title" | "url" | "favIconUrl">;
+type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 interface TabStorage {
   lastTabId?: TabId;
-  tabs?: chrome.tabs.Tab[];
+  tabs?: Tab[];
   history?: ClosedTab[];
 }
 
 export class TabStorageService {
   constructor(private localStorage: Storage.LocalStorageArea) {}
 
-  async add(tab: chrome.tabs.Tab) {
+  async add(tab: Tab) {
     const storage: Pick<TabStorage, "tabs"> = await this.localStorage.get(
       "tabs"
     );
@@ -49,7 +50,7 @@ export class TabStorageService {
     this.localStorage.set({ tabs, history });
   }
 
-  async update(newTab: chrome.tabs.Tab) {
+  async update(newTab: Tab) {
     if (!newTab.id) {
       return;
     }
