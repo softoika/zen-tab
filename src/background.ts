@@ -42,16 +42,21 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 //   console.log("debug storage: ", changes);
 // });
 
+const onInitExtension = async () => {
+  const tabs = await browser.tabs.query({ windowType: "normal" });
+  tabStorageService.updateAllTabs(tabs);
+  chrome.alarms.clear();
+  // TODO: Set alarms for all tabs
+};
+
 chrome.runtime.onInstalled.addListener((details) => {
   console.log("onInstalled", details);
-  chrome.storage.local.clear();
-  chrome.alarms.clear();
+  onInitExtension();
 });
 
 chrome.management.onEnabled.addListener((info) => {
   console.log("onEnabled", info);
   if (chrome.runtime.id === info.id) {
-    chrome.storage.local.clear();
-    chrome.alarms.clear();
+    onInitExtension();
   }
 });

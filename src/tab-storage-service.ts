@@ -1,6 +1,6 @@
 import type { Storage } from "webextension-polyfill-ts";
+import { Tab } from "./types";
 
-type Tab = chrome.tabs.Tab;
 type TabId = Tab["id"];
 
 type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
@@ -59,6 +59,10 @@ export class TabStorageService {
     );
     const tabs =
       storage.tabs?.map((tab) => (newTab.id === tab.id ? newTab : tab)) ?? [];
+    this.localStorage.set({ tabs });
+  }
+
+  updateAllTabs(tabs: Tab[]) {
     this.localStorage.set({ tabs });
   }
 
