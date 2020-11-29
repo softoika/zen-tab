@@ -1,7 +1,6 @@
 import type { Alarms } from "webextension-polyfill-ts";
 import { TabStorageService } from "./tab-storage-service";
-
-type Tab = chrome.tabs.Tab;
+import { Tab } from "./types";
 
 export class LifeLimit {
   constructor(
