@@ -19,8 +19,9 @@ export interface Options {
 export class OptionsService {
   constructor(private storage: Storage.SyncStorageAreaSync) {}
 
-  set(options: Options) {
+  set(options: Options): OptionsService {
     this.storage.set(options);
+    return this;
   }
 
   get(): Promise<Options>;

@@ -14,6 +14,18 @@ interface TabStorage {
 export class TabStorageService {
   constructor(private localStorage: Storage.LocalStorageArea) {}
 
+  get(): Promise<TabStorage>;
+  get<K extends keyof TabStorage, V extends TabStorage[K]>(key: K): Promise<V>;
+  async get<K extends keyof TabStorage, V extends TabStorage[K]>(
+    key?: K
+  ): Promise<TabStorage | V> {
+    if (!key) {
+      return this.localStorage.get();
+    }
+    const storage = await this.localStorage.get(key);
+    return storage[key];
+  }
+
   async add(tab: Tab) {
     const storage: Pick<TabStorage, "tabs"> = await this.localStorage.get(
       "tabs"
