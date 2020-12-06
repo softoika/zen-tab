@@ -1,3 +1,5 @@
+type Flatten<T> = { [P in keyof T]: T[P] };
+
 /**
  * A utility type that makes specific propertis(U) of an object(T) optional.
  *
@@ -11,7 +13,7 @@ type OptinalProps<
   T,
   U extends keyof T,
   _V extends keyof T = Exclude<keyof T, U>
-> = { [P in U]?: T[P] } & { [P in _V]: T[P] };
+> = Flatten<{ [P in U]?: T[P] } & { [P in _V]: T[P] }>;
 
 /**
  * The tab type of webextension-pollyfill-ts does not support `selected` property.
