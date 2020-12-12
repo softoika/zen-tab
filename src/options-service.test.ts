@@ -1,5 +1,6 @@
-import { Options, OptionsService } from "./options-service";
 import { browser, Storage } from "webextension-polyfill-ts";
+import { OptionsService } from "./options-service";
+import type { Options } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -30,6 +31,35 @@ describe("OptionsService", () => {
   afterEach(() => {
     syncStorage.get.mockReset();
     syncStorage.set.mockReset();
+  });
+
+  describe(".init()", () => {
+    test("set default options for production", async (done) => {
+      jest.mock("./default-options.prod", () => ({
+        defaultOptions: { dummyOptions: "prod" },
+      }));
+      await service.init("production");
+      expect(syncStorage.set).toBeCalledWith({ dummyOptions: "prod" });
+      done();
+    });
+
+    test("set default options for development", async (done) => {
+      jest.mock("./default-options.dev", () => ({
+        defaultOptions: { dummyOptions: "dev" },
+      }));
+      await service.init("development");
+      expect(syncStorage.set).toBeCalledWith({ dummyOptions: "dev" });
+      done();
+    });
+
+    test("fallback to production mode", async (done) => {
+      jest.mock("./default-options.prod", () => ({
+        defaultOptions: { dummyOptions: "prod" },
+      }));
+      await service.init("proudction"); // typo
+      expect(syncStorage.set).toBeCalledWith({ dummyOptions: "prod" });
+      done();
+    });
   });
 
   test(".get() get all options", async (done) => {

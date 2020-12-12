@@ -5,7 +5,8 @@
   "author": "softoika <zwgntz@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
     "test": "jest",
     "lint": "eslint src/ && prettier --check src/",
     "format": "prettier --write src/"

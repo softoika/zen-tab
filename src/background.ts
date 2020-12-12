@@ -1,15 +1,20 @@
 import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
 import { OptionsService } from "./options-service";
 import { TabStorageService } from "./tab-storage-service";
 
-dayjs.extend(duration);
-const optionsService = new OptionsService(browser.storage.sync).set({
-  minTabs: 5,
-  baseLimit: dayjs.duration(30, "seconds").asMilliseconds(),
-});
+let _optionsService: Promise<OptionsService>;
+async function getOpionsService(): Promise<OptionsService> {
+  if (_optionsService) {
+    return _optionsService;
+  }
+  _optionsService = new OptionsService(browser.storage.sync).init(
+    process.env.NODE_ENV
+  );
+  return _optionsService;
+}
+
 const tabStorageService = new TabStorageService(browser.storage.local);
 const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
 
@@ -19,6 +24,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
+  const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
   lifeLimit.countDown(tab.tabId, dayjs().valueOf() + baseLimit);
   console.log("onActivated", tab);
@@ -42,6 +48,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   const tab = await browser.tabs.get(tabId);
   // TODO count a number of tabs in each window
   const tabs = await browser.tabs.query({ windowType: "normal" });
+  const optionsService = await getOpionsService();
   const minTabs = await optionsService.get("minTabs");
   if (tab && tabs.length > minTabs) {
     console.log(`Removed ${tabId}`);
@@ -64,6 +71,7 @@ const onInitExtension = async () => {
   // Set alarms for all tabs
   // Must delay alarms in each tab because it is not able to close tabs syncronously.
   let delay = 1000;
+  const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
   tabs
     .map((tab) => tab.id)
