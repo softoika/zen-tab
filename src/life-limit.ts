@@ -1,6 +1,6 @@
 import type { Alarms } from "webextension-polyfill-ts";
-import { TabStorageService } from "./tab-storage-service";
-import { Tab } from "./types";
+import type { TabStorageService } from "./tab-storage-service";
+import type { Tab } from "./types";
 
 export class LifeLimit {
   constructor(

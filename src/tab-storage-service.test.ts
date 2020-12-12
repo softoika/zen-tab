@@ -1,5 +1,6 @@
 import { TabStorageService } from "./tab-storage-service";
-import { browser, Storage } from "webextension-polyfill-ts";
+import type { Storage } from "webextension-polyfill-ts";
+import { browser } from "webextension-polyfill-ts";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -11,9 +12,8 @@ jest.mock("webextension-polyfill-ts", () => ({
     },
   },
 }));
-const localStorage = browser.storage.local as jest.Mocked<
-  Storage.LocalStorageArea
->;
+const localStorage = browser.storage
+  .local as jest.Mocked<Storage.LocalStorageArea>;
 
 const DEFAULT_TAB: chrome.tabs.Tab = {
   id: 1,

@@ -1,4 +1,5 @@
-import { browser, Storage } from "webextension-polyfill-ts";
+import { browser } from "webextension-polyfill-ts";
+import type { Storage } from "webextension-polyfill-ts";
 import { OptionsService } from "./options-service";
 import type { Options } from "./types";
 

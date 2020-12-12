@@ -1,5 +1,5 @@
 import type { Storage } from "webextension-polyfill-ts";
-import { Tab } from "./types";
+import type { Tab } from "./types";
 
 type TabId = Tab["id"];
 

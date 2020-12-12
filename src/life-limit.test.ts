@@ -1,4 +1,5 @@
-import { browser, Storage } from "webextension-polyfill-ts";
+import type { Storage } from "webextension-polyfill-ts";
+import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
 import { TabStorageService } from "./tab-storage-service";
 
