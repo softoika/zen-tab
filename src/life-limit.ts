@@ -9,18 +9,19 @@ export class LifeLimit {
   ) {}
 
   /**
-   * @param tabId
+   * Set alarm for a last activated tab.
+   * @param newTabId
    * @param when Unix timestamps (milliseconds)
    */
-  async countDown(tabId: Tab["id"], when: number) {
-    if (!tabId) {
+  async expireLastTab(newTabId: Tab["id"], when: number) {
+    if (!newTabId) {
       return;
     }
-    await this.alarms.clear(`${tabId}`);
+    await this.alarms.clear(`${newTabId}`);
     const lastTabId = await this.tabStorageService.getLastTabId();
     if (lastTabId) {
       this.alarms.create(`${lastTabId}`, { when });
     }
-    this.tabStorageService.upateLastTabId(tabId);
+    this.tabStorageService.upateLastTabId(newTabId);
   }
 }

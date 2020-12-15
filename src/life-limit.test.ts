@@ -27,11 +27,11 @@ fdescribe("LifeLimit", () => {
     (browser.alarms.clear as jest.Mock).mockReset();
   });
 
-  describe(".countDown()", () => {
+  describe(".expireLastTab()", () => {
     test("just update the lastTabId if the current lastTabId is undefined", async (done) => {
       tabStorageService.getLastTabId.mockResolvedValue(undefined);
       const tabId = 1234;
-      await lifeLimit.countDown(tabId, 0);
+      await lifeLimit.expireLastTab(tabId, 0);
       expect(tabStorageService.upateLastTabId).toBeCalledWith(tabId);
       expect(browser.alarms.clear).toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
@@ -43,14 +43,14 @@ fdescribe("LifeLimit", () => {
       tabStorageService.getLastTabId.mockResolvedValue(lastTabId);
       const tabId = 1234;
       const when = 1605316150185;
-      await lifeLimit.countDown(tabId, when);
+      await lifeLimit.expireLastTab(tabId, when);
       expect(tabStorageService.upateLastTabId).toBeCalledWith(tabId);
       expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, { when });
       done();
     });
 
     test("do nothing if the provided tabId is undefined", async (done) => {
-      await lifeLimit.countDown(undefined, 0);
+      await lifeLimit.expireLastTab(undefined, 0);
       expect(tabStorageService.upateLastTabId).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();

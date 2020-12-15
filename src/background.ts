@@ -26,7 +26,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 chrome.tabs.onActivated.addListener(async (tab) => {
   const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
-  lifeLimit.countDown(tab.tabId, dayjs().valueOf() + baseLimit);
+  lifeLimit.expireLastTab(tab.tabId, dayjs().valueOf() + baseLimit);
   console.log("onActivated", tab);
 });
 
