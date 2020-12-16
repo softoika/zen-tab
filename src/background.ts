@@ -65,21 +65,9 @@ const onInitExtension = async () => {
     windowType: "normal",
     active: false,
   });
-  tabStorageService.updateAllTabs(tabs);
-  chrome.alarms.clear();
-  // Set alarms for all tabs
-  // Must delay alarms in each tab because it is not able to close tabs syncronously.
-  let delay = 1000;
   const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
-  tabs
-    .map((tab) => tab.id)
-    .forEach((tabId) => {
-      browser.alarms.create(`${tabId}`, {
-        when: dayjs().valueOf() + baseLimit + delay,
-      });
-      delay += 1000;
-    });
+  lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf() + baseLimit);
 };
 
 chrome.runtime.onInstalled.addListener((details) => {
