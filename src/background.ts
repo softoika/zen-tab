@@ -65,7 +65,6 @@ const onInitExtension = async () => {
     windowType: "normal",
     active: false,
   });
-  console.log(tabs.length);
   tabStorageService.updateAllTabs(tabs);
   chrome.alarms.clear();
   // Set alarms for all tabs

@@ -56,4 +56,10 @@ fdescribe("LifeLimit", () => {
       done();
     });
   });
+
+  describe(".expireInactiveTabs()", () => {
+    test("create alarms for given tabs", async (done) => {
+      done();
+    });
+  });
 });
