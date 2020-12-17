@@ -26,7 +26,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 chrome.tabs.onActivated.addListener(async (tab) => {
   const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
-  lifeLimit.expireLastTab(tab.tabId, dayjs().valueOf() + baseLimit);
+  lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
   console.log("onActivated", tab);
 });
 
@@ -46,8 +46,10 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   console.log("onAlarm", alarm);
   const tabId = +alarm.name;
   const tab = await browser.tabs.get(tabId);
-  // TODO count a number of tabs in each window
-  const tabs = await browser.tabs.query({ windowType: "normal" });
+  const tabs = await browser.tabs.query({
+    windowType: "normal",
+    windowId: tab.windowId,
+  });
   const optionsService = await getOpionsService();
   const minTabs = await optionsService.get("minTabs");
   if (tab && tabs.length > minTabs) {

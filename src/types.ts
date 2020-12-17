@@ -26,7 +26,15 @@ type OptinalProps<
  */
 export type Tab = OptinalProps<
   chrome.tabs.Tab,
-  "selected" | "windowId" | "discarded" | "autoDiscardable"
+  | "selected"
+  | "windowId"
+  | "discarded"
+  | "autoDiscardable"
+  | "index"
+  | "pinned"
+  | "highlighted"
+  | "active"
+  | "incognito"
 >;
 
 export interface Options {

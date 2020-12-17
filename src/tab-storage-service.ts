@@ -5,8 +5,10 @@ type TabId = Tab["id"];
 
 type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
+type LastTab = Pick<Tab, "id" | "windowId">;
+
 interface TabStorage {
-  lastTabId?: TabId;
+  lastTab?: LastTab;
   tabs?: Tab[];
   history?: ClosedTab[];
 }
@@ -78,16 +80,16 @@ export class TabStorageService {
     this.localStorage.set({ tabs });
   }
 
-  async getLastTabId(): Promise<TabId> {
-    return this.localStorage
-      .get("lastTabId")
-      .then((storage: Pick<TabStorage, "lastTabId">) => storage.lastTabId);
+  async getLastTab(): Promise<LastTab> {
+    return this.localStorage.get("lastTab").then((storage) => storage.lastTab);
   }
 
-  upateLastTabId(tabId: TabId) {
-    if (!tabId) {
+  upateLastTab(tab: chrome.tabs.TabActiveInfo) {
+    if (!tab?.tabId) {
       return;
     }
-    this.localStorage.set({ lastTabId: tabId });
+    this.localStorage.set({
+      lastTab: { id: tab.tabId, windowId: tab.windowId },
+    });
   }
 }

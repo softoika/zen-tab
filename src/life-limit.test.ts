@@ -23,18 +23,21 @@ describe("LifeLimit", () => {
   });
 
   afterEach(() => {
-    tabStorageService.upateLastTabId.mockReset();
-    tabStorageService.getLastTabId.mockReset();
+    tabStorageService.upateLastTab.mockReset();
+    tabStorageService.getLastTab.mockReset();
     (browser.alarms.create as jest.Mock).mockReset();
     (browser.alarms.clear as jest.Mock).mockReset();
   });
 
   describe(".expireLastTab()", () => {
     test("just update the lastTabId if the current lastTabId is undefined", async (done) => {
-      tabStorageService.getLastTabId.mockResolvedValue(undefined);
-      const tabId = 1234;
-      await lifeLimit.expireLastTab(tabId, 0);
-      expect(tabStorageService.upateLastTabId).toBeCalledWith(tabId);
+      tabStorageService.getLastTab.mockResolvedValue({
+        id: undefined,
+        windowId: 1,
+      });
+      const tab = { tabId: 1234, windowId: 1 };
+      await lifeLimit.expireLastTab(tab, 0);
+      expect(tabStorageService.upateLastTab).toBeCalledWith(tab);
       expect(browser.alarms.clear).toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
@@ -42,19 +45,15 @@ describe("LifeLimit", () => {
 
     test("create an alarm with lastTabId and unix timestamp", async (done) => {
       const lastTabId = 111;
-      tabStorageService.getLastTabId.mockResolvedValue(lastTabId);
-      const tabId = 1234;
+      tabStorageService.getLastTab.mockResolvedValue({
+        id: lastTabId,
+        windowId: 1,
+      });
+      const tab = { tabId: 1234, windowId: 1 };
       const when = 1605316150185;
-      await lifeLimit.expireLastTab(tabId, when);
-      expect(tabStorageService.upateLastTabId).toBeCalledWith(tabId);
+      await lifeLimit.expireLastTab(tab, when);
+      expect(tabStorageService.upateLastTab).toBeCalledWith(tab);
       expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, { when });
-      done();
-    });
-
-    test("do nothing if the provided tabId is undefined", async (done) => {
-      await lifeLimit.expireLastTab(undefined, 0);
-      expect(tabStorageService.upateLastTabId).not.toBeCalled();
-      expect(browser.alarms.create).not.toBeCalled();
       done();
     });
   });
@@ -62,13 +61,16 @@ describe("LifeLimit", () => {
   describe(".expireInactiveTabs()", () => {
     test("create alarms for given tabs", async (done) => {
       const tabs: Tab[] = [
-        { ...DEFAULT_TAB, id: 1 },
-        { ...DEFAULT_TAB, id: 2 },
-        { ...DEFAULT_TAB, id: 3 },
+        { ...DEFAULT_TAB, id: 1, windowId: 1 },
+        { ...DEFAULT_TAB, id: 2, windowId: 1 },
+        { ...DEFAULT_TAB, id: 3, windowId: 1 },
       ];
       const when = 1608123162004;
       await lifeLimit.expireInactiveTabs(tabs, when);
-      expect(tabStorageService.upateLastTabId).toBeCalledWith(3);
+      expect(tabStorageService.upateLastTab).toBeCalledWith({
+        tabId: 3,
+        windowId: 1,
+      });
       expect(browser.alarms.create).toBeCalledWith("1", { when });
       expect(browser.alarms.create).toBeCalledWith("2", { when: when + 1000 });
       expect(browser.alarms.create).toBeCalledWith("3", { when: when + 2000 });
@@ -77,7 +79,7 @@ describe("LifeLimit", () => {
 
     test("do nothing if the tabs are empty", async (done) => {
       await lifeLimit.expireInactiveTabs([], 0);
-      expect(tabStorageService.upateLastTabId).not.toBeCalled();
+      expect(tabStorageService.upateLastTab).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
     });

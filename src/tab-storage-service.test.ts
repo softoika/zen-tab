@@ -125,24 +125,22 @@ describe("TabStorageService", () => {
     });
   });
 
-  describe(".getLastTabId()", () => {
+  describe(".getLastTab()", () => {
     test("get lastTabId from local storage", async (done) => {
-      localStorage.get.mockResolvedValue({ lastTabId: 1 });
-      const id = await service.getLastTabId();
-      expect(id).toBe(1);
+      localStorage.get.mockResolvedValue({ lastTab: { id: 1, windowId: 1 } });
+      const lastTab = await service.getLastTab();
+      expect(lastTab).toEqual({ id: 1, windowId: 1 });
       done();
     });
   });
 
-  describe(".updateLastTabId(tabId)", () => {
+  describe(".updateLastTab(tab)", () => {
     test("update lastTabId with the given tabId", () => {
-      service.upateLastTabId(1);
-      expect(localStorage.set).toBeCalledWith({ lastTabId: 1 });
-    });
-
-    test("doesn't update if the given tabId is undefined", () => {
-      service.upateLastTabId(undefined);
-      expect(localStorage.set).toBeCalledTimes(0);
+      const tab = { tabId: 1, windowId: 1 };
+      service.upateLastTab(tab);
+      expect(localStorage.set).toBeCalledWith({
+        lastTab: { id: 1, windowId: 1 },
+      });
     });
   });
 });

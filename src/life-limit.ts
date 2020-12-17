@@ -16,16 +16,16 @@ export class LifeLimit {
   /**
    * Set alarm for a last activated tab.
    */
-  async expireLastTab(newTabId: Tab["id"], when: When) {
-    if (!newTabId) {
+  async expireLastTab(newTab: chrome.tabs.TabActiveInfo, when: When) {
+    if (!newTab?.tabId) {
       return;
     }
-    await this.alarms.clear(`${newTabId}`);
-    const lastTabId = await this.tabStorageService.getLastTabId();
-    if (lastTabId) {
-      this.alarms.create(`${lastTabId}`, { when });
+    await this.alarms.clear(`${newTab.tabId}`);
+    const lastTab = await this.tabStorageService.getLastTab();
+    if (lastTab?.id) {
+      this.alarms.create(`${lastTab.id}`, { when });
     }
-    this.tabStorageService.upateLastTabId(newTabId);
+    this.tabStorageService.upateLastTab(newTab);
   }
 
   /**
@@ -50,9 +50,12 @@ export class LifeLimit {
         totalDelay += delayUnit;
       });
 
-    const lastTabId = inactiveTabs?.[inactiveTabs.length - 1]?.id;
-    if (lastTabId) {
-      this.tabStorageService.upateLastTabId(lastTabId);
+    const lastTab = inactiveTabs?.[inactiveTabs.length - 1];
+    if (lastTab?.id && lastTab?.windowId) {
+      this.tabStorageService.upateLastTab({
+        tabId: lastTab.id,
+        windowId: lastTab.windowId,
+      });
     }
   }
 }
