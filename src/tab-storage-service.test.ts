@@ -143,4 +143,34 @@ describe("TabStorageService", () => {
       });
     });
   });
+
+  describe(".pushLastTab(tab)", () => {
+    test("push a tab to lastTabStack", async (done) => {
+      localStorage.get.mockResolvedValue({});
+      const tab1 = { tabId: 1, windowId: 999 };
+      await service.pushLastTab(tab1);
+      expect(localStorage.set).toBeCalledWith({
+        lastTabStack: { 999: [{ id: 1 }] },
+      });
+
+      localStorage.get.mockResolvedValue({
+        lastTabStack: { 999: [{ id: 1 }] },
+      });
+      const tab2 = { tabId: 2, windowId: 999 };
+      await service.pushLastTab(tab2);
+      expect(localStorage.set).toBeCalledWith({
+        lastTabStack: { 999: [{ id: 2 }, { id: 1 }] },
+      });
+
+      localStorage.get.mockResolvedValue({
+        lastTabStack: { 999: [{ id: 2 }, { id: 1 }] },
+      });
+      const tab3 = { tabId: 3, windowId: 777 };
+      await service.pushLastTab(tab3);
+      expect(localStorage.set).toBeCalledWith({
+        lastTabStack: { 999: [{ id: 2 }, { id: 1 }], 777: [{ id: 3 }] },
+      });
+      done();
+    });
+  });
 });

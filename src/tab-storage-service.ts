@@ -9,6 +9,7 @@ type LastTab = Pick<Tab, "id" | "windowId">;
 
 interface TabStorage {
   lastTab?: LastTab;
+  lastTabStack?: { [windowId: number]: { id: TabId }[] };
   tabs?: Tab[];
   history?: ClosedTab[];
 }
@@ -91,5 +92,22 @@ export class TabStorageService {
     this.localStorage.set({
       lastTab: { id: tab.tabId, windowId: tab.windowId },
     });
+  }
+
+  async pushLastTab(tab: chrome.tabs.TabActiveInfo) {
+    let {
+      lastTabStack,
+    }: Pick<TabStorage, "lastTabStack"> = await this.localStorage.get(
+      "lastTabStack"
+    );
+    if (!lastTabStack) {
+      lastTabStack = {};
+    }
+    const stack = lastTabStack[tab.windowId] ?? [];
+    lastTabStack = {
+      ...lastTabStack,
+      [tab.windowId]: [{ id: tab.tabId }, ...stack],
+    };
+    this.localStorage.set({ lastTabStack });
   }
 }
