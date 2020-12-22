@@ -52,3 +52,9 @@ export interface Options {
    */
   baseLimit: number;
 }
+
+export type NotNull<T> = T extends null
+  ? never
+  : T extends undefined
+  ? never
+  : T;

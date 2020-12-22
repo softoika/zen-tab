@@ -1,5 +1,5 @@
 import type { Storage } from "webextension-polyfill-ts";
-import type { Tab } from "./types";
+import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
 
@@ -7,9 +7,11 @@ type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 type LastTab = Pick<Tab, "id" | "windowId">;
 
+type TabStack = { id: TabId }[];
+
 interface TabStorage {
   lastTab?: LastTab;
-  lastTabStack?: { [windowId: number]: { id: TabId }[] };
+  lastTabStack?: { [windowId: number]: TabStack };
   tabs?: Tab[];
   history?: ClosedTab[];
 }
@@ -94,20 +96,37 @@ export class TabStorageService {
     });
   }
 
-  async pushLastTab(tab: chrome.tabs.TabActiveInfo) {
-    let {
-      lastTabStack,
-    }: Pick<TabStorage, "lastTabStack"> = await this.localStorage.get(
-      "lastTabStack"
-    );
-    if (!lastTabStack) {
-      lastTabStack = {};
+  async getLastTabId(windowId: Tab["windowId"]): Promise<TabId> {
+    if (!windowId) {
+      return undefined;
     }
+    const stack = await this.getTabStackByWindowId(windowId);
+    return stack?.[0]?.id;
+  }
+
+  async pushLastTab(tab: chrome.tabs.TabActiveInfo) {
+    let lastTabStack = await this.getTabStack();
     const stack = lastTabStack[tab.windowId] ?? [];
     lastTabStack = {
       ...lastTabStack,
       [tab.windowId]: [{ id: tab.tabId }, ...stack],
     };
     this.localStorage.set({ lastTabStack });
+  }
+
+  private async getTabStackByWindowId(
+    windowId: NotNull<Tab["windowId"]>
+  ): Promise<TabStack> {
+    const lastTabStack = await this.getTabStack();
+    return lastTabStack[windowId] ?? [];
+  }
+
+  private async getTabStack(): Promise<NotNull<TabStorage["lastTabStack"]>> {
+    const {
+      lastTabStack,
+    }: Pick<TabStorage, "lastTabStack"> = await this.localStorage.get(
+      "lastTabStack"
+    );
+    return lastTabStack ?? {};
   }
 }

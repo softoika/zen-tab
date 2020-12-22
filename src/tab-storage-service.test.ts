@@ -144,6 +144,27 @@ describe("TabStorageService", () => {
     });
   });
 
+  describe.each`
+    lastTabStack                       | windowId     | expectedTabId
+    ${{ 999: [{ id: 1 }] }}            | ${999}       | ${1}
+    ${{ 999: [{ id: 1 }] }}            | ${undefined} | ${undefined}
+    ${{ 999: [{ id: 1 }] }}            | ${777}       | ${undefined}
+    ${{ 999: [] }}                     | ${999}       | ${undefined}
+    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${999}       | ${2}
+  `(
+    ".getLastTabId($windowId: WindowId)",
+    ({ lastTabStack, windowId, expectedTabId }) => {
+      test(`returns ${expectedTabId}: TabId  when the stack is ${JSON.stringify(
+        lastTabStack
+      )}`, async (done) => {
+        localStorage.get.mockResolvedValue({ lastTabStack });
+        const tabId = await service.getLastTabId(windowId);
+        expect(tabId).toBe(expectedTabId);
+        done();
+      });
+    }
+  );
+
   describe(".pushLastTab(tab)", () => {
     test("push a tab to lastTabStack", async (done) => {
       localStorage.get.mockResolvedValue({});
