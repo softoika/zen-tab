@@ -170,6 +170,7 @@ describe("TabStorageService", () => {
     ${{}}                              | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
     ${{ 999: [{ id: 1 }] }}            | ${2}  | ${999}   | ${{ 999: [{ id: 2 }, { id: 1 }] }}
     ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${3}  | ${777}   | ${{ 999: [{ id: 2 }, { id: 1 }], 777: [{ id: 3 }] }}
+    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 1 }, { id: 2 }] }}
   `(
     ".pushLastTab({ tabId: $tabId, windowId: $windowId }) ",
     ({ before, tabId, windowId, expected }) => {

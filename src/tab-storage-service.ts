@@ -104,9 +104,14 @@ export class TabStorageService {
     return stack?.[0]?.id;
   }
 
+  /**
+   * Push the tab on the stack of the most recently activated tabs in each window.
+   * If the tab is in the stack, move it to the top of the stack.
+   */
   async pushLastTab(tab: chrome.tabs.TabActiveInfo) {
     let lastTabStack = await this.getTabStack();
-    const stack = lastTabStack[tab.windowId] ?? [];
+    let stack = lastTabStack[tab.windowId] ?? [];
+    stack = stack.filter(({ id }) => id !== tab.tabId);
     lastTabStack = {
       ...lastTabStack,
       [tab.windowId]: [{ id: tab.tabId }, ...stack],
