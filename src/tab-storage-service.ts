@@ -119,6 +119,20 @@ export class TabStorageService {
     this.localStorage.set({ lastTabStack });
   }
 
+  async removeTabFromStack(
+    tabId: NotNull<TabId>,
+    windowId: NotNull<Tab["windowId"]>
+  ) {
+    let lastTabStack = await this.getTabStack();
+    let stack = lastTabStack[windowId] ?? [];
+    stack = stack.filter(({ id }) => id !== tabId);
+    lastTabStack = {
+      ...lastTabStack,
+      [windowId]: [...stack],
+    };
+    this.localStorage.set({ lastTabStack });
+  }
+
   private async getTabStackByWindowId(
     windowId: NotNull<Tab["windowId"]>
   ): Promise<TabStack> {

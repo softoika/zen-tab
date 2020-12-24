@@ -185,4 +185,24 @@ describe("TabStorageService", () => {
       });
     }
   );
+
+  describe.each`
+    before                             | tabId | windowId | expected
+    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 2 }] }}
+    ${{ 999: [{ id: 1 }] }}            | ${1}  | ${999}   | ${{ 999: [] }}
+    ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [] }}
+    ${{}}                              | ${1}  | ${999}   | ${{ 999: [] }}
+  `(
+    ".removeTabFromStack($tabId: TabId, $windowId: WindowId)",
+    ({ before, tabId, windowId, expected }) => {
+      test(`the stack ${JSON.stringify(before)} should be ${JSON.stringify(
+        expected
+      )}`, async (done) => {
+        localStorage.get.mockResolvedValue({ lastTabStack: before });
+        await service.removeTabFromStack(tabId, windowId);
+        expect(localStorage.set).toBeCalledWith({ lastTabStack: expected });
+        done();
+      });
+    }
+  );
 });
