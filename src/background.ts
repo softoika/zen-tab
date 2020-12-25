@@ -36,10 +36,11 @@ chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId) => {
+chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
   tabStorageService.remove(tabId);
+  tabStorageService.removeTabFromStack(tabId, windowId);
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
@@ -65,7 +66,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
     windowType: "normal",
-    active: false,
   });
   const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
