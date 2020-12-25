@@ -79,14 +79,6 @@ export class TabStorageService {
     this.localStorage.set({ tabs });
   }
 
-  updateAllTabs(tabs: Tab[]) {
-    this.localStorage.set({ tabs });
-  }
-
-  async getLastTab(): Promise<LastTab> {
-    return this.localStorage.get("lastTab").then((storage) => storage.lastTab);
-  }
-
   upateLastTab(tab: chrome.tabs.TabActiveInfo) {
     if (!tab?.tabId) {
       return;

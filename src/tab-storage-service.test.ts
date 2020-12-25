@@ -125,25 +125,6 @@ describe("TabStorageService", () => {
     });
   });
 
-  describe(".getLastTab()", () => {
-    test("get lastTabId from local storage", async (done) => {
-      localStorage.get.mockResolvedValue({ lastTab: { id: 1, windowId: 1 } });
-      const lastTab = await service.getLastTab();
-      expect(lastTab).toEqual({ id: 1, windowId: 1 });
-      done();
-    });
-  });
-
-  describe(".updateLastTab(tab)", () => {
-    test("update lastTabId with the given tabId", () => {
-      const tab = { tabId: 1, windowId: 1 };
-      service.upateLastTab(tab);
-      expect(localStorage.set).toBeCalledWith({
-        lastTab: { id: 1, windowId: 1 },
-      });
-    });
-  });
-
   describe.each`
     lastTabStack                       | windowId     | expectedTabId
     ${{ 999: [{ id: 1 }] }}            | ${999}       | ${1}

@@ -21,25 +21,28 @@ export class LifeLimit {
       return;
     }
     await this.alarms.clear(`${newTab.tabId}`);
-    const lastTab = await this.tabStorageService.getLastTab();
-    if (lastTab?.id) {
-      this.alarms.create(`${lastTab.id}`, { when });
+    const lastTabId = await this.tabStorageService.getLastTabId(
+      newTab.windowId
+    );
+    if (lastTabId) {
+      this.alarms.create(`${lastTabId}`, { when });
     }
-    this.tabStorageService.upateLastTab(newTab);
+    this.tabStorageService.pushLastTab(newTab);
   }
 
   /**
    * Set alarms for all inactive tabs
    */
-  async expireInactiveTabs(inactiveTabs: Tab[], when: When) {
+  async expireInactiveTabs(tabs: Tab[], when: When) {
     this.alarms.clear();
-    if (inactiveTabs.length <= 0) {
+    if (tabs.length <= 0) {
       return;
     }
 
     const delayUnit = 1000;
     let totalDelay = 0;
-    inactiveTabs
+    tabs
+      .filter((tab) => !tab.active)
       .map((tab) => tab.id)
       .forEach((tabId) => {
         if (!tabId) {
@@ -50,12 +53,25 @@ export class LifeLimit {
         totalDelay += delayUnit;
       });
 
-    const lastTab = inactiveTabs?.[inactiveTabs.length - 1];
-    if (lastTab?.id && lastTab?.windowId) {
-      this.tabStorageService.upateLastTab({
-        tabId: lastTab.id,
-        windowId: lastTab.windowId,
+    // active -> inactive order
+    tabs
+      .sort((a, b) => {
+        if (!a.active && b.active) {
+          return 1;
+        }
+        if (a.active && !b.active) {
+          return -1;
+        }
+        return 0;
+      })
+      .forEach((tab) => {
+        if (!tab.id || !tab.windowId) {
+          return;
+        }
+        this.tabStorageService.pushLastTab({
+          tabId: tab.id,
+          windowId: tab.windowId,
+        });
       });
-    }
   }
 }
