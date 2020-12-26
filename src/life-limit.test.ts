@@ -65,13 +65,7 @@ describe("LifeLimit", () => {
       expect(browser.alarms.create).toBeCalledWith("1", { when });
       expect(browser.alarms.create).toBeCalledWith("2", { when: when + 1000 });
       expect(browser.alarms.create).toBeCalledWith("3", { when: when + 2000 });
-      expect(tabStorageService.pushLastTab).toBeCalledTimes(4);
-      expect(tabStorageService.pushLastTab.mock.calls).toEqual([
-        [{ tabId: 4, windowId: 1 }],
-        [{ tabId: 1, windowId: 1 }],
-        [{ tabId: 2, windowId: 1 }],
-        [{ tabId: 3, windowId: 1 }],
-      ]);
+      expect(tabStorageService.createLastTabStack).toBeCalled();
       done();
     });
 

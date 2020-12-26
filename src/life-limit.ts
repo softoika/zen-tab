@@ -53,25 +53,6 @@ export class LifeLimit {
         totalDelay += delayUnit;
       });
 
-    // active -> inactive order
-    tabs
-      .sort((a, b) => {
-        if (!a.active && b.active) {
-          return 1;
-        }
-        if (a.active && !b.active) {
-          return -1;
-        }
-        return 0;
-      })
-      .forEach((tab) => {
-        if (!tab.id || !tab.windowId) {
-          return;
-        }
-        this.tabStorageService.pushLastTab({
-          tabId: tab.id,
-          windowId: tab.windowId,
-        });
-      });
+    this.tabStorageService.createLastTabStack(tabs);
   }
 }

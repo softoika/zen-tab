@@ -2,6 +2,7 @@ import { TabStorageService } from "./tab-storage-service";
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { DEFAULT_TAB } from "./mocks";
+import { Tab } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -186,4 +187,33 @@ describe("TabStorageService", () => {
       });
     }
   );
+
+  describe(".createLastTabStack(tabs)", () => {
+    test("create the stack in each window", () => {
+      const tabs: Tab[] = [
+        { ...DEFAULT_TAB, id: 1, windowId: 999, active: false },
+        { ...DEFAULT_TAB, id: 2, windowId: 777 },
+        { ...DEFAULT_TAB, id: 3, windowId: 999, active: true },
+        { ...DEFAULT_TAB, id: 4, windowId: undefined },
+        { ...DEFAULT_TAB, id: undefined, windowId: 777 },
+      ];
+      service.createLastTabStack(tabs);
+      expect(localStorage.set).toBeCalledWith({
+        lastTabStack: { 999: [{ id: 3 }, { id: 1 }], 777: [{ id: 2 }] },
+      });
+    });
+
+    test("the stack is sorted by its activity", () => {
+      const tabs: Tab[] = [
+        { ...DEFAULT_TAB, id: 1, windowId: 999, active: false },
+        { ...DEFAULT_TAB, id: 2, windowId: 999, active: true },
+        { ...DEFAULT_TAB, id: 3, windowId: 999, active: false },
+      ];
+      service.createLastTabStack(tabs);
+      // an inactive tab is pushed to the last, and an active tab is pushed to the first.
+      expect(localStorage.set).toBeCalledWith({
+        lastTabStack: { 999: [{ id: 2 }, { id: 1 }, { id: 3 }] },
+      });
+    });
+  });
 });

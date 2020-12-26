@@ -7,7 +7,7 @@ type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 type LastTab = Pick<Tab, "id" | "windowId">;
 
-type TabStack = { id: TabId }[];
+type TabStack = { id: NotNull<TabId> }[];
 
 interface TabStorage {
   lastTab?: LastTab;
@@ -94,6 +94,24 @@ export class TabStorageService {
     }
     const stack = await this.getTabStackByWindowId(windowId);
     return stack?.[0]?.id;
+  }
+
+  async createLastTabStack(tabs: Tab[]) {
+    let lastTabStack: { [windowId: number]: TabStack } = {};
+    tabs.forEach((tab) => {
+      if (typeof tab.windowId !== "number" || typeof tab.id !== "number") {
+        return;
+      }
+      let stack = lastTabStack[tab.windowId] ?? [];
+      stack = tab.active
+        ? [{ id: tab.id }, ...stack]
+        : [...stack, { id: tab.id }];
+      lastTabStack = {
+        ...lastTabStack,
+        [tab.windowId]: stack,
+      };
+    });
+    this.localStorage.set({ lastTabStack });
   }
 
   /**
