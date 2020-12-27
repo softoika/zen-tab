@@ -8,6 +8,10 @@ type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 type TabStack = { id: NotNull<TabId> }[];
 
 interface TabStorage {
+  /**
+   * Stacks of last activated tabs in each window.
+   * The tab on the stack will start an alarm on the next activation.
+   */
   lastTabStack?: { [windowId: number]: TabStack };
   tabs?: Tab[];
   history?: ClosedTab[];
