@@ -5,12 +5,9 @@ type TabId = Tab["id"];
 
 type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
-type LastTab = Pick<Tab, "id" | "windowId">;
-
 type TabStack = { id: NotNull<TabId> }[];
 
 interface TabStorage {
-  lastTab?: LastTab;
   lastTabStack?: { [windowId: number]: TabStack };
   tabs?: Tab[];
   history?: ClosedTab[];
@@ -77,15 +74,6 @@ export class TabStorageService {
     const tabs =
       storage.tabs?.map((tab) => (newTab.id === tab.id ? newTab : tab)) ?? [];
     this.localStorage.set({ tabs });
-  }
-
-  upateLastTab(tab: chrome.tabs.TabActiveInfo) {
-    if (!tab?.tabId) {
-      return;
-    }
-    this.localStorage.set({
-      lastTab: { id: tab.tabId, windowId: tab.windowId },
-    });
   }
 
   async getLastTabId(windowId: Tab["windowId"]): Promise<TabId> {

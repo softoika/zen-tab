@@ -25,6 +25,7 @@ describe("LifeLimit", () => {
   afterEach(() => {
     tabStorageService.getLastTabId.mockReset();
     tabStorageService.pushLastTab.mockReset();
+    tabStorageService.createLastTabStack.mockReset();
     (browser.alarms.create as jest.Mock).mockReset();
     (browser.alarms.clear as jest.Mock).mockReset();
   });
@@ -71,7 +72,7 @@ describe("LifeLimit", () => {
 
     test("do nothing if the tabs are empty", async (done) => {
       await lifeLimit.expireInactiveTabs([], 0);
-      expect(tabStorageService.upateLastTab).not.toBeCalled();
+      expect(tabStorageService.createLastTabStack).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
     });
