@@ -2,7 +2,7 @@ import { TabStorageService } from "./tab-storage-service";
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { DEFAULT_TAB } from "./mocks";
-import { Tab } from "./types";
+import type { Tab } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -216,4 +216,42 @@ describe("TabStorageService", () => {
       });
     });
   });
+
+  describe.each`
+    before                             | tabId | windowId | expected
+    ${undefined}                       | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
+    ${{}}                              | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
+    ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
+    ${{ 999: [{ id: 1 }] }}            | ${2}  | ${999}   | ${{ 999: [{ id: 1 }, { id: 2 }] }}
+    ${{ 999: [{ id: 1 }, { id: 2 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 2 }, { id: 1 }] }}
+  `(
+    ".pushOutdatedTab({ id: $tabId, windowId: $windowId })",
+    ({ before, tabId, windowId, expected }) => {
+      test(`outdatedTabs: ${JSON.stringify(before)} should be ${JSON.stringify(
+        expected
+      )}`, async (done) => {
+        localStorage.get.mockResolvedValue({ outdatedTabs: before });
+        await service.pushOutdatedTab({ ...DEFAULT_TAB, id: tabId, windowId });
+        expect(localStorage.set).toBeCalledWith({ outdatedTabs: expected });
+        done();
+      });
+    }
+  );
+
+  describe.each`
+    tabId        | windowId
+    ${undefined} | ${999}
+    ${1}         | ${undefined}
+    ${undefined} | ${undefined}
+  `(
+    ".pushOutdatedTab({ id: $tabId, windowId: $windowId })",
+    ({ tabId, windowId }) => {
+      test("does not change outdatedTabs", async (done) => {
+        localStorage.get.mockResolvedValue({ outdatedTabs: {} });
+        await service.pushOutdatedTab({ ...DEFAULT_TAB, id: tabId, windowId });
+        expect(localStorage.set).not.toBeCalled();
+        done();
+      });
+    }
+  );
 });

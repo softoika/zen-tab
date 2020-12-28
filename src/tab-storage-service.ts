@@ -5,14 +5,22 @@ type TabId = Tab["id"];
 
 type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
-type TabStack = { id: NotNull<TabId> }[];
+type TabIds = { id: NotNull<TabId> }[];
 
 interface TabStorage {
   /**
    * Stacks of last activated tabs in each window.
    * The tab on the stack will start an alarm on the next activation.
+   * The key is the windowId(number). Because type aliases cannot be specified
+   * in index signatures, the `in` keyword is used instead.
    */
-  lastTabStack?: { [windowId: number]: TabStack };
+  lastTabStack?: { [_ in NotNull<Tab["windowId"]>]: TabIds };
+  /**
+   * Lists of outdated tabs in each window.
+   * They are no longer closed by the alarms because of Options.minTabs.
+   * So they can be thought of as having a minus limit time.
+   */
+  outdatedTabs?: { [_ in NotNull<Tab["windowId"]>]: TabIds };
   tabs?: Tab[];
   history?: ClosedTab[];
 }
@@ -89,7 +97,7 @@ export class TabStorageService {
   }
 
   async createLastTabStack(tabs: Tab[]) {
-    let lastTabStack: { [windowId: number]: TabStack } = {};
+    let lastTabStack: { [windowId: number]: TabIds } = {};
     tabs.forEach((tab) => {
       if (typeof tab.windowId !== "number" || typeof tab.id !== "number") {
         return;
@@ -137,7 +145,7 @@ export class TabStorageService {
 
   private async getTabStackByWindowId(
     windowId: NotNull<Tab["windowId"]>
-  ): Promise<TabStack> {
+  ): Promise<TabIds> {
     const lastTabStack = await this.getTabStack();
     return lastTabStack[windowId] ?? [];
   }
@@ -149,5 +157,29 @@ export class TabStorageService {
       "lastTabStack"
     );
     return lastTabStack ?? {};
+  }
+
+  async pushOutdatedTab(tab: Tab) {
+    if (!tab.id) {
+      return;
+    }
+    if (!tab.windowId) {
+      return;
+    }
+    let {
+      outdatedTabs,
+    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
+      "outdatedTabs"
+    );
+    if (!outdatedTabs) {
+      outdatedTabs = {};
+    }
+    let tabs = outdatedTabs[tab.windowId] ?? [];
+    tabs = tabs.filter(({ id }) => id !== tab.id);
+    outdatedTabs = {
+      ...outdatedTabs,
+      [tab.windowId]: [...tabs, { id: tab.id }],
+    };
+    this.localStorage.set({ outdatedTabs });
   }
 }
