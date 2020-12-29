@@ -182,4 +182,16 @@ export class TabStorageService {
     };
     this.localStorage.set({ outdatedTabs });
   }
+
+  async getOutdatedTabs(windowId: NotNull<Tab["windowId"]>): Promise<TabIds> {
+    let {
+      outdatedTabs,
+    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
+      "outdatedTabs"
+    );
+    if (!outdatedTabs) {
+      outdatedTabs = {};
+    }
+    return outdatedTabs[windowId] ?? [];
+  }
 }

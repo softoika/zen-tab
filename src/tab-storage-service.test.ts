@@ -254,4 +254,25 @@ describe("TabStorageService", () => {
       });
     }
   );
+
+  describe.each`
+    outdatedTabs            | windowId | expected
+    ${undefined}            | ${999}   | ${[]}
+    ${{}}                   | ${999}   | ${[]}
+    ${{ 999: [{ id: 1 }] }} | ${999}   | ${[{ id: 1 }]}
+  `(
+    ".getOutdatedTabs($windowId: WindowId)",
+    ({ outdatedTabs, windowId, expected }) => {
+      test(`returns ${JSON.stringify(
+        expected
+      )} when the outdatedTabs is ${JSON.stringify(
+        outdatedTabs
+      )}`, async (done) => {
+        localStorage.get.mockResolvedValue({ outdatedTabs });
+        const tabs = await service.getOutdatedTabs(windowId);
+        expect(tabs).toEqual(expected);
+        done();
+      });
+    }
+  );
 });
