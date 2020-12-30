@@ -18,15 +18,25 @@ async function getOpionsService(): Promise<OptionsService> {
 const tabStorageService = new TabStorageService(browser.storage.local);
 const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
 
-chrome.tabs.onCreated.addListener((tab) => {
+chrome.tabs.onCreated.addListener(async (tab) => {
   console.log("onCreated", tab);
   tabStorageService.add(tab);
+  const optionsService = await getOpionsService();
+  const [{ minTabs }, tabs, outdatedTabs] = await Promise.all([
+    optionsService.get(),
+    browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
+    tabStorageService.getOutdatedTabs(tab.windowId),
+  ]);
+  if (tabs.length > minTabs && outdatedTabs.length > 0) {
+    chrome.tabs.remove(outdatedTabs[0].id);
+  }
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
   const optionsService = await getOpionsService();
   const baseLimit = await optionsService.get("baseLimit");
   lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
+  tabStorageService.removeFromOutdatedTabs(tab.tabId, tab.windowId);
   console.log("onActivated", tab);
 });
 
@@ -41,21 +51,27 @@ chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   chrome.alarms.clear(`${tabId}`);
   tabStorageService.remove(tabId);
   tabStorageService.removeTabFromStack(tabId, windowId);
+  tabStorageService.removeFromOutdatedTabs(tabId, windowId);
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   console.log("onAlarm", alarm);
   const tabId = +alarm.name;
   const tab = await browser.tabs.get(tabId);
+  if (!tab) {
+    return;
+  }
   const tabs = await browser.tabs.query({
     windowType: "normal",
     windowId: tab.windowId,
   });
   const optionsService = await getOpionsService();
   const minTabs = await optionsService.get("minTabs");
-  if (tab && tabs.length > minTabs) {
+  if (tabs.length > minTabs) {
     console.log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
+  } else {
+    tabStorageService.pushOutdatedTab(tab);
   }
 });
 
