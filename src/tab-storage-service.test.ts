@@ -174,6 +174,7 @@ describe("TabStorageService", () => {
     ${{ 999: [{ id: 1 }] }}            | ${1}  | ${999}   | ${{ 999: [] }}
     ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [] }}
     ${{}}                              | ${1}  | ${999}   | ${{ 999: [] }}
+    ${undefined}                       | ${1}  | ${999}   | ${{ 999: [] }}
   `(
     ".removeTabFromStack($tabId: TabId, $windowId: WindowId)",
     ({ before, tabId, windowId, expected }) => {
@@ -271,6 +272,27 @@ describe("TabStorageService", () => {
         localStorage.get.mockResolvedValue({ outdatedTabs });
         const tabs = await service.getOutdatedTabs(windowId);
         expect(tabs).toEqual(expected);
+        done();
+      });
+    }
+  );
+
+  describe.each`
+    before                             | tabId | windowId | expected
+    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 2 }] }}
+    ${{ 999: [{ id: 1 }] }}            | ${1}  | ${999}   | ${{ 999: [] }}
+    ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [] }}
+    ${{}}                              | ${1}  | ${999}   | ${{ 999: [] }}
+    ${undefined}                       | ${1}  | ${999}   | ${{ 999: [] }}
+  `(
+    ".removeFromOutdatedTabs($tabId: TabId, $windowId: WindowId)",
+    ({ before, tabId, windowId, expected }) => {
+      test(`${JSON.stringify(before)} should be ${JSON.stringify(
+        expected
+      )}`, async (done) => {
+        localStorage.get.mockResolvedValue({ outdatedTabs: before });
+        await service.removeFromOutdatedTabs(tabId, windowId);
+        expect(localStorage.set).toBeCalledWith({ outdatedTabs: expected });
         done();
       });
     }

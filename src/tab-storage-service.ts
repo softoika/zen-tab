@@ -194,4 +194,25 @@ export class TabStorageService {
     }
     return outdatedTabs[windowId] ?? [];
   }
+
+  async removeFromOutdatedTabs(
+    tabId: NotNull<TabId>,
+    windowId: NotNull<Tab["windowId"]>
+  ) {
+    let {
+      outdatedTabs,
+    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
+      "outdatedTabs"
+    );
+    if (!outdatedTabs) {
+      outdatedTabs = {};
+    }
+    let tabs = outdatedTabs[windowId] ?? [];
+    tabs = tabs.filter(({ id }) => id !== tabId);
+    outdatedTabs = {
+      ...outdatedTabs,
+      [windowId]: tabs,
+    };
+    this.localStorage.set({ outdatedTabs });
+  }
 }
