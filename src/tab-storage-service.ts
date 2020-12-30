@@ -2,6 +2,7 @@ import type { Storage } from "webextension-polyfill-ts";
 import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
+type WindowId = Tab["windowId"];
 
 type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
@@ -14,13 +15,13 @@ interface TabStorage {
    * The key is the windowId(number). Because type aliases cannot be specified
    * in index signatures, the `in` keyword is used instead.
    */
-  lastTabStack?: { [_ in NotNull<Tab["windowId"]>]: TabIds };
+  lastTabStack?: { [_ in NotNull<WindowId>]: TabIds };
   /**
    * Lists of outdated tabs in each window.
    * They are no longer closed by the alarms because of Options.minTabs.
    * So they can be thought of as having a minus limit time.
    */
-  outdatedTabs?: { [_ in NotNull<Tab["windowId"]>]: TabIds };
+  outdatedTabs?: { [_ in NotNull<WindowId>]: TabIds };
   tabs?: Tab[];
   history?: ClosedTab[];
 }
@@ -88,7 +89,7 @@ export class TabStorageService {
     this.localStorage.set({ tabs });
   }
 
-  async getLastTabId(windowId: Tab["windowId"]): Promise<TabId> {
+  async getLastTabId(windowId: WindowId): Promise<TabId> {
     if (!windowId) {
       return undefined;
     }
@@ -129,10 +130,7 @@ export class TabStorageService {
     this.localStorage.set({ lastTabStack });
   }
 
-  async removeTabFromStack(
-    tabId: NotNull<TabId>,
-    windowId: NotNull<Tab["windowId"]>
-  ) {
+  async removeTabFromStack(tabId: NotNull<TabId>, windowId: NotNull<WindowId>) {
     let lastTabStack = await this.getTabStack();
     let stack = lastTabStack[windowId] ?? [];
     stack = stack.filter(({ id }) => id !== tabId);
@@ -144,7 +142,7 @@ export class TabStorageService {
   }
 
   private async getTabStackByWindowId(
-    windowId: NotNull<Tab["windowId"]>
+    windowId: NotNull<WindowId>
   ): Promise<TabIds> {
     const lastTabStack = await this.getTabStack();
     return lastTabStack[windowId] ?? [];
@@ -183,7 +181,7 @@ export class TabStorageService {
     this.localStorage.set({ outdatedTabs });
   }
 
-  async getOutdatedTabs(windowId: NotNull<Tab["windowId"]>): Promise<TabIds> {
+  async getOutdatedTabs(windowId: NotNull<WindowId>): Promise<TabIds> {
     let {
       outdatedTabs,
     }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
@@ -197,7 +195,7 @@ export class TabStorageService {
 
   async removeFromOutdatedTabs(
     tabId: NotNull<TabId>,
-    windowId: NotNull<Tab["windowId"]>
+    windowId: NotNull<WindowId>
   ) {
     let {
       outdatedTabs,
