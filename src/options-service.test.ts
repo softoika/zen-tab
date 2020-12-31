@@ -61,6 +61,16 @@ describe("OptionsService", () => {
       expect(syncStorage.set).toBeCalledWith({ dummyOptions: "prod" });
       done();
     });
+
+    test("does'nt set the default options if options exist in the storage", async (done) => {
+      jest.mock("./default-options.dev", () => ({
+        defaultOptions: { dummyOptions: "dev" },
+      }));
+      syncStorage.get.mockResolvedValue(DEFAULT_OPTIONS);
+      await service.init("production");
+      expect(syncStorage.set).not.toBeCalled();
+      done();
+    });
   });
 
   test(".get() get all options", async (done) => {

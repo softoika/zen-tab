@@ -5,6 +5,10 @@ export class OptionsService {
   constructor(private storage: Storage.SyncStorageAreaSync) {}
 
   async init(nodeEnv = "production"): Promise<OptionsService> {
+    const options = await this.get();
+    if (options && Object.keys(options).length > 0) {
+      return this;
+    }
     const { defaultOptions } =
       nodeEnv === "development"
         ? await import("./default-options.dev")
