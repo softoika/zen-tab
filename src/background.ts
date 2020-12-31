@@ -1,19 +1,8 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
-import { OptionsService } from "./options-service";
+import { getOptions, initOptions } from "./storage/options";
 import { TabStorageService } from "./tab-storage-service";
-
-let _optionsService: Promise<OptionsService>;
-async function getOpionsService(): Promise<OptionsService> {
-  if (_optionsService) {
-    return _optionsService;
-  }
-  _optionsService = new OptionsService(browser.storage.sync).init(
-    process.env.NODE_ENV
-  );
-  return _optionsService;
-}
 
 const tabStorageService = new TabStorageService(browser.storage.local);
 const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
@@ -21,9 +10,8 @@ const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
 chrome.tabs.onCreated.addListener(async (tab) => {
   console.log("onCreated", tab);
   tabStorageService.add(tab);
-  const optionsService = await getOpionsService();
-  const [{ minTabs }, tabs, outdatedTabs] = await Promise.all([
-    optionsService.get(),
+  const [minTabs, tabs, outdatedTabs] = await Promise.all([
+    getOptions("minTabs"),
     browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
     tabStorageService.getOutdatedTabs(tab.windowId),
   ]);
@@ -33,8 +21,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
-  const optionsService = await getOpionsService();
-  const baseLimit = await optionsService.get("baseLimit");
+  const baseLimit = await getOptions("baseLimit");
   lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
   tabStorageService.removeFromOutdatedTabs(tab.tabId, tab.windowId);
   console.log("onActivated", tab);
@@ -65,8 +52,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     windowType: "normal",
     windowId: tab.windowId,
   });
-  const optionsService = await getOpionsService();
-  const minTabs = await optionsService.get("minTabs");
+  const minTabs = await getOptions("minTabs");
   if (tabs.length > minTabs) {
     console.log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
@@ -83,8 +69,8 @@ const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
     windowType: "normal",
   });
-  const optionsService = await getOpionsService();
-  const baseLimit = await optionsService.get("baseLimit");
+  await initOptions(process.env.NODE_ENV);
+  const baseLimit = await getOptions("baseLimit");
   lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf() + baseLimit);
 };
 

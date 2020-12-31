@@ -1,33 +1,32 @@
-import type { Storage } from "webextension-polyfill-ts";
-import type { Options } from "./types";
+import { browser } from "webextension-polyfill-ts";
+import type { Options } from "../types";
 
-export class OptionsService {
-  constructor(private storage: Storage.SyncStorageAreaSync) {}
+const storage = browser.storage.sync;
 
-  async init(nodeEnv = "production"): Promise<OptionsService> {
-    const options = await this.get();
-    if (options && Object.keys(options).length > 0) {
-      return this;
-    }
-    const { defaultOptions } =
-      nodeEnv === "development"
-        ? await import("./default-options.dev")
-        : await import("./default-options.prod");
-    return this.set(defaultOptions);
+export async function initOptions(nodeEnv = "production") {
+  const options = await getOptions();
+  if (options && Object.keys(options).length > 0) {
+    return;
   }
+  const { defaultOptions } =
+    nodeEnv === "development"
+      ? await import("./../default-options.dev")
+      : await import("./../default-options.prod");
+  return setOptions(defaultOptions);
+}
 
-  set(options: Options): OptionsService {
-    this.storage.set(options);
-    return this;
+export async function getOptions(): Promise<Options>;
+export async function getOptions<K extends keyof Options>(
+  key: K
+): Promise<Options[K]>;
+export async function getOptions<K extends keyof Options>(key?: K) {
+  if (!key) {
+    return storage.get();
   }
+  const options = await storage.get(key);
+  return options[key];
+}
 
-  get(): Promise<Options>;
-  get<K extends keyof Options>(key: K): Promise<Options[K]>;
-  async get<K extends keyof Options>(key?: K): Promise<Options | Options[K]> {
-    if (!key) {
-      return this.storage.get() as Promise<Options>;
-    }
-    const options = (await this.storage.get(key)) as Options;
-    return options[key];
-  }
+export function setOptions(options: Options) {
+  storage.set(options);
 }
