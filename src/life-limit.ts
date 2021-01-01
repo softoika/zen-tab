@@ -1,4 +1,5 @@
 import type { Alarms } from "webextension-polyfill-ts";
+import { createActivatedTabs } from "./activated-tabs";
 import type { TabStorageService } from "./tab-storage-service";
 import type { Tab } from "./types";
 
@@ -21,13 +22,14 @@ export class LifeLimit {
       return;
     }
     await this.alarms.clear(`${newTab.tabId}`);
-    const lastTabId = await this.tabStorageService.getLastTabId(
-      newTab.windowId
-    );
+    const activatedTabs = await this.tabStorageService.getActivatedTabs();
+    const lastTabId = activatedTabs.getLastTabId(newTab.windowId);
     if (lastTabId) {
       this.alarms.create(`${lastTabId}`, { when });
     }
-    this.tabStorageService.pushLastTab(newTab);
+    this.tabStorageService.updateActivatedTabs(
+      activatedTabs.push(newTab.tabId, newTab.windowId)
+    );
   }
 
   /**
@@ -53,6 +55,6 @@ export class LifeLimit {
         totalDelay += delayUnit;
       });
 
-    this.tabStorageService.createLastTabStack(tabs);
+    this.tabStorageService.updateActivatedTabs(createActivatedTabs(tabs));
   }
 }

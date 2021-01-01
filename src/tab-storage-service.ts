@@ -1,4 +1,6 @@
 import type { Storage } from "webextension-polyfill-ts";
+import type { TabStorage as ActivatedTabsStorage } from "./activated-tabs";
+import { ActivatedTabs } from "./activated-tabs";
 import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
@@ -8,14 +10,7 @@ type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 type TabIds = { id: NotNull<TabId> }[];
 
-interface TabStorage {
-  /**
-   * Stacks of last activated tabs in each window.
-   * The tab on the stack will start an alarm on the next activation.
-   * The key is the windowId(number). Because type aliases cannot be specified
-   * in index signatures, the `in` keyword is used instead.
-   */
-  lastTabStack?: { [_ in NotNull<WindowId>]: TabIds };
+type TabStorage = {
   /**
    * Lists of outdated tabs in each window.
    * They are no longer closed by the alarms because of Options.minTabs.
@@ -24,7 +19,7 @@ interface TabStorage {
   outdatedTabs?: { [_ in NotNull<WindowId>]: TabIds };
   tabs?: Tab[];
   history?: ClosedTab[];
-}
+} & ActivatedTabsStorage;
 
 export class TabStorageService {
   constructor(private localStorage: Storage.LocalStorageArea) {}
@@ -89,72 +84,18 @@ export class TabStorageService {
     this.localStorage.set({ tabs });
   }
 
-  async getLastTabId(windowId: WindowId): Promise<TabId> {
-    if (!windowId) {
-      return undefined;
-    }
-    const stack = await this.getTabStackByWindowId(windowId);
-    return stack?.[0]?.id;
-  }
-
-  async createLastTabStack(tabs: Tab[]) {
-    let lastTabStack: { [windowId: number]: TabIds } = {};
-    tabs.forEach((tab) => {
-      if (typeof tab.windowId !== "number" || typeof tab.id !== "number") {
-        return;
-      }
-      let stack = lastTabStack[tab.windowId] ?? [];
-      stack = tab.active
-        ? [{ id: tab.id }, ...stack]
-        : [...stack, { id: tab.id }];
-      lastTabStack = {
-        ...lastTabStack,
-        [tab.windowId]: stack,
-      };
-    });
-    this.localStorage.set({ lastTabStack });
-  }
-
-  /**
-   * Push the tab on the stack of the most recently activated tabs in each window.
-   * If the tab is in the stack, move it to the top of the stack.
-   */
-  async pushLastTab(tab: chrome.tabs.TabActiveInfo) {
-    let lastTabStack = await this.getTabStack();
-    let stack = lastTabStack[tab.windowId] ?? [];
-    stack = stack.filter(({ id }) => id !== tab.tabId);
-    lastTabStack = {
-      ...lastTabStack,
-      [tab.windowId]: [{ id: tab.tabId }, ...stack],
-    };
-    this.localStorage.set({ lastTabStack });
-  }
-
-  async removeTabFromStack(tabId: NotNull<TabId>, windowId: NotNull<WindowId>) {
-    let lastTabStack = await this.getTabStack();
-    let stack = lastTabStack[windowId] ?? [];
-    stack = stack.filter(({ id }) => id !== tabId);
-    lastTabStack = {
-      ...lastTabStack,
-      [windowId]: [...stack],
-    };
-    this.localStorage.set({ lastTabStack });
-  }
-
-  private async getTabStackByWindowId(
-    windowId: NotNull<WindowId>
-  ): Promise<TabIds> {
-    const lastTabStack = await this.getTabStack();
-    return lastTabStack[windowId] ?? [];
-  }
-
-  private async getTabStack(): Promise<NotNull<TabStorage["lastTabStack"]>> {
-    const {
-      lastTabStack,
-    }: Pick<TabStorage, "lastTabStack"> = await this.localStorage.get(
-      "lastTabStack"
+  async getActivatedTabs(): Promise<ActivatedTabs> {
+    let { activatedTabs }: ActivatedTabsStorage = await this.localStorage.get(
+      "activatedTabs"
     );
-    return lastTabStack ?? {};
+    if (!activatedTabs) {
+      activatedTabs = {};
+    }
+    return new ActivatedTabs(activatedTabs);
+  }
+
+  updateActivatedTabs(activatedTabs: ActivatedTabs) {
+    this.localStorage.set({ activatedTabs: activatedTabs.value });
   }
 
   async pushOutdatedTab(tab: Tab) {

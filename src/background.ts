@@ -37,7 +37,8 @@ chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
   tabStorageService.remove(tabId);
-  tabStorageService.removeTabFromStack(tabId, windowId);
+  const activatedTabs = await tabStorageService.getActivatedTabs();
+  tabStorageService.updateActivatedTabs(activatedTabs.remove(tabId, windowId));
   tabStorageService.removeFromOutdatedTabs(tabId, windowId);
 });
 

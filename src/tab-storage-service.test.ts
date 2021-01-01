@@ -2,7 +2,6 @@ import { TabStorageService } from "./tab-storage-service";
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { DEFAULT_TAB } from "./mocks";
-import type { Tab } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -123,98 +122,6 @@ describe("TabStorageService", () => {
       await service.update(tab2);
       expect(localStorage.set).toBeCalledTimes(0);
       done();
-    });
-  });
-
-  describe.each`
-    lastTabStack                       | windowId     | expectedTabId
-    ${{ 999: [{ id: 1 }] }}            | ${999}       | ${1}
-    ${{ 999: [{ id: 1 }] }}            | ${undefined} | ${undefined}
-    ${{ 999: [{ id: 1 }] }}            | ${777}       | ${undefined}
-    ${{ 999: [] }}                     | ${999}       | ${undefined}
-    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${999}       | ${2}
-  `(
-    ".getLastTabId($windowId: WindowId)",
-    ({ lastTabStack, windowId, expectedTabId }) => {
-      test(`returns ${expectedTabId}: TabId  when the stack is ${JSON.stringify(
-        lastTabStack
-      )}`, async (done) => {
-        localStorage.get.mockResolvedValue({ lastTabStack });
-        const tabId = await service.getLastTabId(windowId);
-        expect(tabId).toBe(expectedTabId);
-        done();
-      });
-    }
-  );
-
-  describe.each`
-    before                             | tabId | windowId | expected
-    ${{}}                              | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
-    ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [{ id: 1 }] }}
-    ${{ 999: [{ id: 1 }] }}            | ${2}  | ${999}   | ${{ 999: [{ id: 2 }, { id: 1 }] }}
-    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${3}  | ${777}   | ${{ 999: [{ id: 2 }, { id: 1 }], 777: [{ id: 3 }] }}
-    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 1 }, { id: 2 }] }}
-  `(
-    ".pushLastTab({ tabId: $tabId, windowId: $windowId }) ",
-    ({ before, tabId, windowId, expected }) => {
-      test(`the stack ${JSON.stringify(before)} should be ${JSON.stringify(
-        expected
-      )}`, async (done) => {
-        localStorage.get.mockResolvedValue({ lastTabStack: before });
-        await service.pushLastTab({ tabId, windowId });
-        expect(localStorage.set).toBeCalledWith({ lastTabStack: expected });
-        done();
-      });
-    }
-  );
-
-  describe.each`
-    before                             | tabId | windowId | expected
-    ${{ 999: [{ id: 2 }, { id: 1 }] }} | ${1}  | ${999}   | ${{ 999: [{ id: 2 }] }}
-    ${{ 999: [{ id: 1 }] }}            | ${1}  | ${999}   | ${{ 999: [] }}
-    ${{ 999: [] }}                     | ${1}  | ${999}   | ${{ 999: [] }}
-    ${{}}                              | ${1}  | ${999}   | ${{ 999: [] }}
-    ${undefined}                       | ${1}  | ${999}   | ${{ 999: [] }}
-  `(
-    ".removeTabFromStack($tabId: TabId, $windowId: WindowId)",
-    ({ before, tabId, windowId, expected }) => {
-      test(`the stack ${JSON.stringify(before)} should be ${JSON.stringify(
-        expected
-      )}`, async (done) => {
-        localStorage.get.mockResolvedValue({ lastTabStack: before });
-        await service.removeTabFromStack(tabId, windowId);
-        expect(localStorage.set).toBeCalledWith({ lastTabStack: expected });
-        done();
-      });
-    }
-  );
-
-  describe(".createLastTabStack(tabs)", () => {
-    test("create the stack in each window", () => {
-      const tabs: Tab[] = [
-        { ...DEFAULT_TAB, id: 1, windowId: 999, active: false },
-        { ...DEFAULT_TAB, id: 2, windowId: 777 },
-        { ...DEFAULT_TAB, id: 3, windowId: 999, active: true },
-        { ...DEFAULT_TAB, id: 4, windowId: undefined },
-        { ...DEFAULT_TAB, id: undefined, windowId: 777 },
-      ];
-      service.createLastTabStack(tabs);
-      expect(localStorage.set).toBeCalledWith({
-        lastTabStack: { 999: [{ id: 3 }, { id: 1 }], 777: [{ id: 2 }] },
-      });
-    });
-
-    test("the stack is sorted by its activity", () => {
-      const tabs: Tab[] = [
-        { ...DEFAULT_TAB, id: 1, windowId: 999, active: false },
-        { ...DEFAULT_TAB, id: 2, windowId: 999, active: true },
-        { ...DEFAULT_TAB, id: 3, windowId: 999, active: false },
-      ];
-      service.createLastTabStack(tabs);
-      // an inactive tab is pushed to the last, and an active tab is pushed to the first.
-      expect(localStorage.set).toBeCalledWith({
-        lastTabStack: { 999: [{ id: 2 }, { id: 1 }, { id: 3 }] },
-      });
     });
   });
 

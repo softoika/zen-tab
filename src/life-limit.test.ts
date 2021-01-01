@@ -1,5 +1,6 @@
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
+import { ActivatedTabs } from "./activated-tabs";
 import { LifeLimit } from "./life-limit";
 import { DEFAULT_TAB } from "./mocks";
 import { TabStorageService } from "./tab-storage-service";
@@ -23,19 +24,22 @@ describe("LifeLimit", () => {
   });
 
   afterEach(() => {
-    tabStorageService.getLastTabId.mockReset();
-    tabStorageService.pushLastTab.mockReset();
-    tabStorageService.createLastTabStack.mockReset();
+    tabStorageService.getActivatedTabs.mockReset();
+    tabStorageService.updateActivatedTabs.mockReset();
     (browser.alarms.create as jest.Mock).mockReset();
     (browser.alarms.clear as jest.Mock).mockReset();
   });
 
   describe(".expireLastTab()", () => {
     test("just update the lastTabId if the current lastTabId is undefined", async (done) => {
-      tabStorageService.getLastTabId.mockResolvedValue(undefined);
+      tabStorageService.getActivatedTabs.mockResolvedValue(
+        new ActivatedTabs({})
+      );
       const tab = { tabId: 1234, windowId: 1 };
       await lifeLimit.expireLastTab(tab, 0);
-      expect(tabStorageService.pushLastTab).toBeCalledWith(tab);
+      expect(tabStorageService.updateActivatedTabs).toBeCalledWith({
+        activatedTabs: { 1: [{ id: 1234 }] },
+      });
       expect(browser.alarms.clear).toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
@@ -43,11 +47,15 @@ describe("LifeLimit", () => {
 
     test("create an alarm with lastTabId and unix timestamp", async (done) => {
       const lastTabId = 111;
-      tabStorageService.getLastTabId.mockResolvedValue(lastTabId);
+      tabStorageService.getActivatedTabs.mockResolvedValue(
+        new ActivatedTabs({ 1: [{ id: 111 }] })
+      );
       const tab = { tabId: 1234, windowId: 1 };
       const when = 1605316150185;
       await lifeLimit.expireLastTab(tab, when);
-      expect(tabStorageService.pushLastTab).toBeCalledWith(tab);
+      expect(tabStorageService.updateActivatedTabs).toBeCalledWith({
+        activatedTabs: { 1: [{ id: 1234 }, { id: 111 }] },
+      });
       expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, { when });
       done();
     });
@@ -66,13 +74,13 @@ describe("LifeLimit", () => {
       expect(browser.alarms.create).toBeCalledWith("1", { when });
       expect(browser.alarms.create).toBeCalledWith("2", { when: when + 1000 });
       expect(browser.alarms.create).toBeCalledWith("3", { when: when + 2000 });
-      expect(tabStorageService.createLastTabStack).toBeCalled();
+      expect(tabStorageService.updateActivatedTabs).toBeCalled();
       done();
     });
 
     test("do nothing if the tabs are empty", async (done) => {
       await lifeLimit.expireInactiveTabs([], 0);
-      expect(tabStorageService.createLastTabStack).not.toBeCalled();
+      expect(tabStorageService.updateActivatedTabs).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
     });
