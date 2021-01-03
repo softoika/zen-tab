@@ -15,10 +15,8 @@ export interface TabStorage {
   };
 }
 
-type Stack = TabStorage["activatedTabs"];
-
 export class ActivatedTabs {
-  constructor(private activatedTabs: NotNull<Stack>) {}
+  constructor(private activatedTabs: NotNull<TabStorage["activatedTabs"]>) {}
 
   get value() {
     return this.activatedTabs;
