@@ -13,17 +13,21 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   const [minTabs, tabs, outdatedTabs] = await Promise.all([
     getOptions("minTabs"),
     browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
-    tabStorageService.getOutdatedTabs(tab.windowId),
+    tabStorageService.getOutdatedTabs(),
   ]);
-  if (tabs.length > minTabs && outdatedTabs.length > 0) {
-    chrome.tabs.remove(outdatedTabs[0].id);
+  const lastTabId = outdatedTabs.getLastTabId(tab.windowId);
+  if (tabs.length > minTabs && lastTabId) {
+    chrome.tabs.remove(lastTabId);
   }
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
   const baseLimit = await getOptions("baseLimit");
   lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
-  tabStorageService.removeFromOutdatedTabs(tab.tabId, tab.windowId);
+  const outdatedTabs = await tabStorageService.getOutdatedTabs();
+  tabStorageService.updateOutdatedTabs(
+    outdatedTabs.remove(tab.tabId, tab.windowId)
+  );
   console.log("onActivated", tab);
 });
 
@@ -37,9 +41,12 @@ chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
   tabStorageService.remove(tabId);
-  const activatedTabs = await tabStorageService.getActivatedTabs();
+  const [activatedTabs, outdatedTabs] = await Promise.all([
+    tabStorageService.getActivatedTabs(),
+    tabStorageService.getOutdatedTabs(),
+  ]);
   tabStorageService.updateActivatedTabs(activatedTabs.remove(tabId, windowId));
-  tabStorageService.removeFromOutdatedTabs(tabId, windowId);
+  tabStorageService.updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
@@ -58,7 +65,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     console.log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
   } else {
-    tabStorageService.pushOutdatedTab(tab);
+    const outdatedTabs = await tabStorageService.getOutdatedTabs();
+    tabStorageService.updateOutdatedTabs(outdatedTabs.push(tab));
   }
 });
 

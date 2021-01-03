@@ -1,5 +1,9 @@
 import type { Storage } from "webextension-polyfill-ts";
 import type { TabStorage as ActivatedTabsStorage } from "./activated-tabs";
+import {
+  OutdatedTabs,
+  TabStorage as OutdatedTabsStorage,
+} from "./outdated-tabs";
 import { ActivatedTabs } from "./activated-tabs";
 import type { NotNull, Tab } from "./types";
 
@@ -11,15 +15,10 @@ type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 type TabIds = { id: NotNull<TabId> }[];
 
 type TabStorage = {
-  /**
-   * Lists of outdated tabs in each window.
-   * They are no longer closed by the alarms because of Options.minTabs.
-   * So they can be thought of as having a minus limit time.
-   */
-  outdatedTabs?: { [_ in NotNull<WindowId>]: TabIds };
   tabs?: Tab[];
   history?: ClosedTab[];
-} & ActivatedTabsStorage;
+} & ActivatedTabsStorage &
+  OutdatedTabsStorage;
 
 export class TabStorageService {
   constructor(private localStorage: Storage.LocalStorageArea) {}
@@ -85,12 +84,7 @@ export class TabStorageService {
   }
 
   async getActivatedTabs(): Promise<ActivatedTabs> {
-    let { activatedTabs }: ActivatedTabsStorage = await this.localStorage.get(
-      "activatedTabs"
-    );
-    if (!activatedTabs) {
-      activatedTabs = {};
-    }
+    const activatedTabs = (await this.get("activatedTabs")) ?? {};
     return new ActivatedTabs(activatedTabs);
   }
 
@@ -98,60 +92,12 @@ export class TabStorageService {
     this.localStorage.set({ activatedTabs: activatedTabs.value });
   }
 
-  async pushOutdatedTab(tab: Tab) {
-    if (!tab.id) {
-      return;
-    }
-    if (!tab.windowId) {
-      return;
-    }
-    let {
-      outdatedTabs,
-    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
-      "outdatedTabs"
-    );
-    if (!outdatedTabs) {
-      outdatedTabs = {};
-    }
-    let tabs = outdatedTabs[tab.windowId] ?? [];
-    tabs = tabs.filter(({ id }) => id !== tab.id);
-    outdatedTabs = {
-      ...outdatedTabs,
-      [tab.windowId]: [...tabs, { id: tab.id }],
-    };
-    this.localStorage.set({ outdatedTabs });
+  async getOutdatedTabs(): Promise<OutdatedTabs> {
+    const outdatedTabs = (await this.get("outdatedTabs")) ?? {};
+    return new OutdatedTabs(outdatedTabs);
   }
 
-  async getOutdatedTabs(windowId: NotNull<WindowId>): Promise<TabIds> {
-    let {
-      outdatedTabs,
-    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
-      "outdatedTabs"
-    );
-    if (!outdatedTabs) {
-      outdatedTabs = {};
-    }
-    return outdatedTabs[windowId] ?? [];
-  }
-
-  async removeFromOutdatedTabs(
-    tabId: NotNull<TabId>,
-    windowId: NotNull<WindowId>
-  ) {
-    let {
-      outdatedTabs,
-    }: Pick<TabStorage, "outdatedTabs"> = await this.localStorage.get(
-      "outdatedTabs"
-    );
-    if (!outdatedTabs) {
-      outdatedTabs = {};
-    }
-    let tabs = outdatedTabs[windowId] ?? [];
-    tabs = tabs.filter(({ id }) => id !== tabId);
-    outdatedTabs = {
-      ...outdatedTabs,
-      [windowId]: tabs,
-    };
-    this.localStorage.set({ outdatedTabs });
+  async updateOutdatedTabs(outdatedTabs: OutdatedTabs) {
+    this.localStorage.set({ outdatedTabs: outdatedTabs.value });
   }
 }
