@@ -9,7 +9,8 @@ const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   console.log("onCreated", tab);
-  tabStorageService.add(tab);
+  const history = await tabStorageService.getClosedTabHistory();
+  tabStorageService.updateClosedTabHistory(history.createTab(tab));
   const [minTabs, tabs, outdatedTabs] = await Promise.all([
     getOptions("minTabs"),
     browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
@@ -33,14 +34,16 @@ chrome.tabs.onActivated.addListener(async (tab) => {
 
 chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    tabStorageService.update(tab);
+    const history = await tabStorageService.getClosedTabHistory();
+    tabStorageService.updateClosedTabHistory(history.updateTab(tab));
   }
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
-  tabStorageService.remove(tabId);
+  const history = await tabStorageService.getClosedTabHistory();
+  tabStorageService.updateClosedTabHistory(history.closeTab(tabId, windowId));
   const [activatedTabs, outdatedTabs] = await Promise.all([
     tabStorageService.getActivatedTabs(),
     tabStorageService.getOutdatedTabs(),
