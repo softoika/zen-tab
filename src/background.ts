@@ -2,19 +2,25 @@ import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
 import { getOptions, initOptions } from "./storage/options";
-import { TabStorageService } from "./storage/tabs";
+import {
+  getActivatedTabs,
+  getClosedTabHistory,
+  getOutdatedTabs,
+  updateActivatedTabs,
+  updateClosedTabHistory,
+  updateOutdatedTabs,
+} from "./storage/tabs";
 
-const tabStorageService = new TabStorageService(browser.storage.local);
-const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
+const lifeLimit = new LifeLimit(browser.alarms);
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   console.log("onCreated", tab);
-  const history = await tabStorageService.getClosedTabHistory();
-  tabStorageService.updateClosedTabHistory(history.createTab(tab));
+  const history = await getClosedTabHistory();
+  updateClosedTabHistory(history.createTab(tab));
   const [minTabs, tabs, outdatedTabs] = await Promise.all([
     getOptions("minTabs"),
     browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
-    tabStorageService.getOutdatedTabs(),
+    getOutdatedTabs(),
   ]);
   const lastTabId = outdatedTabs.getLastTabId(tab.windowId);
   if (tabs.length > minTabs && lastTabId) {
@@ -25,31 +31,29 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 chrome.tabs.onActivated.addListener(async (tab) => {
   const baseLimit = await getOptions("baseLimit");
   lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
-  const outdatedTabs = await tabStorageService.getOutdatedTabs();
-  tabStorageService.updateOutdatedTabs(
-    outdatedTabs.remove(tab.tabId, tab.windowId)
-  );
+  const outdatedTabs = await getOutdatedTabs();
+  updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
   console.log("onActivated", tab);
 });
 
 chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
-    const history = await tabStorageService.getClosedTabHistory();
-    tabStorageService.updateClosedTabHistory(history.updateTab(tab));
+    const history = await getClosedTabHistory();
+    updateClosedTabHistory(history.updateTab(tab));
   }
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   console.log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
-  const history = await tabStorageService.getClosedTabHistory();
-  tabStorageService.updateClosedTabHistory(history.closeTab(tabId, windowId));
+  const history = await getClosedTabHistory();
+  updateClosedTabHistory(history.closeTab(tabId, windowId));
   const [activatedTabs, outdatedTabs] = await Promise.all([
-    tabStorageService.getActivatedTabs(),
-    tabStorageService.getOutdatedTabs(),
+    getActivatedTabs(),
+    getOutdatedTabs(),
   ]);
-  tabStorageService.updateActivatedTabs(activatedTabs.remove(tabId, windowId));
-  tabStorageService.updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
+  updateActivatedTabs(activatedTabs.remove(tabId, windowId));
+  updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
@@ -68,8 +72,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     console.log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
   } else {
-    const outdatedTabs = await tabStorageService.getOutdatedTabs();
-    tabStorageService.updateOutdatedTabs(outdatedTabs.push(tab));
+    const outdatedTabs = await getOutdatedTabs();
+    updateOutdatedTabs(outdatedTabs.push(tab));
   }
 });
 

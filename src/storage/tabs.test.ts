@@ -1,6 +1,7 @@
-import { TabStorageService } from "./tabs";
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
+import { getStorage, getValue } from "./tabs";
+import type { TabStorage } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -15,19 +16,59 @@ jest.mock("webextension-polyfill-ts", () => ({
 const localStorage = browser.storage
   .local as jest.Mocked<Storage.LocalStorageArea>;
 
-describe("TabStorageService", () => {
-  let service: TabStorageService;
-
+describe("storage/tabs", () => {
   beforeEach(() => {
-    service = new TabStorageService(localStorage);
-  });
-
-  afterEach(() => {
     localStorage.get.mockReset();
     localStorage.set.mockReset();
   });
 
-  test("TODO: write tests when refactoring", () => {
-    expect(service).toBeTruthy();
+  describe("getStorage()", () => {
+    test("gets a whole object that has all values", async (done) => {
+      const storage: TabStorage = {
+        activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
+        outdatedTabs: { 999: [{ id: 1 }] },
+      };
+      localStorage.get.mockResolvedValue(storage);
+
+      const target = await getStorage();
+
+      expect(target).toEqual(storage);
+      done();
+    });
+  });
+
+  describe("getStorage(keys)", () => {
+    test("gets an object that has values of specified keys", async (done) => {
+      const storage: TabStorage = {
+        activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
+        outdatedTabs: { 999: [{ id: 1 }] },
+      };
+      localStorage.get.mockResolvedValue(storage);
+
+      const target = await getStorage(["outdatedTabs", "activatedTabs"]);
+
+      expect(localStorage.get).toBeCalledWith([
+        "outdatedTabs",
+        "activatedTabs",
+      ]);
+      expect(target).toEqual(storage);
+      done();
+    });
+  });
+
+  describe("getValue(key)", () => {
+    test("returns a value of the specified key", async (done) => {
+      const storage: TabStorage = {
+        activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
+        outdatedTabs: { 999: [{ id: 1 }] },
+      };
+      localStorage.get.mockResolvedValue(storage);
+
+      const value = await getValue("outdatedTabs");
+
+      expect(localStorage.get).toBeCalledWith("outdatedTabs");
+      expect(value).toEqual({ 999: [{ id: 1 }] });
+      done();
+    });
   });
 });

@@ -1,69 +1,61 @@
-import type { Storage } from "webextension-polyfill-ts";
-import { OutdatedTabs } from "../outdated-tabs";
+import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs } from "../activated-tabs";
 import { ClosedTabsHistory } from "../closed-tabs-history";
+import { OutdatedTabs } from "../outdated-tabs";
 import type { TabStorage } from "./types";
 
-export class TabStorageService {
-  constructor(private localStorage: Storage.LocalStorageArea) {}
+const localStorage = browser.storage.local;
 
-  get(): Promise<TabStorage>;
-  get<K extends keyof TabStorage, V extends TabStorage[K]>(key: K): Promise<V>;
-  async get<K extends keyof TabStorage, V extends TabStorage[K]>(
-    key?: K
-  ): Promise<TabStorage | V> {
-    if (!key) {
-      return this.localStorage.get();
-    }
-    const storage = await this.localStorage.get(key);
-    return storage[key];
+export function getStorage(): Promise<TabStorage>;
+export function getStorage<K extends keyof TabStorage>(
+  keys: K[]
+): Promise<Pick<TabStorage, K>>;
+export function getStorage<K extends keyof TabStorage>(
+  keys?: K[]
+): Promise<Pick<TabStorage, K> | TabStorage> {
+  if (!keys) {
+    return localStorage.get();
   }
+  return localStorage.get(keys);
+}
 
-  async getStorage<K extends keyof TabStorage>(
-    keys: K[]
-  ): Promise<Pick<TabStorage, K>> {
-    const storage: TabStorage = await this.localStorage.get(keys);
-    return storage;
-  }
+export function updateStorage(value: TabStorage) {
+  localStorage.set(value);
+}
 
-  async getValue<K extends keyof TabStorage>(
-    key: K
-  ): Promise<TabStorage[K] | undefined> {
-    const storage = await this.localStorage.get(key);
-    return storage[key];
-  }
+export async function getValue<K extends keyof TabStorage>(
+  key: K
+): Promise<TabStorage[K] | undefined> {
+  const storage = await localStorage.get(key);
+  return storage[key];
+}
 
-  updateStorage(value: TabStorage) {
-    this.localStorage.set(value);
-  }
+export async function getClosedTabHistory(): Promise<ClosedTabsHistory> {
+  const { tabs, history } = await getStorage(["tabs", "history"]);
+  return new ClosedTabsHistory(tabs ?? {}, history ?? {});
+}
 
-  async getClosedTabHistory(): Promise<ClosedTabsHistory> {
-    const { tabs, history } = await this.getStorage(["tabs", "history"]);
-    return new ClosedTabsHistory(tabs ?? {}, history ?? {});
-  }
+export function updateClosedTabHistory(closedTabHistory: ClosedTabsHistory) {
+  updateStorage({
+    tabs: closedTabHistory.tabs,
+    history: closedTabHistory.history,
+  });
+}
 
-  updateClosedTabHistory(closedTabHistory: ClosedTabsHistory) {
-    this.updateStorage({
-      tabs: closedTabHistory.tabs,
-      history: closedTabHistory.history,
-    });
-  }
+export async function getActivatedTabs(): Promise<ActivatedTabs> {
+  const activatedTabs = (await getValue("activatedTabs")) ?? {};
+  return new ActivatedTabs(activatedTabs);
+}
 
-  async getActivatedTabs(): Promise<ActivatedTabs> {
-    const activatedTabs = (await this.get("activatedTabs")) ?? {};
-    return new ActivatedTabs(activatedTabs);
-  }
+export function updateActivatedTabs(activatedTabs: ActivatedTabs) {
+  updateStorage({ activatedTabs: activatedTabs.value });
+}
 
-  updateActivatedTabs(activatedTabs: ActivatedTabs) {
-    this.updateStorage({ activatedTabs: activatedTabs.value });
-  }
+export async function getOutdatedTabs(): Promise<OutdatedTabs> {
+  const outdatedTabs = (await getValue("outdatedTabs")) ?? {};
+  return new OutdatedTabs(outdatedTabs);
+}
 
-  async getOutdatedTabs(): Promise<OutdatedTabs> {
-    const outdatedTabs = (await this.get("outdatedTabs")) ?? {};
-    return new OutdatedTabs(outdatedTabs);
-  }
-
-  async updateOutdatedTabs(outdatedTabs: OutdatedTabs) {
-    this.updateStorage({ outdatedTabs: outdatedTabs.value });
-  }
+export function updateOutdatedTabs(outdatedTabs: OutdatedTabs) {
+  updateStorage({ outdatedTabs: outdatedTabs.value });
 }

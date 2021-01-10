@@ -1,6 +1,6 @@
 import type { Alarms } from "webextension-polyfill-ts";
 import { createActivatedTabs } from "./activated-tabs";
-import type { TabStorageService } from "./storage/tabs";
+import { getActivatedTabs, updateActivatedTabs } from "./storage/tabs";
 import type { Tab } from "./types";
 
 /**
@@ -9,10 +9,7 @@ import type { Tab } from "./types";
 type When = number;
 
 export class LifeLimit {
-  constructor(
-    private tabStorageService: TabStorageService,
-    private alarms: Alarms.Static
-  ) {}
+  constructor(private alarms: Alarms.Static) {}
 
   /**
    * Set alarm for a last activated tab.
@@ -22,14 +19,12 @@ export class LifeLimit {
       return;
     }
     await this.alarms.clear(`${newTab.tabId}`);
-    const activatedTabs = await this.tabStorageService.getActivatedTabs();
+    const activatedTabs = await getActivatedTabs();
     const lastTabId = activatedTabs.getLastTabId(newTab.windowId);
     if (lastTabId) {
       this.alarms.create(`${lastTabId}`, { when });
     }
-    this.tabStorageService.updateActivatedTabs(
-      activatedTabs.push(newTab.tabId, newTab.windowId)
-    );
+    updateActivatedTabs(activatedTabs.push(newTab.tabId, newTab.windowId));
   }
 
   /**
@@ -55,6 +50,6 @@ export class LifeLimit {
         totalDelay += delayUnit;
       });
 
-    this.tabStorageService.updateActivatedTabs(createActivatedTabs(tabs));
+    updateActivatedTabs(createActivatedTabs(tabs));
   }
 }
