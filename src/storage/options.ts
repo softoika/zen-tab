@@ -10,8 +10,8 @@ export async function initOptions(nodeEnv = "production") {
   }
   const { defaultOptions } =
     nodeEnv === "development"
-      ? await import("./../default-options.dev")
-      : await import("./../default-options.prod");
+      ? await import("./data/default-options.dev")
+      : await import("./data/default-options.prod");
   return setOptions(defaultOptions);
 }
 

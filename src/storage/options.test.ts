@@ -30,7 +30,7 @@ describe("storage/options", () => {
 
   describe("initOptions()", () => {
     test("sets default options for production", async (done) => {
-      jest.mock("../default-options.prod", () => ({
+      jest.mock("./data/default-options.prod", () => ({
         defaultOptions: { dummyOptions: "prod" },
       }));
       await initOptions("production");
@@ -39,7 +39,7 @@ describe("storage/options", () => {
     });
 
     test("sets default options for development", async (done) => {
-      jest.mock("../default-options.dev", () => ({
+      jest.mock("./data/default-options.dev", () => ({
         defaultOptions: { dummyOptions: "dev" },
       }));
       await initOptions("development");
@@ -48,7 +48,7 @@ describe("storage/options", () => {
     });
 
     test("fallbacks to production mode", async (done) => {
-      jest.mock("../default-options.prod", () => ({
+      jest.mock("./data/default-options.prod", () => ({
         defaultOptions: { dummyOptions: "prod" },
       }));
       await initOptions("proudction"); // typo
@@ -57,7 +57,7 @@ describe("storage/options", () => {
     });
 
     test("does'nt set the default options if options exist in the storage", async (done) => {
-      jest.mock("../default-options.dev", () => ({
+      jest.mock("./data/default-options.dev", () => ({
         defaultOptions: { dummyOptions: "dev" },
       }));
       storage.get.mockResolvedValue(DEFAULT_OPTIONS);
