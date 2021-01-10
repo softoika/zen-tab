@@ -1,4 +1,4 @@
-import { TabStorageService } from "./tab-storage-service";
+import { TabStorageService } from "./tabs";
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 

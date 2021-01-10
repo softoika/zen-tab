@@ -1,6 +1,6 @@
 import type { Alarms } from "webextension-polyfill-ts";
 import { createActivatedTabs } from "./activated-tabs";
-import type { TabStorageService } from "./tab-storage-service";
+import type { TabStorageService } from "./storage/tabs";
 import type { Tab } from "./types";
 
 /**

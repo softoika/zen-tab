@@ -3,7 +3,7 @@ import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs } from "./activated-tabs";
 import { LifeLimit } from "./life-limit";
 import { DEFAULT_TAB } from "./mocks";
-import { TabStorageService } from "./tab-storage-service";
+import { TabStorageService } from "./storage/tabs";
 import type { Tab } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
@@ -12,7 +12,7 @@ jest.mock("webextension-polyfill-ts", () => ({
   },
 }));
 
-jest.mock("./tab-storage-service");
+jest.mock("./storage/tabs");
 const tabStorageService = new TabStorageService(
   {} as Storage.LocalStorageArea
 ) as jest.Mocked<TabStorageService>;

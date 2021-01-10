@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
 import { getOptions, initOptions } from "./storage/options";
-import { TabStorageService } from "./tab-storage-service";
+import { TabStorageService } from "./storage/tabs";
 
 const tabStorageService = new TabStorageService(browser.storage.local);
 const lifeLimit = new LifeLimit(tabStorageService, browser.alarms);
