@@ -1,6 +1,6 @@
 import { browser } from "webextension-polyfill-ts";
 import type { Storage } from "webextension-polyfill-ts";
-import type { Options } from "../types";
+import type { Options } from "./types";
 import { getOptions, initOptions } from "./options";
 
 jest.mock("webextension-polyfill-ts", () => ({

@@ -1,14 +1,8 @@
 import type { Storage } from "webextension-polyfill-ts";
-import type { TabStorage as ActivatedTabsStorage } from "../activated-tabs";
-import type { TabStorage as OutdatedTabsStorage } from "../outdated-tabs";
-import type { TabHistoryStorage } from "../closed-tabs-history";
 import { OutdatedTabs } from "../outdated-tabs";
 import { ActivatedTabs } from "../activated-tabs";
 import { ClosedTabsHistory } from "../closed-tabs-history";
-
-type TabStorage = TabHistoryStorage &
-  ActivatedTabsStorage &
-  OutdatedTabsStorage;
+import type { TabStorage } from "./types";
 
 export class TabStorageService {
   constructor(private localStorage: Storage.LocalStorageArea) {}

@@ -1,18 +1,13 @@
+import type { ClosedTab, TabStorage } from "./storage/types";
 import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
 type WindowId = Tab["windowId"];
-type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
-
-export interface TabHistoryStorage {
-  tabs?: { readonly [_ in NotNull<WindowId>]: readonly Tab[] };
-  history?: { readonly [_ in NotNull<WindowId>]: readonly ClosedTab[] };
-}
 
 export class ClosedTabsHistory {
   constructor(
-    private _tabs: NotNull<TabHistoryStorage["tabs"]>,
-    private _history: NotNull<TabHistoryStorage["history"]>
+    private _tabs: NotNull<TabStorage["tabs"]>,
+    private _history: NotNull<TabStorage["history"]>
   ) {}
 
   get tabs() {

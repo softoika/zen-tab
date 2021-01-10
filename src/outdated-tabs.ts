@@ -1,20 +1,8 @@
+import type { TabStorage } from "./storage/types";
 import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
 type WindowId = Tab["windowId"];
-
-export interface TabStorage {
-  /**
-   * Lists of outdated tabs in each window.
-   * They are no longer closed by the alarms because of Options.minTabs.
-   * So they can be thought of as having a minus limit time.
-   * The key is the windowId(number). Because type aliases cannot be specified
-   * in index signatures, the `in` keyword is used instead.
-   */
-  outdatedTabs?: {
-    readonly [_ in NotNull<WindowId>]: readonly { id: NotNull<TabId> }[];
-  };
-}
 
 export class OutdatedTabs {
   constructor(private outdatedTabs: NotNull<TabStorage["outdatedTabs"]>) {}

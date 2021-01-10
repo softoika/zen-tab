@@ -1,5 +1,5 @@
 import { browser } from "webextension-polyfill-ts";
-import type { Options } from "../types";
+import type { Options } from "./types";
 
 const storage = browser.storage.sync;
 

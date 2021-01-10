@@ -1,19 +1,8 @@
+import type { TabStorage } from "./storage/types";
 import type { NotNull, Tab } from "./types";
 
 type TabId = Tab["id"];
 type WindowId = Tab["windowId"];
-
-export interface TabStorage {
-  /**
-   * Stacks of last activated tabs in each window.
-   * The tab on the stack will start an alarm on the next activation.
-   * The key is the windowId(number). Because type aliases cannot be specified
-   * in index signatures, the `in` keyword is used instead.
-   */
-  activatedTabs?: {
-    readonly [_ in NotNull<WindowId>]: readonly { id: NotNull<TabId> }[];
-  };
-}
 
 export class ActivatedTabs {
   constructor(private activatedTabs: NotNull<TabStorage["activatedTabs"]>) {}
