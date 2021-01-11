@@ -1,7 +1,7 @@
 import type { Alarms } from "webextension-polyfill-ts";
-import { createActivatedTabs } from "./tabs";
-import { getActivatedTabs, updateActivatedTabs } from "./storage/tabs";
-import type { Tab } from "./types";
+import { createActivatedTabs } from "../tabs";
+import { getActivatedTabs, updateActivatedTabs } from "../storage/tabs";
+import type { Tab } from "../types";
 
 /**
  * Unix timestamps (milliseconds)

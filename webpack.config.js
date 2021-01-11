@@ -9,7 +9,7 @@ module.exports = {
   mode,
   entry: {
     popup: "./src/popup/Popup.tsx",
-    background: "./src/background.ts",
+    background: "./src/background/index.ts",
   },
   output: {
     path: path.resolve(__dirname, "dist/"),
