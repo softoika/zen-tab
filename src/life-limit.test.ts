@@ -1,8 +1,8 @@
 import { browser } from "webextension-polyfill-ts";
-import { ActivatedTabs } from "./activated-tabs";
 import { LifeLimit } from "./life-limit";
 import { DEFAULT_TAB } from "./mocks";
 import { getActivatedTabs, updateActivatedTabs } from "./storage/tabs";
+import { ActivatedTabs } from "./tabs";
 import type { Tab } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({

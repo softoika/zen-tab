@@ -1,7 +1,5 @@
 import { browser } from "webextension-polyfill-ts";
-import { ActivatedTabs } from "../activated-tabs";
-import { ClosedTabsHistory } from "../closed-tabs-history";
-import { OutdatedTabs } from "../outdated-tabs";
+import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "../tabs";
 import type { TabStorage } from "./types";
 
 const localStorage = browser.storage.local;
