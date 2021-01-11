@@ -9,6 +9,7 @@ import {
   updateActivatedTabs,
   updateClosedTabHistory,
   updateOutdatedTabs,
+  updateStorage,
 } from "../storage/tabs";
 
 const lifeLimit = new LifeLimit(browser.alarms);
@@ -88,6 +89,7 @@ const onInitExtension = async () => {
   await initOptions(process.env.NODE_ENV);
   const baseLimit = await getOptions("baseLimit");
   lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf() + baseLimit);
+  updateStorage({ activatedTabs: {}, outdatedTabs: {}, tabs: {} });
 };
 
 chrome.runtime.onInstalled.addListener((details) => {
