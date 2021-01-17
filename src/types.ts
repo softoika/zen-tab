@@ -8,7 +8,7 @@
  * ```
  > = Flatten<{ [P in U]?: T[P] } & { [P in _V]: T[P] }>;
  */
-type OptinalProps<
+type OptionalProps<
   T,
   U extends keyof T,
   _V extends keyof T = Exclude<keyof T, U>
@@ -24,7 +24,7 @@ type OptinalProps<
  * Export the tab type makes `selected` optional because it is deprecated since Chrome 38.
  * `windowId`, `discarded` and `autoDiscardable` is optional in Firefox API.
  */
-export type Tab = OptinalProps<
+export type Tab = OptionalProps<
   chrome.tabs.Tab,
   | "selected"
   | "windowId"
