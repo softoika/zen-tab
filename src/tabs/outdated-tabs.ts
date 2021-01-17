@@ -1,5 +1,5 @@
-import type { TabStorage } from "../storage/types";
-import type { NotNull, Tab } from "../types";
+import type { TabStorage } from "storage/types";
+import type { NotNull, Tab } from "types";
 
 type TabId = Tab["id"];
 type WindowId = Tab["windowId"];

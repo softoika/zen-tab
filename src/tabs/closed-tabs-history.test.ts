@@ -1,5 +1,5 @@
 import { ClosedTabsHistory } from "./closed-tabs-history";
-import { DEFAULT_TAB } from "../mocks";
+import { DEFAULT_TAB } from "mocks";
 
 describe("ClosedTabsHistory", () => {
   describe(".createTab(tab)", () => {

@@ -1,6 +1,6 @@
 import { ActivatedTabs, createActivatedTabs } from "./activated-tabs";
-import { DEFAULT_TAB } from "../mocks";
-import type { Tab } from "../types";
+import { DEFAULT_TAB } from "mocks";
+import type { Tab } from "types";
 
 describe("ActivatedTabs", () => {
   describe.each`

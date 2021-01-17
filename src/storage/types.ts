@@ -1,4 +1,4 @@
-import type { NotNull, Tab } from "../types";
+import type { NotNull, Tab } from "types";
 
 type TabId = Tab["id"];
 type WindowId = Tab["windowId"];

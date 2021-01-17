@@ -1,4 +1,4 @@
-import { DEFAULT_TAB } from "../mocks";
+import { DEFAULT_TAB } from "mocks";
 import { OutdatedTabs } from "./outdated-tabs";
 
 describe("OutdatedTabs", () => {

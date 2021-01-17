@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import type { Options } from "../types";
+import type { Options } from "storage/types";
 
 dayjs.extend(duration);
 

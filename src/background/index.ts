@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
-import { getOptions, initOptions } from "../storage/options";
+import { getOptions, initOptions } from "storage/options";
 import {
   getActivatedTabs,
   getClosedTabHistory,
@@ -10,7 +10,7 @@ import {
   updateClosedTabHistory,
   updateOutdatedTabs,
   updateStorage,
-} from "../storage/tabs";
+} from "storage/tabs";
 
 const lifeLimit = new LifeLimit(browser.alarms);
 
