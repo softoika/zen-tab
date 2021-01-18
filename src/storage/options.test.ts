@@ -1,7 +1,7 @@
 import { browser } from "webextension-polyfill-ts";
 import type { Storage } from "webextension-polyfill-ts";
 import type { Options } from "./types";
-import { getOptions, initOptions } from "./options";
+import { loadOptions, initOptions } from "./options";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -69,7 +69,7 @@ describe("storage/options", () => {
 
   test("getOptions() gets all options", async (done) => {
     storage.get.mockResolvedValue(DEFAULT_OPTIONS);
-    const options = await getOptions();
+    const options = await loadOptions();
     expect(storage.get).toBeCalledWith();
     expect(options).toEqual(DEFAULT_OPTIONS);
     done();
@@ -77,7 +77,7 @@ describe("storage/options", () => {
 
   test("getOptions(key) gets the value of the given key", async (done) => {
     storage.get.mockResolvedValue(DEFAULT_OPTIONS);
-    const minTabs = await getOptions("minTabs");
+    const minTabs = await loadOptions("minTabs");
     expect(storage.get).toBeCalledWith("minTabs");
     expect(minTabs).toBe(DEFAULT_OPTIONS.minTabs);
     done();

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
-import { getOptions, initOptions } from "storage/options";
+import { loadOptions, initOptions } from "storage/options";
 import {
   getActivatedTabs,
   getClosedTabHistory,
@@ -19,7 +19,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   const history = await getClosedTabHistory();
   updateClosedTabHistory(history.createTab(tab));
   const [minTabs, tabs, outdatedTabs] = await Promise.all([
-    getOptions("minTabs"),
+    loadOptions("minTabs"),
     browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
     getOutdatedTabs(),
   ]);
@@ -30,7 +30,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
-  const baseLimit = await getOptions("baseLimit");
+  const baseLimit = await loadOptions("baseLimit");
   lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
   const outdatedTabs = await getOutdatedTabs();
   updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
@@ -68,7 +68,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     windowType: "normal",
     windowId: tab.windowId,
   });
-  const minTabs = await getOptions("minTabs");
+  const minTabs = await loadOptions("minTabs");
   if (tabs.length > minTabs) {
     console.log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
@@ -87,7 +87,7 @@ const onInitExtension = async () => {
     windowType: "normal",
   });
   await initOptions(process.env.NODE_ENV);
-  const baseLimit = await getOptions("baseLimit");
+  const baseLimit = await loadOptions("baseLimit");
   lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf() + baseLimit);
   updateStorage({ activatedTabs: {}, outdatedTabs: {}, tabs: {} });
 };
