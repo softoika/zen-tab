@@ -6,6 +6,7 @@
   "browser_action": {
     "default_popup": "popup.html"
   },
+  "options_page": "options.html",
   "background": {
     "scripts": ["background.js", "browser-polyfill.js"],
     "persistent": false

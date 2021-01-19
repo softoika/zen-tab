@@ -10,6 +10,7 @@ module.exports = {
   mode,
   entry: {
     popup: "./src/popup/Popup.tsx",
+    options: "./src/options/Options.tsx",
     background: "./src/background/index.ts",
   },
   output: {
