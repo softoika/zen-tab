@@ -5,11 +5,12 @@
   "author": "softoika <zwgntz@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "NODE_ENV=production webpack",
-    "build:dev": "NODE_ENV=development webpack",
+    "build": "yarn clean && NODE_ENV=production webpack",
+    "build:dev": "yarn clean && NODE_ENV=development webpack",
     "test": "jest",
     "lint": "eslint src/ && prettier --check src/",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "clean": "rm -rf dist/"
   },
   "dependencies": {
     "dayjs": "^1.10.2",
