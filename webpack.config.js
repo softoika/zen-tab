@@ -1,7 +1,7 @@
 const path = require("path");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 const mode = process.env.NODE_ENV || "development";
 const isProd = mode === "production";
@@ -22,6 +22,10 @@ module.exports = {
         test: /\.tsx?$/,
         loader: "ts-loader",
       },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
+      },
     ],
   },
   plugins: [
@@ -39,10 +43,12 @@ module.exports = {
   },
   optimization: {
     minimize: isProd,
-    minimizer: [new TerserWebpackPlugin({ 
-      terserOptions: {
-        compress: { drop_console: true }
-      }
-    })],
+    minimizer: [
+      new TerserWebpackPlugin({
+        terserOptions: {
+          compress: { drop_console: true },
+        },
+      }),
+    ],
   },
 };

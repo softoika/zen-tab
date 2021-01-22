@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import "styles.css";
 import { loadOptions, saveOptions } from "storage/options";
 import type { Options as OptionsType } from "storage/types";
 import { InputBaseLimit } from "./InputBaseLimit";
