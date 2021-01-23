@@ -15,14 +15,13 @@ export const InputMinTabs: React.FC<Props> = (props) => {
   };
   return (
     <div>
-      <label>
-        min tabs:
-        <input
-          type="number"
-          value={props.minTabs}
-          onChange={(e) => updateMinTabs(e.target.value)}
-        />
-      </label>
+      <label htmlFor="input-min-tabs">min tabs</label>
+      <input
+        id="input-min-tabs"
+        type="number"
+        value={props.minTabs}
+        onChange={(e) => updateMinTabs(e.target.value)}
+      />
     </div>
   );
 };

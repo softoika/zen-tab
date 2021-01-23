@@ -27,25 +27,21 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
   };
   return (
     <div>
-      base limit:
-      <label>
-        <input
-          id="hours"
-          type="number"
-          value={hours}
-          onChange={(e) => updateHours(e.target.value)}
-        />
-        hours
-      </label>
-      <label>
-        <input
-          id="mins"
-          type="number"
-          value={mins}
-          onChange={(e) => updateMins(e.target.value)}
-        />
-        mins
-      </label>
+      <span>base limit</span>
+      <input
+        id="input-base-limit-hours"
+        type="number"
+        value={hours}
+        onChange={(e) => updateHours(e.target.value)}
+      />
+      <label htmlFor="input-base-limit-hours">hours</label>
+      <input
+        id="input-base-limit-mins"
+        type="number"
+        value={mins}
+        onChange={(e) => updateMins(e.target.value)}
+      />
+      <label htmlFor="input-base-limit-mins">mins</label>
     </div>
   );
 };
