@@ -15,7 +15,7 @@ export const InputMinTabs: React.FC<Props> = (props) => {
   };
   return (
     <div>
-      <label htmlFor="input-min-tabs">min tabs</label>
+      <label htmlFor="input-min-tabs">Minimum number of tabs</label>
       <input
         id="input-min-tabs"
         type="number"

@@ -27,7 +27,7 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
   };
   return (
     <div>
-      <span>base limit</span>
+      <span>Tab lifetime</span>
       <input
         id="input-base-limit-hours"
         type="number"
