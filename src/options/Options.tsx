@@ -40,10 +40,7 @@ const Options: React.FC = () => {
         baseLimit={options?.baseLimit ?? 0}
         onUpdate={(baseLimit) => updateOptions({ baseLimit })}
       />
-      <button
-        className="px-4 py-2 text-base font-medium text-white bg-indigo-500 border border-transparent rounded-md hover:bg-indigo-700 focus:ring-offset-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-        onClick={() => save()}
-      >
+      <button className="btn-primary" onClick={() => save()}>
         Save
       </button>
     </div>

@@ -34,7 +34,6 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
           type="number"
           value={hours}
           onChange={(e) => updateHours(e.target.value)}
-          className="border-gray-300 rounded-md shadow-sm"
         />
         <label htmlFor="input-base-limit-hours" className="text-base">
           hours
@@ -44,7 +43,6 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
           type="number"
           value={mins}
           onChange={(e) => updateMins(e.target.value)}
-          className="border-gray-300 rounded-md shadow-sm"
         />
         <label htmlFor="input-base-limit-mins" className="text-base">
           mins

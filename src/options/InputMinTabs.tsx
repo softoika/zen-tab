@@ -23,7 +23,6 @@ export const InputMinTabs: React.FC<Props> = (props) => {
         id="input-min-tabs"
         value={props.minTabs}
         onChange={(e) => updateMinTabs(e.target.value)}
-        className="border-gray-300 rounded-md shadow-sm"
       />
     </div>
   );
