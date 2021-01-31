@@ -1,9 +1,9 @@
 import { browser } from "webextension-polyfill-ts";
-import { LifeLimit } from "./lifetime";
 import { DEFAULT_TAB } from "mocks";
 import { getStorage, updateStorage } from "storage/tabs";
 import type { Tab } from "types";
 import { loadOptions } from "storage/options";
+import { expireInactiveTabs, expireLastTab } from "./lifetime";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -21,11 +21,6 @@ jest.mock("storage/options");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("LifeLimit", () => {
-  let lifeLimit: LifeLimit;
-  beforeEach(() => {
-    lifeLimit = new LifeLimit(browser.alarms);
-  });
-
   afterEach(() => {
     getStorageMock.mockReset();
     updateStorageMock.mockReset();
@@ -39,7 +34,7 @@ describe("LifeLimit", () => {
       getStorageMock.mockResolvedValue({});
       const tab = { tabId: 1234, windowId: 1 };
 
-      await lifeLimit.expireLastTab(tab, 0);
+      await expireLastTab(tab, 0);
 
       expect(updateStorageMock).toBeCalledWith({
         activatedTabs: { 1: [{ id: 1234 }] },
@@ -59,7 +54,7 @@ describe("LifeLimit", () => {
       const tab = { tabId: 1234, windowId: 1 };
       const currentMillis = 1605316150185;
 
-      await lifeLimit.expireLastTab(tab, currentMillis);
+      await expireLastTab(tab, currentMillis);
 
       expect(updateStorageMock).toBeCalledWith({
         tabsMap: { [lastTabId]: { lastInactivated: currentMillis } },
@@ -84,7 +79,7 @@ describe("LifeLimit", () => {
       const baseLimit = 1_800_000;
       loadOptionsMock.mockResolvedValue(baseLimit);
 
-      await lifeLimit.expireInactiveTabs(tabs, currentMillis);
+      await expireInactiveTabs(tabs, currentMillis);
 
       expect(browser.alarms.create).toBeCalledWith("1", {
         when: currentMillis + baseLimit,
@@ -110,7 +105,7 @@ describe("LifeLimit", () => {
     });
 
     test("do nothing if the tabs are empty", async (done) => {
-      await lifeLimit.expireInactiveTabs([], 0);
+      await expireInactiveTabs([], 0);
       expect(updateStorageMock).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();

@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
-import { LifeLimit } from "./lifetime";
 import { loadOptions, initOptions } from "storage/options";
 import {
   getActivatedTabs,
@@ -11,8 +10,7 @@ import {
   updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
-
-const lifeLimit = new LifeLimit(browser.alarms);
+import { expireInactiveTabs, expireLastTab } from "./lifetime";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   console.log("onCreated", tab);
@@ -30,7 +28,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
-  lifeLimit.expireLastTab(tab, dayjs().valueOf());
+  expireLastTab(tab, dayjs().valueOf());
   const outdatedTabs = await getOutdatedTabs();
   updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
   console.log("onActivated", tab);
@@ -86,7 +84,7 @@ const onInitExtension = async () => {
     windowType: "normal",
   });
   await initOptions(process.env.NODE_ENV);
-  lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf());
+  expireInactiveTabs(tabs, dayjs().valueOf());
   updateStorage({ activatedTabs: {}, outdatedTabs: {}, tabs: {} });
 };
 
