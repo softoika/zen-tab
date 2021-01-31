@@ -1,5 +1,5 @@
 import { browser } from "webextension-polyfill-ts";
-import { LifeLimit } from "./life-limit";
+import { LifeLimit } from "./lifetime";
 import { DEFAULT_TAB } from "mocks";
 import { getStorage, updateStorage } from "storage/tabs";
 import type { Tab } from "types";

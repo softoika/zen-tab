@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
-import { LifeLimit } from "./life-limit";
+import { LifeLimit } from "./lifetime";
 import { loadOptions, initOptions } from "storage/options";
 import {
   getActivatedTabs,
