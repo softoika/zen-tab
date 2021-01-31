@@ -6,6 +6,15 @@ export type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 export interface TabStorage {
   tabs?: { readonly [_ in NotNull<WindowId>]: readonly Tab[] };
+  tabsMap?: {
+    readonly [_ in NotNull<TabId>]: {
+      /**
+       * A timestamp the tab was inactivated.
+       * When the tab is activated, its value is undefined.
+       */
+      lastInactivated?: number;
+    };
+  };
   history?: { readonly [_ in NotNull<WindowId>]: readonly ClosedTab[] };
   /**
    * Stacks of last activated tabs in each window.

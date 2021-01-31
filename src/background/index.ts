@@ -30,8 +30,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (tab) => {
-  const baseLimit = await loadOptions("baseLimit");
-  lifeLimit.expireLastTab(tab, dayjs().valueOf() + baseLimit);
+  lifeLimit.expireLastTab(tab, dayjs().valueOf());
   const outdatedTabs = await getOutdatedTabs();
   updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
   console.log("onActivated", tab);
@@ -87,8 +86,7 @@ const onInitExtension = async () => {
     windowType: "normal",
   });
   await initOptions(process.env.NODE_ENV);
-  const baseLimit = await loadOptions("baseLimit");
-  lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf() + baseLimit);
+  lifeLimit.expireInactiveTabs(tabs, dayjs().valueOf());
   updateStorage({ activatedTabs: {}, outdatedTabs: {}, tabs: {} });
 };
 

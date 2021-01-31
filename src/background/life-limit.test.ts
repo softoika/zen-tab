@@ -1,9 +1,9 @@
 import { browser } from "webextension-polyfill-ts";
 import { LifeLimit } from "./life-limit";
 import { DEFAULT_TAB } from "mocks";
-import { getActivatedTabs, updateActivatedTabs } from "storage/tabs";
-import { ActivatedTabs } from "tabs";
+import { getStorage, updateStorage } from "storage/tabs";
 import type { Tab } from "types";
+import { loadOptions } from "storage/options";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -12,13 +12,13 @@ jest.mock("webextension-polyfill-ts", () => ({
   },
 }));
 
-jest.mock("../storage/tabs");
-const getActivatedTabsMock = getActivatedTabs as jest.MockedFunction<
-  typeof getActivatedTabs
+jest.mock("storage/tabs");
+const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
+const updateStorageMock = updateStorage as jest.MockedFunction<
+  typeof updateStorage
 >;
-const updateActivatedTabsMock = updateActivatedTabs as jest.MockedFunction<
-  typeof updateActivatedTabs
->;
+jest.mock("storage/options");
+const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("LifeLimit", () => {
   let lifeLimit: LifeLimit;
@@ -27,18 +27,21 @@ describe("LifeLimit", () => {
   });
 
   afterEach(() => {
-    getActivatedTabsMock.mockReset();
-    updateActivatedTabsMock.mockReset();
+    getStorageMock.mockReset();
+    updateStorageMock.mockReset();
+    loadOptionsMock.mockReset();
     (browser.alarms.create as jest.Mock).mockReset();
     (browser.alarms.clear as jest.Mock).mockReset();
   });
 
   describe(".expireLastTab()", () => {
     test("just update the lastTabId if the current lastTabId is undefined", async (done) => {
-      getActivatedTabsMock.mockResolvedValue(new ActivatedTabs({}));
+      getStorageMock.mockResolvedValue({});
       const tab = { tabId: 1234, windowId: 1 };
+
       await lifeLimit.expireLastTab(tab, 0);
-      expect(updateActivatedTabsMock).toBeCalledWith({
+
+      expect(updateStorageMock).toBeCalledWith({
         activatedTabs: { 1: [{ id: 1234 }] },
       });
       expect(browser.alarms.clear).toBeCalled();
@@ -48,16 +51,23 @@ describe("LifeLimit", () => {
 
     test("create an alarm with lastTabId and unix timestamp", async (done) => {
       const lastTabId = 111;
-      getActivatedTabsMock.mockResolvedValue(
-        new ActivatedTabs({ 1: [{ id: 111 }] })
-      );
+      const baseLimit = 1_800_000;
+      getStorageMock.mockResolvedValue({
+        activatedTabs: { 1: [{ id: lastTabId }] },
+      });
+      loadOptionsMock.mockResolvedValue(baseLimit);
       const tab = { tabId: 1234, windowId: 1 };
-      const when = 1605316150185;
-      await lifeLimit.expireLastTab(tab, when);
-      expect(updateActivatedTabsMock).toBeCalledWith({
+      const currentMillis = 1605316150185;
+
+      await lifeLimit.expireLastTab(tab, currentMillis);
+
+      expect(updateStorageMock).toBeCalledWith({
+        tabsMap: { [lastTabId]: { lastInactivated: currentMillis } },
         activatedTabs: { 1: [{ id: 1234 }, { id: 111 }] },
       });
-      expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, { when });
+      expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, {
+        when: currentMillis + baseLimit,
+      });
       done();
     });
   });
@@ -70,18 +80,38 @@ describe("LifeLimit", () => {
         { ...DEFAULT_TAB, id: 3, windowId: 1, active: false },
         { ...DEFAULT_TAB, id: 4, windowId: 1, active: true },
       ];
-      const when = 1608123162004;
-      await lifeLimit.expireInactiveTabs(tabs, when);
-      expect(browser.alarms.create).toBeCalledWith("1", { when });
-      expect(browser.alarms.create).toBeCalledWith("2", { when: when + 1000 });
-      expect(browser.alarms.create).toBeCalledWith("3", { when: when + 2000 });
-      expect(updateActivatedTabsMock).toBeCalled();
+      const currentMillis = 1608123162004;
+      const baseLimit = 1_800_000;
+      loadOptionsMock.mockResolvedValue(baseLimit);
+
+      await lifeLimit.expireInactiveTabs(tabs, currentMillis);
+
+      expect(browser.alarms.create).toBeCalledWith("1", {
+        when: currentMillis + baseLimit,
+      });
+      expect(browser.alarms.create).toBeCalledWith("2", {
+        when: currentMillis + baseLimit + 1000,
+      });
+      expect(browser.alarms.create).toBeCalledWith("3", {
+        when: currentMillis + baseLimit + 2000,
+      });
+      expect(updateStorageMock).toBeCalled();
+      expect(updateStorageMock).toBeCalledWith({
+        activatedTabs: {
+          1: [{ id: 4 }, { id: 3 }, { id: 2 }, { id: 1 }],
+        },
+        tabsMap: {
+          1: { lastInactivated: currentMillis },
+          2: { lastInactivated: currentMillis },
+          3: { lastInactivated: currentMillis },
+        },
+      });
       done();
     });
 
     test("do nothing if the tabs are empty", async (done) => {
       await lifeLimit.expireInactiveTabs([], 0);
-      expect(updateActivatedTabsMock).not.toBeCalled();
+      expect(updateStorageMock).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
       done();
     });

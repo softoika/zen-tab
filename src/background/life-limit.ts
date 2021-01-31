@@ -1,43 +1,77 @@
 import type { Alarms } from "webextension-polyfill-ts";
-import { createActivatedTabs } from "tabs";
-import { getActivatedTabs, updateActivatedTabs } from "storage/tabs";
-import type { Tab } from "types";
+import { ActivatedTabs, createActivatedTabs } from "tabs";
+import { getStorage, updateStorage } from "storage/tabs";
+import type { NotNull, Tab } from "types";
+import type { TabStorage } from "storage/types";
+import { loadOptions } from "storage/options";
 
-/**
- * Unix timestamps (milliseconds)
- */
-type When = number;
+type TabId = Tab["id"];
+
+type TabsMap = TabStorage["tabsMap"];
+
+function setLastInactivated(
+  tabsMap: TabsMap,
+  tabId: NotNull<TabId>,
+  currentMillis: number
+) {
+  if (!tabsMap) {
+    tabsMap = {};
+  }
+  tabsMap = { ...tabsMap, [tabId]: { lastInactivated: currentMillis } };
+  return tabsMap;
+}
+
+async function getLifetime(currentMillis: number) {
+  const baseLimit = await loadOptions("baseLimit");
+  return currentMillis + baseLimit;
+}
 
 export class LifeLimit {
   constructor(private alarms: Alarms.Static) {}
 
   /**
    * Set alarm for a last activated tab.
+   * If it exists, memorize its inactivated timestamp. This is useful for showing
+   * time left to close the tab.
    */
-  async expireLastTab(newTab: chrome.tabs.TabActiveInfo, when: When) {
+  async expireLastTab(
+    newTab: chrome.tabs.TabActiveInfo,
+    currentMillis: number
+  ) {
     if (!newTab?.tabId) {
       return;
     }
     await this.alarms.clear(`${newTab.tabId}`);
-    const activatedTabs = await getActivatedTabs();
+    let storage = await getStorage(["activatedTabs", "tabsMap"]);
+    const activatedTabs = new ActivatedTabs(storage.activatedTabs ?? {});
     const lastTabId = activatedTabs.getLastTabId(newTab.windowId);
     if (lastTabId) {
+      const when = await getLifetime(currentMillis);
       this.alarms.create(`${lastTabId}`, { when });
+      storage = {
+        ...storage,
+        tabsMap: setLastInactivated(storage.tabsMap, lastTabId, currentMillis),
+      };
     }
-    updateActivatedTabs(activatedTabs.push(newTab.tabId, newTab.windowId));
+    updateStorage({
+      ...storage,
+      activatedTabs: activatedTabs.push(newTab.tabId, newTab.windowId).value,
+    });
   }
 
   /**
    * Set alarms for all inactive tabs
    */
-  async expireInactiveTabs(tabs: Tab[], when: When) {
+  async expireInactiveTabs(tabs: Tab[], currentMillis: number) {
     this.alarms.clear();
     if (tabs.length <= 0) {
       return;
     }
 
     const delayUnit = 1000;
+    const when = await getLifetime(currentMillis);
     let totalDelay = 0;
+    let tabsMap: TabStorage["tabsMap"] = {};
     tabs
       .filter((tab) => !tab.active)
       .map((tab) => tab.id)
@@ -47,9 +81,14 @@ export class LifeLimit {
         }
         // Must delay alarms in each tab because it is not able to close tabs syncronously.
         this.alarms.create(`${tabId}`, { when: when + totalDelay });
+        tabsMap = {
+          ...tabsMap,
+          [tabId]: { lastInactivated: when + totalDelay },
+        };
+        tabsMap = setLastInactivated(tabsMap, tabId, currentMillis);
         totalDelay += delayUnit;
       });
 
-    updateActivatedTabs(createActivatedTabs(tabs));
+    updateStorage({ tabsMap, activatedTabs: createActivatedTabs(tabs).value });
   }
 }
