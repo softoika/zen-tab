@@ -11,6 +11,12 @@
     "scripts": ["background.js", "browser-polyfill.js"],
     "persistent": false
   },
-  "permissions": ["tabs", "storage", "alarms", "management"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "management",
+    "chrome://favicon/*"
+  ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
