@@ -11,18 +11,20 @@ export const History: React.FC<{ page: Page }> = ({ page }) => {
     return null;
   }
   return (
-    <div>
-      <ul>
-        {history.map((tab) => (
-          <li key={tab.id}>
-            <button type="button" onClick={() => open(tab.url)}>
-              <FavIcon favIconUrl={tab.favIconUrl} url={tab.url} />
-              <span>{tab.title}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="space-y-4">
+      {history.map((tab) => (
+        <li key={tab.id}>
+          <button
+            type="button"
+            onClick={() => open(tab.url)}
+            className="flex items-start space-x-3 text-left"
+          >
+            <FavIcon favIconUrl={tab.favIconUrl} url={tab.url} />
+            <span>{tab.title}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 };
 
