@@ -6,7 +6,7 @@ import type { NotNull, Tab } from "types";
 import { browser } from "webextension-polyfill-ts";
 import type { Page } from "./types";
 
-export const TabsStatus: React.FC<{ selected: Page }> = ({ selected }) => {
+export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
   const [tabs, setTabs] = useState<Tab[]>([]);
   useEffect(() => {
     fetchTabs().then((t) => setTabs(t));
@@ -29,7 +29,7 @@ export const TabsStatus: React.FC<{ selected: Page }> = ({ selected }) => {
     );
     return () => clearInterval(timer);
   }, [timeLeftMap, baseLimit, tabsMap]);
-  if (selected !== "tabs") {
+  if (page !== "tabs") {
     return null;
   }
   return (

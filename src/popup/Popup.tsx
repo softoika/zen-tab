@@ -9,10 +9,10 @@ const Popup: React.FC = () => {
   const [page, setPage] = useState<Page>("tabs");
   return (
     <>
-      <Header selected={page} onChangePage={(page) => setPage(page)} />
+      <Header page={page} onChangePage={(page) => setPage(page)} />
       <main>
-        <TabsStatus selected={page} />
-        <History selected={page} />
+        <TabsStatus page={page} />
+        <History page={page} />
       </main>
     </>
   );
