@@ -36,6 +36,17 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
     <ul>
       {tabs.map((tab) => (
         <li key={tab.id}>
+          <div>
+            {timeLeftMap?.[tab.id ?? 0] && (
+              <>
+                <span>{timeLeftMap?.[tab.id ?? 0]?.minus && "-"}</span>
+                <span>{timeLeftMap?.[tab.id ?? 0]?.hours}</span>
+                <span>hours</span>
+                <span>{timeLeftMap?.[tab.id ?? 0]?.mins}</span>
+                <span>mins</span>
+              </>
+            )}
+          </div>
           <img
             src={
               tab.favIconUrl ||
@@ -45,17 +56,7 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
             height="16"
             width="16"
           />
-          <div>{tab.title}</div>
-          <div>{tab.url ?? tab.pendingUrl}</div>
-          {timeLeftMap?.[tab.id ?? 0] && (
-            <div>
-              <span>{timeLeftMap?.[tab.id ?? 0]?.minus && "-"}</span>
-              <span>{timeLeftMap?.[tab.id ?? 0]?.hours}</span>
-              <span>hours</span>
-              <span>{timeLeftMap?.[tab.id ?? 0]?.mins}</span>
-              <span>mins</span>
-            </div>
-          )}
+          <div>{tab.title ?? tab.url ?? tab.pendingUrl}</div>
         </li>
       ))}
     </ul>
