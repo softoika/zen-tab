@@ -21,13 +21,21 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
   }, []);
   const [timeLeftMap, setTimeLeftMap] = useState<TimeLeftMap | null>(null);
   useEffect(() => {
+    if (baseLimit === 0 || tabsMap == null) {
+      return;
+    }
     const currentMillis = Date.now();
-    const timer = setInterval(
+    if (timeLeftMap == null) {
+      // Build the map instantly at first
+      setTimeLeftMap(calculateTimeLeft(baseLimit, tabsMap, currentMillis));
+      return;
+    }
+    const timer = setTimeout(
       () =>
         setTimeLeftMap(calculateTimeLeft(baseLimit, tabsMap, currentMillis)),
       1000
     );
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [timeLeftMap, baseLimit, tabsMap]);
   if (page !== "tabs") {
     return null;
@@ -41,9 +49,8 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
               <>
                 <span>{timeLeftMap?.[tab.id ?? 0]?.minus && "-"}</span>
                 <span>{timeLeftMap?.[tab.id ?? 0]?.hours}</span>
-                <span>hours</span>
+                <span>:</span>
                 <span>{timeLeftMap?.[tab.id ?? 0]?.mins}</span>
-                <span>mins</span>
               </>
             )}
           </div>
