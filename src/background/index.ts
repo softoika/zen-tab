@@ -12,8 +12,13 @@ import {
 } from "storage/tabs";
 import { expireInactiveTabs, expireLastTab } from "./lifetime";
 
+function log(...args: unknown[]) {
+  const date = dayjs().format("MM/DD HH:mm:ss.SSS");
+  console.log(date, ...args);
+}
+
 chrome.tabs.onCreated.addListener(async (tab) => {
-  console.log("onCreated", tab);
+  log("onCreated", tab);
   const history = await getClosedTabHistory();
   updateClosedTabHistory(history.createTab(tab));
   const [minTabs, tabs, outdatedTabs] = await Promise.all([
@@ -31,7 +36,7 @@ chrome.tabs.onActivated.addListener(async (tab) => {
   expireLastTab(tab, dayjs().valueOf());
   const outdatedTabs = await getOutdatedTabs();
   updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
-  console.log("onActivated", tab);
+  log("onActivated", tab);
 });
 
 chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
@@ -42,7 +47,7 @@ chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
-  console.log("onRemoved", tabId);
+  log("onRemoved", tabId);
   chrome.alarms.clear(`${tabId}`);
   const history = await getClosedTabHistory();
   updateClosedTabHistory(history.closeTab(tabId, windowId));
@@ -55,7 +60,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  console.log("onAlarm", alarm);
+  log("onAlarm", alarm.name, alarm.scheduledTime);
   const tabId = +alarm.name;
   const tab = await browser.tabs.get(tabId);
   if (!tab) {
@@ -67,7 +72,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   });
   const minTabs = await loadOptions("minTabs");
   if (tabs.length > minTabs) {
-    console.log(`Removed ${tabId}`);
+    log(`Removed ${tabId}`);
     chrome.tabs.remove(tabId);
   } else {
     const outdatedTabs = await getOutdatedTabs();
@@ -75,9 +80,9 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-// chrome.storage.onChanged.addListener((changes) => {
-//   console.log("debug storage: ", changes);
-// });
+chrome.storage.onChanged.addListener((changes) => {
+  log("debug storage: ", changes);
+});
 
 const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
@@ -89,12 +94,12 @@ const onInitExtension = async () => {
 };
 
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log("onInstalled", details);
+  log("onInstalled", details);
   onInitExtension();
 });
 
 chrome.management.onEnabled.addListener((info) => {
-  console.log("onEnabled", info);
+  log("onEnabled", info);
   if (chrome.runtime.id === info.id) {
     onInitExtension();
   }
