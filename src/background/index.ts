@@ -84,6 +84,10 @@ chrome.storage.onChanged.addListener((changes) => {
   log("debug storage: ", changes);
 });
 
+chrome.idle.onStateChanged.addListener((newState) => {
+  log(`idle state: ${newState}`);
+});
+
 const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
     windowType: "normal",
