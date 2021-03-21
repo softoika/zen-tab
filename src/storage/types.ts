@@ -1,13 +1,11 @@
-import type { NotNull, Tab } from "types";
+import type { Tab, TabId, WindowId } from "types";
 
-type TabId = Tab["id"];
-type WindowId = Tab["windowId"];
 export type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 export interface TabStorage {
-  tabs?: { readonly [_ in NotNull<WindowId>]: readonly Tab[] };
+  tabs?: { readonly [_ in WindowId]: readonly Tab[] };
   tabsMap?: {
-    readonly [_ in NotNull<TabId>]: {
+    readonly [_ in TabId]: {
       /**
        * A timestamp the tab was inactivated.
        * When the tab is activated, its value is undefined.
@@ -15,7 +13,7 @@ export interface TabStorage {
       lastInactivated?: number;
     };
   };
-  history?: { readonly [_ in NotNull<WindowId>]: readonly ClosedTab[] };
+  history?: { readonly [_ in WindowId]: readonly ClosedTab[] };
   /**
    * Stacks of last activated tabs in each window.
    * The tab on the stack will start an alarm on the next activation.
@@ -23,7 +21,7 @@ export interface TabStorage {
    * in index signatures, the `in` keyword is used instead.
    */
   activatedTabs?: {
-    readonly [_ in NotNull<WindowId>]: readonly { id: NotNull<TabId> }[];
+    readonly [_ in WindowId]: readonly { id: TabId }[];
   };
 
   /**
@@ -34,7 +32,7 @@ export interface TabStorage {
    * in index signatures, the `in` keyword is used instead.
    */
   outdatedTabs?: {
-    readonly [_ in NotNull<WindowId>]: readonly { id: NotNull<TabId> }[];
+    readonly [_ in WindowId]: readonly { id: TabId }[];
   };
 }
 

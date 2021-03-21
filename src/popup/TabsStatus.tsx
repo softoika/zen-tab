@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { loadOptions } from "storage/options";
 import { getValue } from "storage/tabs";
 import type { Options, TabStorage } from "storage/types";
-import type { NotNull, Tab } from "types";
+import type { Tab, TabId } from "types";
 import { browser } from "webextension-polyfill-ts";
 import type { Page } from "./types";
 
@@ -110,8 +110,6 @@ interface TimeLeft {
 }
 
 type TimeLeftMap = { [_ in TabId]?: TimeLeft };
-
-type TabId = NotNull<Tab["id"]>;
 
 function calculateTimeLeft(
   baseLimit: Options["baseLimit"],

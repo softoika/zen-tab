@@ -1,8 +1,5 @@
 import type { TabStorage } from "storage/types";
-import type { NotNull, Tab } from "types";
-
-type TabId = Tab["id"];
-type WindowId = Tab["windowId"];
+import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class ActivatedTabs {
   constructor(private activatedTabs: NotNull<TabStorage["activatedTabs"]>) {}
@@ -11,7 +8,7 @@ export class ActivatedTabs {
     return this.activatedTabs;
   }
 
-  getLastTabId(windowId: NotNull<WindowId>): TabId {
+  getLastTabId(windowId: WindowId): TabId | undefined {
     const stack = this.activatedTabs[windowId] ?? [];
     return stack?.[0]?.id;
   }
@@ -20,7 +17,7 @@ export class ActivatedTabs {
    * Push the tab on the stack of the most recently activated tabs in each window.
    * If the tab is in the stack, move it to the top of the stack.
    */
-  push(tabId: NotNull<TabId>, windowId: NotNull<WindowId>): ActivatedTabs {
+  push(tabId: TabId, windowId: WindowId): ActivatedTabs {
     let stack = this.activatedTabs[windowId] ?? [];
     stack = stack.filter(({ id }) => id !== tabId);
     this.activatedTabs = {
@@ -30,7 +27,7 @@ export class ActivatedTabs {
     return this;
   }
 
-  remove(tabId: NotNull<TabId>, windowId: NotNull<WindowId>): ActivatedTabs {
+  remove(tabId: TabId, windowId: WindowId): ActivatedTabs {
     let stack = this.activatedTabs[windowId] ?? [];
     stack = stack.filter(({ id }) => id !== tabId);
     this.activatedTabs = {

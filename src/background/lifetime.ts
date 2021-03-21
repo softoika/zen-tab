@@ -1,17 +1,15 @@
 import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs, createActivatedTabs } from "tabs";
 import { getStorage, updateStorage } from "storage/tabs";
-import type { NotNull, Tab } from "types";
+import type { Tab, TabId } from "types";
 import type { TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
-
-type TabId = Tab["id"];
 
 type TabsMap = TabStorage["tabsMap"];
 
 function setLastInactivated(
   tabsMap: TabsMap,
-  tabId: NotNull<TabId>,
+  tabId: TabId,
   currentMillis: number
 ) {
   if (!tabsMap) {

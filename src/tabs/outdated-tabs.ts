@@ -1,8 +1,5 @@
 import type { TabStorage } from "storage/types";
-import type { NotNull, Tab } from "types";
-
-type TabId = Tab["id"];
-type WindowId = Tab["windowId"];
+import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class OutdatedTabs {
   constructor(private outdatedTabs: NotNull<TabStorage["outdatedTabs"]>) {}
@@ -11,7 +8,7 @@ export class OutdatedTabs {
     return this.outdatedTabs;
   }
 
-  getLastTabId(windowId: NotNull<WindowId>): TabId {
+  getLastTabId(windowId: WindowId): TabId | undefined {
     const tabs = this.outdatedTabs[windowId];
     if (!tabs?.length) {
       return undefined;
@@ -39,7 +36,7 @@ export class OutdatedTabs {
     return this;
   }
 
-  remove(tabId: NotNull<TabId>, windowId: NotNull<WindowId>): OutdatedTabs {
+  remove(tabId: TabId, windowId: WindowId): OutdatedTabs {
     let tabs = this.outdatedTabs[windowId] ?? [];
     tabs = tabs.filter(({ id }) => id !== tabId);
     this.outdatedTabs = {

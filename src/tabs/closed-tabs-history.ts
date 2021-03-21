@@ -1,8 +1,5 @@
 import type { ClosedTab, TabStorage } from "storage/types";
-import type { NotNull, Tab } from "types";
-
-type TabId = Tab["id"];
-type WindowId = Tab["windowId"];
+import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class ClosedTabsHistory {
   constructor(
@@ -47,10 +44,7 @@ export class ClosedTabsHistory {
     return this;
   }
 
-  closeTab(
-    tabId: NotNull<TabId>,
-    windowId: NotNull<WindowId>
-  ): ClosedTabsHistory {
+  closeTab(tabId: TabId, windowId: WindowId): ClosedTabsHistory {
     const tabs = this.getTabs(windowId);
     const history = this.getHistory(windowId);
     const tab = tabs.find((t) => t.id === tabId);
@@ -79,11 +73,11 @@ export class ClosedTabsHistory {
     return this;
   }
 
-  private getTabs(windowId: NotNull<WindowId>): readonly Tab[] {
+  private getTabs(windowId: WindowId): readonly Tab[] {
     return this._tabs[windowId] ?? [];
   }
 
-  private getHistory(windowId: NotNull<WindowId>): readonly ClosedTab[] {
+  private getHistory(windowId: WindowId): readonly ClosedTab[] {
     return this._history[windowId] ?? [];
   }
 }

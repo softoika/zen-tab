@@ -37,6 +37,9 @@ export type Tab = OptionalProps<
   | "incognito"
 >;
 
+export type TabId = NotNull<Tab["id"]>;
+export type WindowId = NotNull<Tab["windowId"]>;
+
 export type NotNull<T> = T extends null
   ? never
   : T extends undefined
