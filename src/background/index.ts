@@ -10,12 +10,12 @@ import {
   updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
-import { expireInactiveTabs, expireLastTab } from "./lifetime";
-
-function log(...args: unknown[]) {
-  const date = dayjs().format("MM/DD HH:mm:ss.SSS");
-  console.log(date, ...args);
-}
+import {
+  expireInactiveTabs,
+  expireLastTab,
+  removeTabOnAlarm,
+} from "./lifetime";
+import { log } from "utils";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   log("onCreated", tab);
@@ -59,26 +59,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
   updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
 });
 
-chrome.alarms.onAlarm.addListener(async (alarm) => {
-  log("onAlarm", alarm.name, alarm.scheduledTime);
-  const tabId = +alarm.name;
-  const tab = await browser.tabs.get(tabId);
-  if (!tab) {
-    return;
-  }
-  const tabs = await browser.tabs.query({
-    windowType: "normal",
-    windowId: tab.windowId,
-  });
-  const minTabs = await loadOptions("minTabs");
-  if (tabs.length > minTabs) {
-    log(`Removed ${tabId}`);
-    chrome.tabs.remove(tabId);
-  } else {
-    const outdatedTabs = await getOutdatedTabs();
-    updateOutdatedTabs(outdatedTabs.push(tab));
-  }
-});
+chrome.alarms.onAlarm.addListener((alarm) => removeTabOnAlarm(alarm));
 
 chrome.storage.onChanged.addListener((changes) => {
   log("debug storage: ", changes);

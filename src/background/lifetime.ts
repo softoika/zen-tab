@@ -1,28 +1,47 @@
-import { browser } from "webextension-polyfill-ts";
+import { browser, Tabs } from "webextension-polyfill-ts";
 import { ActivatedTabs, createActivatedTabs } from "tabs";
-import { getStorage, updateStorage } from "storage/tabs";
+import {
+  getOutdatedTabs,
+  getStorage,
+  updateOutdatedTabs,
+  updateStorage,
+} from "storage/tabs";
 import type { Tab, TabId } from "types";
 import type { TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
+import { log } from "utils";
+
+type Alarm = chrome.alarms.Alarm;
+
+export async function removeTabOnAlarm(alarm: Alarm) {
+  log("onAlarm", alarm.name, alarm.scheduledTime);
+  const tabId = +alarm.name;
+  let tab: Tabs.Tab | undefined = undefined;
+  try {
+    tab = await browser.tabs.get(tabId);
+  } catch {
+    return;
+  }
+  if (!tab) {
+    return;
+  }
+  const [tabs, minTabs] = await Promise.all([
+    browser.tabs.query({
+      windowType: "normal",
+      windowId: tab.windowId,
+    }),
+    loadOptions("minTabs"),
+  ]);
+  if (tabs.length > minTabs) {
+    log(`Removed ${tabId}`);
+    browser.tabs.remove(tabId);
+  } else {
+    const outdatedTabs = await getOutdatedTabs();
+    updateOutdatedTabs(outdatedTabs.push(tab));
+  }
+}
 
 type TabsMap = TabStorage["tabsMap"];
-
-function setLastInactivated(
-  tabsMap: TabsMap,
-  tabId: TabId,
-  currentMillis: number
-) {
-  if (!tabsMap) {
-    tabsMap = {};
-  }
-  tabsMap = { ...tabsMap, [tabId]: { lastInactivated: currentMillis } };
-  return tabsMap;
-}
-
-async function getLifetime(currentMillis: number) {
-  const baseLimit = await loadOptions("baseLimit");
-  return currentMillis + baseLimit;
-}
 
 /**
  * Set alarm for a last activated tab.
@@ -85,4 +104,21 @@ export async function expireInactiveTabs(tabs: Tab[], currentMillis: number) {
     });
 
   updateStorage({ tabsMap, activatedTabs: createActivatedTabs(tabs).value });
+}
+
+function setLastInactivated(
+  tabsMap: TabsMap,
+  tabId: TabId,
+  currentMillis: number
+) {
+  if (!tabsMap) {
+    tabsMap = {};
+  }
+  tabsMap = { ...tabsMap, [tabId]: { lastInactivated: currentMillis } };
+  return tabsMap;
+}
+
+async function getLifetime(currentMillis: number) {
+  const baseLimit = await loadOptions("baseLimit");
+  return currentMillis + baseLimit;
 }

@@ -1,35 +1,125 @@
-import { browser } from "webextension-polyfill-ts";
-import { DEFAULT_TAB } from "mocks";
-import { getStorage, updateStorage } from "storage/tabs";
+import { browser, Tabs } from "webextension-polyfill-ts";
+import { DEFAULT_BROWSER_TAB, DEFAULT_TAB } from "mocks";
+import {
+  getOutdatedTabs,
+  getStorage,
+  updateOutdatedTabs,
+  updateStorage,
+} from "storage/tabs";
 import type { Tab } from "types";
 import { loadOptions } from "storage/options";
-import { expireInactiveTabs, expireLastTab } from "./lifetime";
+import {
+  expireInactiveTabs,
+  expireLastTab,
+  removeTabOnAlarm,
+} from "./lifetime";
+import { OutdatedTabs } from "tabs";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
     alarms: { clear: jest.fn(), create: jest.fn() },
     storage: { local: {} },
+    tabs: { query: jest.fn(), remove: jest.fn(), get: jest.fn() },
   },
 }));
+const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
+  typeof browser.tabs.query
+>;
+const tabsGetMock = browser.tabs.get as jest.MockedFunction<
+  typeof browser.tabs.get
+>;
 
 jest.mock("storage/tabs");
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
 >;
+const getOutdatedTabsMock = getOutdatedTabs as jest.MockedFunction<
+  typeof getOutdatedTabs
+>;
 jest.mock("storage/options");
+const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
+  typeof updateOutdatedTabs
+>;
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
-describe("LifeLimit", () => {
+describe("lifetime", () => {
   afterEach(() => {
     getStorageMock.mockReset();
     updateStorageMock.mockReset();
     loadOptionsMock.mockReset();
+    getOutdatedTabsMock.mockReset();
+    updateOutdatedTabsMock.mockReset();
     (browser.alarms.create as jest.Mock).mockReset();
     (browser.alarms.clear as jest.Mock).mockReset();
+    (browser.tabs.query as jest.Mock).mockReset();
+    (browser.tabs.remove as jest.Mock).mockReset();
+    (browser.tabs.get as jest.Mock).mockReset();
   });
 
-  describe(".expireLastTab()", () => {
+  describe("removeTabOnAlarm()", () => {
+    type Alarm = chrome.alarms.Alarm;
+    test("remove the tab if number of tabs is greater than minTabs option", async (done) => {
+      const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
+      tabsGetMock.mockResolvedValue({
+        ...DEFAULT_BROWSER_TAB,
+        id: 12,
+        windowId: 1,
+      });
+      tabsQueryMock.mockResolvedValue([
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+      ]);
+      loadOptionsMock.mockResolvedValue(2);
+
+      await removeTabOnAlarm(alarm);
+
+      expect(browser.tabs.remove).toBeCalledWith(12);
+      done();
+    });
+
+    test("push the tab to OutdatedTabs if number of tabs is equals to minTabs or smaller than it", async (done) => {
+      const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
+      tabsGetMock.mockResolvedValue({
+        ...DEFAULT_BROWSER_TAB,
+        id: 12,
+        windowId: 1,
+      });
+      tabsQueryMock.mockResolvedValue([
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+      ]);
+      loadOptionsMock.mockResolvedValue(3);
+      getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
+
+      await removeTabOnAlarm(alarm);
+
+      expect(browser.tabs.query).toBeCalledWith({
+        windowId: 1,
+        windowType: "normal",
+      });
+      expect(browser.tabs.remove).not.toBeCalled();
+      expect(updateOutdatedTabsMock).toBeCalled();
+      done();
+    });
+
+    test("do nothing if the tabId does not exists", async (done) => {
+      const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
+      tabsGetMock.mockRejectedValue({});
+
+      await removeTabOnAlarm(alarm);
+
+      expect(browser.tabs.query).not.toBeCalled();
+      expect(loadOptionsMock).not.toBeCalled();
+      expect(browser.tabs.remove).not.toBeCalled();
+      expect(updateOutdatedTabsMock).not.toBeCalled();
+      done();
+    });
+  });
+
+  describe("expireLastTab()", () => {
     test("just update the lastTabId if the current lastTabId is undefined", async (done) => {
       getStorageMock.mockResolvedValue({});
       const tab = { tabId: 1234, windowId: 1 };
@@ -67,7 +157,7 @@ describe("LifeLimit", () => {
     });
   });
 
-  describe(".expireInactiveTabs()", () => {
+  describe("expireInactiveTabs()", () => {
     test("create alarms for given tabs", async (done) => {
       const tabs: Tab[] = [
         { ...DEFAULT_TAB, id: 1, windowId: 1, active: false },
