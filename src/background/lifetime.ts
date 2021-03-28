@@ -1,4 +1,5 @@
-import { browser, Tabs } from "webextension-polyfill-ts";
+import type { Tabs } from "webextension-polyfill-ts";
+import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs, createActivatedTabs } from "tabs";
 import {
   getOutdatedTabs,
@@ -15,6 +16,10 @@ type Alarm = chrome.alarms.Alarm;
 
 export async function removeTabOnAlarm(alarm: Alarm) {
   log("onAlarm", alarm.name, alarm.scheduledTime);
+  // do nothing if a name of the alarm is invalid or its id of tab does'nt exist.
+  if (!isValidAsId(alarm.name)) {
+    return;
+  }
   const tabId = +alarm.name;
   let tab: Tabs.Tab | undefined = undefined;
   try {
@@ -25,6 +30,7 @@ export async function removeTabOnAlarm(alarm: Alarm) {
   if (!tab) {
     return;
   }
+
   const [tabs, minTabs] = await Promise.all([
     browser.tabs.query({
       windowType: "normal",
@@ -39,6 +45,82 @@ export async function removeTabOnAlarm(alarm: Alarm) {
     const outdatedTabs = await getOutdatedTabs();
     updateOutdatedTabs(outdatedTabs.push(tab));
   }
+}
+
+/**
+ * Remove the tab of alarms at once. If the number of tabs in each window
+ * is the minTabs or less, push the tabs to the outdatedTabs.
+ * It will be removed when a new tab is created.
+ */
+export async function removeTabOfAlarms(alarms: Alarm[]) {
+  if (alarms.length === 0) {
+    return;
+  }
+  const [minTabs, outdatedTabs, tabs] = await Promise.all([
+    loadOptions("minTabs"),
+    getOutdatedTabs(),
+    browser.tabs.query({ windowType: "normal" }),
+  ]);
+
+  // Create a map whose tab id corresponds to a tab object.
+  const tabIdToTabMap: { [tabId: number]: Tabs.Tab } = {};
+  tabs.forEach((tab) => {
+    if (tab.id == null) return;
+    tabIdToTabMap[tab.id] = tab;
+  });
+
+  // Create a valid id list from alarms
+  const idOfAlarms = alarms
+    .filter((a) => isValidAsId(a.name))
+    .map((a) => +a.name)
+    .filter((id) => !!tabIdToTabMap[id]);
+
+  // Create a map that corresponds to the window id and the number of tabs in the window
+  // and a map that corresponds the tab id and the window it belongs to.
+  const tabCountMap: {
+    [windowId: number]: number /* the number of tabs */;
+  } = {};
+  const tabIdToWindowIdMap: { [tabId: number]: number /* windowId */ } = {};
+  tabs.forEach((t) => {
+    if (t.windowId == null || t.id == null) {
+      return;
+    }
+    const count = tabCountMap[t.windowId] ?? 0;
+    tabCountMap[t.windowId] = count + 1;
+    tabIdToWindowIdMap[t.id] = t.windowId;
+  });
+
+  // Remove more tabs than minTabs in each window.
+  // If the number of tabs is minTabs or less, push tabs to outdatedTabs.
+  const idsToBeRemoved: TabId[] = [];
+  idOfAlarms.forEach((tabId) => {
+    const windowId = tabIdToWindowIdMap[tabId];
+    const tabCount = tabCountMap[windowId];
+    if (tabCount > minTabs) {
+      idsToBeRemoved.push(tabId);
+      tabCountMap[windowId]--;
+    } else {
+      outdatedTabs.push(tabIdToTabMap[tabId]);
+    }
+  });
+
+  // Remove tabs and update outdateTabs at once.
+  browser.tabs.remove(idsToBeRemoved);
+  updateOutdatedTabs(outdatedTabs);
+}
+
+function isValidAsId(name: Alarm["name"]): boolean {
+  const id = +name;
+  if (isNaN(id)) {
+    return false;
+  }
+  if (!Number.isInteger(id)) {
+    return false;
+  }
+  if (id < 0) {
+    return false;
+  }
+  return true;
 }
 
 type TabsMap = TabStorage["tabsMap"];

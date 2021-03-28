@@ -4,6 +4,7 @@ export type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
 
 export interface TabStorage {
   tabs?: { readonly [_ in WindowId]: readonly Tab[] };
+
   tabsMap?: {
     readonly [_ in TabId]: {
       /**
@@ -13,7 +14,9 @@ export interface TabStorage {
       lastInactivated?: number;
     };
   };
+
   history?: { readonly [_ in WindowId]: readonly ClosedTab[] };
+
   /**
    * Stacks of last activated tabs in each window.
    * The tab on the stack will start an alarm on the next activation.
@@ -34,6 +37,12 @@ export interface TabStorage {
   outdatedTabs?: {
     readonly [_ in WindowId]: readonly { id: TabId }[];
   };
+
+  /**
+   * Alarms that are temporarily evacuated when a computer is locked.
+   * This is necessary because if it is locked, the alarms will not work properly.
+   */
+  evacuatedAlarms?: readonly chrome.alarms.Alarm[];
 }
 
 export interface Options {

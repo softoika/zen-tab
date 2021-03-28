@@ -1,4 +1,4 @@
-import { browser, Tabs } from "webextension-polyfill-ts";
+import { browser } from "webextension-polyfill-ts";
 import { DEFAULT_BROWSER_TAB, DEFAULT_TAB } from "mocks";
 import {
   getOutdatedTabs,
@@ -12,6 +12,7 @@ import {
   expireInactiveTabs,
   expireLastTab,
   removeTabOnAlarm,
+  removeTabOfAlarms,
 } from "./lifetime";
 import { OutdatedTabs } from "tabs";
 
@@ -43,6 +44,8 @@ const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
 >;
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
+type Alarm = chrome.alarms.Alarm;
+
 describe("lifetime", () => {
   afterEach(() => {
     getStorageMock.mockReset();
@@ -58,7 +61,6 @@ describe("lifetime", () => {
   });
 
   describe("removeTabOnAlarm()", () => {
-    type Alarm = chrome.alarms.Alarm;
     test("remove the tab if number of tabs is greater than minTabs option", async (done) => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockResolvedValue({
@@ -115,6 +117,99 @@ describe("lifetime", () => {
       expect(loadOptionsMock).not.toBeCalled();
       expect(browser.tabs.remove).not.toBeCalled();
       expect(updateOutdatedTabsMock).not.toBeCalled();
+      done();
+    });
+  });
+
+  describe("removeTabOfAlarms()", () => {
+    const alarms: Alarm[] = [
+      { name: "12", scheduledTime: 1616893705109 },
+      { name: "23", scheduledTime: 1616893706109 },
+      { name: "34", scheduledTime: 1616893707109 },
+    ];
+
+    beforeEach(() => {
+      loadOptionsMock.mockResolvedValue(0);
+      getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
+    });
+
+    test("remove multiple tabs at once", async (done) => {
+      tabsQueryMock.mockResolvedValue([
+        { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 34, windowId: 1 },
+      ]);
+
+      await removeTabOfAlarms(alarms);
+
+      expect(browser.tabs.remove).toBeCalledTimes(1);
+      expect(browser.tabs.remove).toBeCalledWith([12, 23, 34]);
+      done();
+    });
+
+    test("remove more tabs than minTabs", async (done) => {
+      tabsQueryMock.mockResolvedValue([
+        { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 34, windowId: 2 },
+      ]);
+      loadOptionsMock.mockResolvedValue(1);
+
+      await removeTabOfAlarms(alarms);
+
+      expect(tabsQueryMock).toBeCalledWith({
+        windowType: "normal",
+      });
+      expect(loadOptionsMock).toBeCalledWith("minTabs");
+      expect(browser.tabs.remove).toBeCalledWith([12]);
+      expect(updateOutdatedTabsMock).toBeCalledWith(
+        new OutdatedTabs({ 1: [{ id: 23 }], 2: [{ id: 34 }] })
+      );
+      done();
+    });
+
+    test("push tabs to outdatedTabs if the number of tabs is minTabs or less", async (done) => {
+      tabsQueryMock.mockResolvedValue([
+        { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 34, windowId: 2 },
+      ]);
+      loadOptionsMock.mockResolvedValue(2);
+
+      await removeTabOfAlarms(alarms);
+
+      expect(updateOutdatedTabsMock).toBeCalledWith(
+        new OutdatedTabs({ 1: [{ id: 12 }, { id: 23 }], 2: [{ id: 34 }] })
+      );
+      done();
+    });
+
+    test("ignore alarms which the id doesn't exist", async (done) => {
+      tabsQueryMock.mockResolvedValue([
+        { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 34, windowId: 2 },
+      ]);
+
+      await removeTabOfAlarms([
+        { name: "1", scheduledTime: 1616893705109 },
+        { name: "2", scheduledTime: 1616893706109 },
+        { name: "3", scheduledTime: 1616893707109 },
+      ]);
+
+      expect(browser.tabs.remove).toBeCalledWith([]);
+      done();
+    });
+
+    test("ignore the invalid name of alarms", async (done) => {
+      tabsQueryMock.mockResolvedValue([]);
+
+      await removeTabOfAlarms([
+        { name: "あ", scheduledTime: 1616893705109 },
+        { name: "-1", scheduledTime: 1616893706109 },
+        { name: "1.1", scheduledTime: 1616893707109 },
+      ]);
+      expect(browser.tabs.remove).toBeCalledWith([]);
       done();
     });
   });

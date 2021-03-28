@@ -1,10 +1,12 @@
 import dayjs from "dayjs";
+
 import { browser } from "webextension-polyfill-ts";
 import { loadOptions, initOptions } from "storage/options";
 import {
   getActivatedTabs,
   getClosedTabHistory,
   getOutdatedTabs,
+  getStorage,
   updateActivatedTabs,
   updateClosedTabHistory,
   updateOutdatedTabs,
@@ -16,6 +18,7 @@ import {
   removeTabOnAlarm,
 } from "./lifetime";
 import { log } from "utils";
+import { protectAlarmsOnChangeIdleState } from "./idle";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   log("onCreated", tab);
@@ -65,9 +68,9 @@ chrome.storage.onChanged.addListener((changes) => {
   log("debug storage: ", changes);
 });
 
-chrome.idle.onStateChanged.addListener((newState) => {
-  log(`idle state: ${newState}`);
-});
+chrome.idle.onStateChanged.addListener((state) =>
+  protectAlarmsOnChangeIdleState(state)
+);
 
 const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
