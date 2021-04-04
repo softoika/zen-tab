@@ -1,7 +1,7 @@
 import { browser } from "webextension-polyfill-ts";
 import type { Options } from "./types";
 
-const storage = browser.storage.sync;
+const storage = () => browser.storage.sync;
 
 export async function initOptions(nodeEnv = "production") {
   const options = await loadOptions();
@@ -21,12 +21,12 @@ export async function loadOptions<K extends keyof Options>(
 ): Promise<Options[K]>;
 export async function loadOptions<K extends keyof Options>(key?: K) {
   if (!key) {
-    return storage.get();
+    return storage().get();
   }
-  const options = await storage.get(key);
+  const options = await storage().get(key);
   return options[key];
 }
 
 export function saveOptions(options: Options) {
-  storage.set(options);
+  storage().set(options);
 }
