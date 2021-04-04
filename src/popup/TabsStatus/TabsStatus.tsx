@@ -4,7 +4,7 @@ import { getValue } from "storage/tabs";
 import type { Options, TabStorage } from "storage/types";
 import type { Tab, TabId } from "types";
 import { browser } from "webextension-polyfill-ts";
-import type { Page } from "./types";
+import type { Page } from "../types";
 
 export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
   const [tabs, setTabs] = useState<Tab[]>([]);
