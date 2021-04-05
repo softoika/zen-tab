@@ -1,5 +1,11 @@
 {
-  "extends": [
-    "config:base"
-  ]
+  "extends": ["config:base"],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["after 8am and before 12am on saturday"],
+  "groupName": "all",
+  "prCreation": "status-success",
+  "automerge": true,
+  "major": {
+    "automerge": false
+  }
 }
