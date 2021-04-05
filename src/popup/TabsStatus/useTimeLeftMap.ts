@@ -13,7 +13,7 @@ export interface TimeLeft {
 
 type TimeLeftMap = { [_ in TabId]?: TimeLeft };
 
-export function useTimeLeftMap() {
+export function useTimeLeftMap(msInterval = 1000) {
   const tabsMap = useTabsMap();
   const baseLimit = useBaseLimit();
 
@@ -30,11 +30,13 @@ export function useTimeLeftMap() {
     }
     const timer = setTimeout(
       () =>
-        setTimeLeftMap(calculateTimeLeft(baseLimit, tabsMap, currentMillis)),
-      1000
+        setTimeLeftMap(
+          calculateTimeLeft(baseLimit, tabsMap, currentMillis + msInterval)
+        ),
+      msInterval
     );
     return () => clearTimeout(timer);
-  }, [timeLeftMap, baseLimit, tabsMap]);
+  }, [msInterval, timeLeftMap, baseLimit, tabsMap]);
 
   return timeLeftMap;
 }
