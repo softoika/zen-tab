@@ -28,6 +28,7 @@ export type Tab = OptionalProps<
   chrome.tabs.Tab,
   | "selected"
   | "windowId"
+  | "groupId"
   | "discarded"
   | "autoDiscardable"
   | "index"
