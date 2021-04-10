@@ -4,5 +4,23 @@
   "automerge": true,
   "major": {
     "automerge": false
-  }
+  },
+  "packageRules": [
+    {
+      "groupName": "webextension-polyfill",
+      "matchPackageNames": [
+        "webextension-polyfill-ts",
+        "webextension-polyfill"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript"],
+      "automerge": false,
+      "patch": {
+        "automerge": true
+      }
+    }
+  ]
 }
