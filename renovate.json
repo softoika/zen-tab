@@ -1,7 +1,7 @@
 {
   "extends": ["config:base"],
   "timezone": "Asia/Tokyo",
-  "schedule": ["after 8am and before 12am on saturday"],
+  "schedule": ["after 8am and before 12pm on saturday"],
   "groupName": "all",
   "prCreation": "status-success",
   "automerge": true,
