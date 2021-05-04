@@ -6,7 +6,6 @@ import {
   getActivatedTabs,
   getClosedTabHistory,
   getOutdatedTabs,
-  getStorage,
   updateActivatedTabs,
   updateClosedTabHistory,
   updateOutdatedTabs,
