@@ -1,3 +1,4 @@
+import { FavIcon } from "popup/components/FavIcon";
 import React from "react";
 import type { Page } from "../types";
 import { useTabs } from "./useTabs";
@@ -22,14 +23,9 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
               />
             )}
           </div>
-          <img
-            src={
-              tab.favIconUrl ||
-              `chrome://favicon/${tab.url ?? tab.pendingUrl ?? ""}`
-            }
-            alt="favicon"
-            height="16"
-            width="16"
+          <FavIcon
+            favIconUrl={tab.favIconUrl}
+            url={tab.url ?? tab.pendingUrl}
           />
           <div>{tab.title ?? tab.url ?? tab.pendingUrl}</div>
         </li>
