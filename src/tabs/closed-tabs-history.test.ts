@@ -80,7 +80,14 @@ describe("ClosedTabsHistory", () => {
 
       expect(target.tabs).toEqual({ 999: [] });
       expect(target.history).toEqual({
-        999: [{ title: "foo", url: "https://foo.com", favIconUrl: undefined }],
+        999: [
+          {
+            id: 1,
+            title: "foo",
+            url: "https://foo.com",
+            favIconUrl: undefined,
+          },
+        ],
       });
     });
 
@@ -110,6 +117,7 @@ describe("ClosedTabsHistory", () => {
       expect(target.history).toEqual({
         999: [
           {
+            id: 1,
             title: "Bookmarks",
             url: "chrome://bookmarks",
             favIconUrl: undefined,

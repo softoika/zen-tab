@@ -1,6 +1,6 @@
 import type { Tab, TabId, WindowId } from "types";
 
-export type ClosedTab = Pick<Tab, "title" | "url" | "favIconUrl">;
+export type ClosedTab = Pick<Tab, "id" | "title" | "url" | "favIconUrl">;
 
 export interface TabStorage {
   tabs?: { readonly [_ in WindowId]: readonly Tab[] };

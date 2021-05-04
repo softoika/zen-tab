@@ -62,6 +62,7 @@ export class ClosedTabsHistory {
       ...this._history,
       [windowId]: [
         {
+          id: tab.id,
           title: tab.title,
           url: tab.url ?? tab.pendingUrl,
           favIconUrl: tab.favIconUrl,
