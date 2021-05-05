@@ -1,5 +1,6 @@
 import React from "react";
 import type { Options } from "storage/types";
+import { Input } from "./components/Input";
 
 type BaseLimit = Options["baseLimit"];
 
@@ -29,7 +30,7 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
     <div className="space-y-2">
       <span className="block text-lg font-medium">Tab lifetime</span>
       <div className="space-x-2">
-        <input
+        <Input
           id="input-base-limit-hours"
           type="number"
           value={hours}
@@ -38,7 +39,7 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
         <label htmlFor="input-base-limit-hours" className="text-base">
           hours
         </label>
-        <input
+        <Input
           id="input-base-limit-mins"
           type="number"
           value={mins}

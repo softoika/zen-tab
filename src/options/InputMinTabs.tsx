@@ -1,5 +1,6 @@
 import React from "react";
 import type { Options } from "storage/types";
+import { Input } from "./components/Input";
 
 type Props = Pick<Options, "minTabs"> & {
   onUpdate(minTabs: Options["minTabs"]): void;
@@ -18,7 +19,7 @@ export const InputMinTabs: React.FC<Props> = (props) => {
       <label htmlFor="input-min-tabs" className="block text-lg font-medium">
         Minimum number of tabs
       </label>
-      <input
+      <Input
         type="number"
         id="input-min-tabs"
         value={props.minTabs}
