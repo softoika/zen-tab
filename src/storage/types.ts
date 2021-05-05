@@ -3,6 +3,11 @@ import type { Tab, TabId, WindowId } from "types";
 export type ClosedTab = Pick<Tab, "id" | "title" | "url" | "favIconUrl">;
 
 export interface TabStorage {
+  /**
+   * The stored tab objects that are currently opened.
+   * This is necessary because the tab object cannot be retrieved
+   * when closing a tab.
+   */
   tabs?: { readonly [_ in WindowId]: readonly Tab[] };
 
   tabsMap?: {

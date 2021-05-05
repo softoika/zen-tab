@@ -23,6 +23,20 @@ describe("ClosedTabsHistory", () => {
     });
   });
 
+  describe(".createTabs(tabs)", () => {
+    test("adds tabs of each window", () => {
+      const target = new ClosedTabsHistory({}, {});
+      const tab1 = { ...DEFAULT_TAB, id: 1, windowId: 999 };
+      const tab2 = { ...DEFAULT_TAB, id: 2, windowId: 999 };
+      const tab3 = { ...DEFAULT_TAB, id: 3, windowId: 123 };
+      const tabs = [tab1, tab2, tab3];
+
+      target.createTabs(tabs);
+
+      expect(target.tabs).toEqual({ 999: [tab1, tab2], 123: [tab3] });
+    });
+  });
+
   describe(".updateTab(tab)", () => {
     test("updates the tab that matches the tab's id ", () => {
       const tab1 = { ...DEFAULT_TAB, id: 1, windowId: 999 };

@@ -30,6 +30,18 @@ export class ClosedTabsHistory {
     return this;
   }
 
+  createTabs(tabs: Tab[]): ClosedTabsHistory {
+    if (tabs.length === 0) {
+      return this;
+    }
+    // make this class work correctly even if it becomes immutable.
+    let self = this.createTab(tabs[0]);
+    for (let i = 1; i < tabs.length; i++) {
+      self = self.createTab(tabs[i]);
+    }
+    return self;
+  }
+
   updateTab(newTab: Tab): ClosedTabsHistory {
     if (!newTab.id) {
       return this;

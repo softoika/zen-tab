@@ -18,6 +18,7 @@ import {
 } from "./lifetime";
 import { log } from "utils";
 import { protectAlarmsOnChangeIdleState } from "./idle";
+import { ClosedTabsHistory } from "tabs";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   log("onCreated", tab);
@@ -77,7 +78,10 @@ const onInitExtension = async () => {
   });
   await initOptions(process.env.NODE_ENV);
   expireInactiveTabs(tabs, dayjs().valueOf());
-  updateStorage({ activatedTabs: {}, outdatedTabs: {}, tabs: {} });
+  const history = await getClosedTabHistory().then((h) => h.history);
+  const closedTabHistory = new ClosedTabsHistory({}, history).createTabs(tabs);
+  updateStorage({ activatedTabs: {}, outdatedTabs: {} });
+  updateClosedTabHistory(closedTabHistory);
 };
 
 chrome.runtime.onInstalled.addListener((details) => {
