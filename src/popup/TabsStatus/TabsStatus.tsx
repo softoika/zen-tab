@@ -12,17 +12,13 @@ export const TabsStatus: React.FC<{ page: Page }> = ({ page }) => {
     return null;
   }
   return (
-    <ul>
+    <ul className="space-y-4">
       {tabs.map((tab) => (
-        <li key={tab.id}>
-          <div>
-            {timeLeftMap?.[tab.id ?? 0] && (
-              <TimeLeftOfTab
-                timeLeft={timeLeftMap?.[tab.id ?? 0]}
-                active={tab.active}
-              />
-            )}
-          </div>
+        <li key={tab.id} className="flex space-x-3 items-start">
+          <TimeLeftOfTab
+            timeLeft={timeLeftMap?.[tab.id ?? 0]}
+            active={tab.active}
+          />
           <FavIcon
             favIconUrl={tab.favIconUrl}
             url={tab.url ?? tab.pendingUrl}
@@ -38,15 +34,13 @@ const TimeLeftOfTab: React.FC<{ timeLeft?: TimeLeft; active?: boolean }> = ({
   timeLeft,
   active,
 }) => {
-  if (timeLeft == null || active) {
-    return null;
-  }
+  const timeLeftText =
+    timeLeft != null && !active
+      ? `${timeLeft.minus ? "-" : ""}${timeLeft.hours}:${timeLeft.mins}`
+      : "";
   return (
-    <>
-      <span>{timeLeft.minus && "-"}</span>
-      <span>{timeLeft.hours}</span>
-      <span>:</span>
-      <span>{timeLeft.mins}</span>
-    </>
+    <div className="flex justify-end" style={{ minWidth: "35px" }}>
+      {timeLeftText}
+    </div>
   );
 };

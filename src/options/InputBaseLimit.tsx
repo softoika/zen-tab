@@ -1,5 +1,6 @@
 import React from "react";
 import type { Options } from "storage/types";
+import { Input } from "./components/Input";
 
 type BaseLimit = Options["baseLimit"];
 
@@ -26,22 +27,28 @@ export const InputBaseLimit: React.FC<Props> = (props) => {
     props.onUpdate(hours * 3_600_000 + m * 60_000 + remainder);
   };
   return (
-    <div>
-      <span>Tab lifetime</span>
-      <input
-        id="input-base-limit-hours"
-        type="number"
-        value={hours}
-        onChange={(e) => updateHours(e.target.value)}
-      />
-      <label htmlFor="input-base-limit-hours">hours</label>
-      <input
-        id="input-base-limit-mins"
-        type="number"
-        value={mins}
-        onChange={(e) => updateMins(e.target.value)}
-      />
-      <label htmlFor="input-base-limit-mins">mins</label>
+    <div className="space-y-2">
+      <span className="block text-lg font-medium">Tab lifetime</span>
+      <div className="space-x-2">
+        <Input
+          id="input-base-limit-hours"
+          type="number"
+          value={hours}
+          onChange={(e) => updateHours(e.target.value)}
+        />
+        <label htmlFor="input-base-limit-hours" className="text-base">
+          hours
+        </label>
+        <Input
+          id="input-base-limit-mins"
+          type="number"
+          value={mins}
+          onChange={(e) => updateMins(e.target.value)}
+        />
+        <label htmlFor="input-base-limit-mins" className="text-base">
+          mins
+        </label>
+      </div>
     </div>
   );
 };

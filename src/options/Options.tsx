@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import "styles.css";
 import { loadOptions, saveOptions } from "storage/options";
 import type { Options as OptionsType } from "storage/types";
 import { InputBaseLimit } from "./InputBaseLimit";
@@ -30,7 +31,7 @@ const Options: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="p-4 mx-auto mt-4 bg-white max-w-screen-md space-y-4 rounded-md shadow-sm">
       <InputMinTabs
         minTabs={options?.minTabs ?? 0}
         onUpdate={(minTabs) => updateOptions({ minTabs })}
@@ -39,7 +40,9 @@ const Options: React.FC = () => {
         baseLimit={options?.baseLimit ?? 0}
         onUpdate={(baseLimit) => updateOptions({ baseLimit })}
       />
-      <button onClick={() => save()}>Save</button>
+      <button className="btn-primary" onClick={() => save()}>
+        Save
+      </button>
     </div>
   );
 };
