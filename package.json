@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "5.1.2",
-    "@types/chrome": "0.0.139",
+    "@types/chrome": "0.0.140",
     "@types/jest": "26.0.23",
     "@types/react": "17.0.5",
     "@types/react-dom": "17.0.5",
