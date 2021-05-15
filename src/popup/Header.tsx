@@ -33,8 +33,10 @@ const TabButton: React.FC<{
   <button
     type="button"
     className={
-      "p-2 text-lg border-b-2 border-blue-200 border-opacity-0 focus:outline-none focus:border-opacity-100 " +
-      (selected ? " text-blue-500" : "")
+      "p-2 text-lg border-b-2 border-opacity-0 focus:outline-none focus:border-opacity-100 hover:border-opacity-100 " +
+      (selected
+        ? " border-opacity-100 text-blue-500 border-blue-200"
+        : " border-gray-200")
     }
     onClick={() => onSelect()}
   >
