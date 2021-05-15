@@ -48,6 +48,11 @@ export interface TabStorage {
    * This is necessary because if it is locked, the alarms will not work properly.
    */
   evacuatedAlarms?: readonly chrome.alarms.Alarm[];
+
+  /**
+   * Timestamp to calculate the time while a computer is locked.
+   */
+  lastLockedAt?: number;
 }
 
 export interface Options {

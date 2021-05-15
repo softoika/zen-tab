@@ -1,4 +1,4 @@
-import { getValue, updateStorage } from "storage/tabs";
+import { getStorage, updateStorage } from "storage/tabs";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { protectAlarmsOnChangeIdleState } from "./idle";
@@ -24,7 +24,7 @@ jest.mock("storage/tabs");
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
 >;
-const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
+const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 
 jest.mock("./lifetime");
 const removeTabOfAlarmsMock = removeTabOfAlarms as jest.MockedFunction<
@@ -32,24 +32,37 @@ const removeTabOfAlarmsMock = removeTabOfAlarms as jest.MockedFunction<
 >;
 
 describe("idle", () => {
+  beforeAll(() => {
+    jest.useFakeTimers("modern");
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     alarmsGetAllMock.mockReset();
     alarmsClearAllMock.mockReset();
     alarmsCreateMock.mockReset();
     updateStorageMock.mockReset();
-    getValueMock.mockReset();
+    getStorageMock.mockReset();
     removeTabOfAlarmsMock.mockReset();
   });
 
   describe("evacuateAlarms()", () => {
-    test("save alarms to storage and clear it", async (done) => {
+    test("save alarms and current time to storage and clear it", async (done) => {
       const alarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: 1616827701912 },
         { name: "2", scheduledTime: 1616829466759 },
       ];
+      const now = 1616824701912;
+      jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(alarms);
       await protectAlarmsOnChangeIdleState("locked");
-      expect(updateStorageMock).toBeCalledWith({ evacuatedAlarms: alarms });
+      expect(updateStorageMock).toBeCalledWith({
+        evacuatedAlarms: alarms,
+        lastLockedAt: now,
+      });
       expect(alarmsClearAllMock).toBeCalled();
       done();
     });
@@ -57,70 +70,53 @@ describe("idle", () => {
 
   describe("recoverAlarms()", () => {
     test("recover alarms if the scheduled times are not over", async (done) => {
-      const alarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: 1616827701912 },
-        { name: "2", scheduledTime: 1616829466759 },
+      const baseTime = 1616827701912;
+      const evacuatedAlarms: Alarms.Alarm[] = [
+        { name: "1", scheduledTime: baseTime },
+        { name: "2", scheduledTime: baseTime + 60 * 1000 },
       ];
-      getValueMock.mockResolvedValue(alarms);
-      Date.now = jest.fn(() => 1516827701912);
+      const lastLockedAt = baseTime - 50 * 60 * 1000;
+      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastLockedAt });
+      jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
       await protectAlarmsOnChangeIdleState("active");
 
-      expect(getValueMock).toBeCalledWith("evacuatedAlarms");
-      expect(alarmsCreateMock).nthCalledWith(1, "1", { when: 1616827701912 });
-      expect(alarmsCreateMock).nthCalledWith(2, "2", { when: 1616829466759 });
+      expect(getStorageMock).toBeCalledWith([
+        "evacuatedAlarms",
+        "lastLockedAt",
+      ]);
+      expect(alarmsCreateMock).nthCalledWith(1, "1", {
+        when: baseTime + 30 * 60 * 1000,
+      });
+      expect(alarmsCreateMock).nthCalledWith(2, "2", {
+        when: baseTime + 31 * 60 * 1000,
+      });
       done();
     });
 
-    test("remove the tabs of the alarms if its scheduled times are over", async (done) => {
-      const alarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: 1616827701912 },
-        { name: "2", scheduledTime: 1616829466759 },
+    test("the difference time should be 0 if lastLockedAt isn't set", async (done) => {
+      const baseTime = 1616827701912;
+      const evacuatedAlarms: Alarms.Alarm[] = [
+        { name: "1", scheduledTime: baseTime },
+        { name: "2", scheduledTime: baseTime + 60 * 1000 },
       ];
-      getValueMock.mockResolvedValue(alarms);
-      Date.now = jest.fn(() => 1716827701912);
+      const lastLockedAt = undefined;
+      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastLockedAt });
+      jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
       await protectAlarmsOnChangeIdleState("active");
 
-      expect(alarmsCreateMock).not.toBeCalled();
-      expect(removeTabOfAlarmsMock).toBeCalledWith(alarms);
+      expect(getStorageMock).toBeCalledWith([
+        "evacuatedAlarms",
+        "lastLockedAt",
+      ]);
+      expect(alarmsCreateMock).nthCalledWith(1, "1", {
+        when: baseTime,
+      });
+      expect(alarmsCreateMock).nthCalledWith(2, "2", {
+        when: baseTime + 60 * 1000,
+      });
       done();
-    });
-
-    describe("the threshold of the recovering is 1 minute after current time", () => {
-      test("recovers the last alarm", async (done) => {
-        const alarms: Alarms.Alarm[] = [
-          { name: "1", scheduledTime: 1616827701912 },
-          { name: "2", scheduledTime: 1616829466759 },
-        ];
-        getValueMock.mockResolvedValue(alarms);
-        Date.now = jest.fn(() => 1616829466759 - 60_001);
-
-        await protectAlarmsOnChangeIdleState("active");
-
-        expect(alarmsCreateMock).toBeCalledWith("2", {
-          when: 1616829466759,
-        });
-        expect(removeTabOfAlarmsMock).toBeCalledWith([
-          { name: "1", scheduledTime: 1616827701912 },
-        ]);
-        done();
-      });
-
-      test("doesn't recover the last alarm", async (done) => {
-        const alarms: Alarms.Alarm[] = [
-          { name: "1", scheduledTime: 1616827701912 },
-          { name: "2", scheduledTime: 1616829466759 },
-        ];
-        getValueMock.mockResolvedValue(alarms);
-        Date.now = jest.fn(() => 1616829466759 - 60_000);
-
-        await protectAlarmsOnChangeIdleState("active");
-
-        expect(alarmsCreateMock).not.toBeCalled();
-        expect(removeTabOfAlarmsMock).toBeCalledWith(alarms);
-        done();
-      });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { getValue, updateStorage } from "storage/tabs";
+import { getStorage, updateStorage } from "storage/tabs";
 import { log } from "utils";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
@@ -16,25 +16,30 @@ export async function protectAlarmsOnChangeIdleState(
 
 async function evacuateAlarms() {
   const alarms = await browser.alarms.getAll();
-  updateStorage({ evacuatedAlarms: alarms });
+  updateStorage({ evacuatedAlarms: alarms, lastLockedAt: Date.now() });
   browser.alarms.clearAll();
   log("evacuated alarms: ", alarms);
 }
 
 async function recoverAlarms() {
-  const alarms = (await getValue("evacuatedAlarms")) ?? [];
+  const storage = await getStorage(["evacuatedAlarms", "lastLockedAt"]);
+  const alarms = storage.evacuatedAlarms ?? [];
+  const lastLockedAt = storage.lastLockedAt ?? 0;
   log("recovered alarms:", alarms);
+  log("lastLockedAt:", lastLockedAt);
+  const diff = lastLockedAt > 0 ? Date.now() - lastLockedAt : 0;
   const threshold = Date.now() + 60_000;
 
   const toBeRecoverd: Alarms.Alarm[] = alarms.filter(
-    (a) => threshold < a.scheduledTime
-  );
-  const toBeRemoved: Alarms.Alarm[] = alarms.filter(
-    (a) => threshold >= a.scheduledTime
+    (a) => threshold < a.scheduledTime + diff
   );
 
+  // This case should never happen.
+  const toBeRemoved: Alarms.Alarm[] = alarms.filter(
+    (a) => threshold >= a.scheduledTime + diff
+  );
   toBeRecoverd.forEach((a) =>
-    browser.alarms.create(a.name, { when: a.scheduledTime })
+    browser.alarms.create(a.name, { when: a.scheduledTime + diff })
   );
   removeTabOfAlarms(toBeRemoved);
 

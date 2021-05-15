@@ -79,6 +79,7 @@ const onInitExtension = async () => {
   await initOptions(process.env.NODE_ENV);
   expireInactiveTabs(tabs, dayjs().valueOf());
   const history = await getClosedTabHistory().then((h) => h.history);
+  log(history);
   const closedTabHistory = new ClosedTabsHistory({}, history).createTabs(tabs);
   updateStorage({ activatedTabs: {}, outdatedTabs: {} });
   updateClosedTabHistory(closedTabHistory);
