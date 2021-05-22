@@ -242,7 +242,12 @@ describe("lifetime", () => {
       await expireLastTab(tab, currentMillis);
 
       expect(updateStorageMock).toBeCalledWith({
-        tabsMap: { [lastTabId]: { lastInactivated: currentMillis } },
+        tabsMap: {
+          [lastTabId]: {
+            lastInactivated: currentMillis,
+            scheduledTime: currentMillis + baseLimit,
+          },
+        },
         activatedTabs: { 1: [{ id: 1234 }, { id: 111 }] },
       });
       expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, {
@@ -281,9 +286,18 @@ describe("lifetime", () => {
           1: [{ id: 4 }, { id: 3 }, { id: 2 }, { id: 1 }],
         },
         tabsMap: {
-          1: { lastInactivated: currentMillis },
-          2: { lastInactivated: currentMillis },
-          3: { lastInactivated: currentMillis },
+          1: {
+            lastInactivated: currentMillis,
+            scheduledTime: currentMillis + baseLimit,
+          },
+          2: {
+            lastInactivated: currentMillis,
+            scheduledTime: currentMillis + baseLimit,
+          },
+          3: {
+            lastInactivated: currentMillis,
+            scheduledTime: currentMillis + baseLimit,
+          },
         },
       });
       done();

@@ -22,7 +22,12 @@ async function evacuateAlarms() {
 }
 
 async function recoverAlarms() {
-  const storage = await getStorage(["evacuatedAlarms", "lastLockedAt"]);
+  const storage = await getStorage([
+    "evacuatedAlarms",
+    "lastLockedAt",
+    "tabsMap",
+  ]);
+  let tabsMap = storage.tabsMap;
   const alarms = storage.evacuatedAlarms ?? [];
   const lastLockedAt = storage.lastLockedAt ?? 0;
   log("recovered alarms:", alarms);
@@ -38,11 +43,20 @@ async function recoverAlarms() {
   const toBeRemoved: Alarms.Alarm[] = alarms.filter(
     (a) => threshold >= a.scheduledTime + diff
   );
-  toBeRecoverd.forEach((a) =>
-    browser.alarms.create(a.name, { when: a.scheduledTime + diff })
-  );
   removeTabOfAlarms(toBeRemoved);
 
-  // Clean up the evacuated alarms from storage
-  updateStorage({ evacuatedAlarms: [] });
+  toBeRecoverd.forEach((a) => {
+    browser.alarms.create(a.name, { when: a.scheduledTime + diff });
+    const tabId = +a.name;
+    tabsMap = {
+      ...tabsMap,
+      [tabId]: {
+        lastInactivated: tabsMap?.[tabId]?.lastInactivated,
+        scheduledTime: a.scheduledTime + diff,
+      },
+    };
+  });
+
+  // Clean up the evacuated alarms from storage and update tabsMap
+  updateStorage({ evacuatedAlarms: [], tabsMap });
 }

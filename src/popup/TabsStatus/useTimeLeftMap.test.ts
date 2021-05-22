@@ -30,10 +30,16 @@ describe("useTimeLeftMap()", () => {
     const { checkArgs } = mockResolvedValues({
       baseLimit: 60 * 60_000,
       tabsMap: {
-        1: { lastInactivated: now - 30 * 60_000 },
-        2: { lastInactivated: now - 90 * 60_000 },
-        3: { lastInactivated: now - 60 * 60_000 },
-        4: { lastInactivated: now - 60 * 60_000 - 1 },
+        1: {
+          lastInactivated: now - 30 * 60_000,
+          scheduledTime: now + 30 * 60_000,
+        },
+        2: {
+          lastInactivated: now - 90 * 60_000,
+          scheduledTime: now - 30 * 60_000,
+        },
+        3: { lastInactivated: now - 60 * 60_000, scheduledTime: now },
+        4: { lastInactivated: now - 60 * 60_000 - 1, scheduledTime: now - 1 },
       },
     });
 
@@ -54,7 +60,12 @@ describe("useTimeLeftMap()", () => {
   test("updates timeLeftMap every second", async (done) => {
     const { checkArgs } = mockResolvedValues({
       baseLimit: 60 * 60_000,
-      tabsMap: { 1: { lastInactivated: now - 30 * 60_000 } },
+      tabsMap: {
+        1: {
+          lastInactivated: now - 30 * 60_000,
+          scheduledTime: now + 30 * 60_000,
+        },
+      },
     });
 
     const { result, rerender, waitForNextUpdate } = renderHook(() =>

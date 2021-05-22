@@ -1,4 +1,5 @@
 import { getStorage, updateStorage } from "storage/tabs";
+import { TabStorage } from "storage/types";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { protectAlarmsOnChangeIdleState } from "./idle";
@@ -50,7 +51,7 @@ describe("idle", () => {
   });
 
   describe("evacuateAlarms()", () => {
-    test("save alarms and current time to storage and clear it", async (done) => {
+    test("saves alarms and current time to storage and clear it", async (done) => {
       const alarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: 1616827701912 },
         { name: "2", scheduledTime: 1616829466759 },
@@ -69,7 +70,7 @@ describe("idle", () => {
   });
 
   describe("recoverAlarms()", () => {
-    test("recover alarms if the scheduled times are not over", async (done) => {
+    test("recovers alarms if the scheduled times are not over", async (done) => {
       const baseTime = 1616827701912;
       const evacuatedAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: baseTime },
@@ -84,6 +85,7 @@ describe("idle", () => {
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
         "lastLockedAt",
+        "tabsMap",
       ]);
       expect(alarmsCreateMock).nthCalledWith(1, "1", {
         when: baseTime + 30 * 60 * 1000,
@@ -91,6 +93,54 @@ describe("idle", () => {
       expect(alarmsCreateMock).nthCalledWith(2, "2", {
         when: baseTime + 31 * 60 * 1000,
       });
+      done();
+    });
+
+    test("updates the scheduledTime of the tabsMap", async (done) => {
+      const baseTime = 1616827701912;
+      const evacuatedAlarms: Alarms.Alarm[] = [
+        { name: "1", scheduledTime: baseTime },
+        { name: "2", scheduledTime: baseTime + 60 * 1000 },
+      ];
+      const tabsMap: TabStorage["tabsMap"] = {
+        1: {
+          lastInactivated: baseTime - 61 * 60 * 1000,
+          scheduledTime: baseTime,
+        },
+        2: {
+          lastInactivated: baseTime - 60 * 60 * 1000,
+          scheduledTime: baseTime + 60 * 1000,
+        },
+      };
+      const lastLockedAt = baseTime - 50 * 60 * 1000;
+      getStorageMock.mockResolvedValue({
+        evacuatedAlarms,
+        lastLockedAt,
+        tabsMap,
+      });
+      jest.setSystemTime(baseTime - 20 * 60 * 1000);
+
+      await protectAlarmsOnChangeIdleState("active");
+
+      expect(getStorageMock).toBeCalledWith([
+        "evacuatedAlarms",
+        "lastLockedAt",
+        "tabsMap",
+      ]);
+      expect(updateStorageMock).toBeCalledWith({
+        evacuatedAlarms: [],
+        tabsMap: {
+          1: {
+            lastInactivated: baseTime - 61 * 60 * 1000,
+            scheduledTime: baseTime + 30 * 60 * 1000,
+          },
+          2: {
+            lastInactivated: baseTime - 60 * 60 * 1000,
+            scheduledTime: baseTime + 31 * 60 * 1000,
+          },
+        },
+      });
+
       done();
     });
 
@@ -109,6 +159,7 @@ describe("idle", () => {
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
         "lastLockedAt",
+        "tabsMap",
       ]);
       expect(alarmsCreateMock).nthCalledWith(1, "1", {
         when: baseTime,

@@ -8,7 +8,7 @@ import {
   updateStorage,
 } from "storage/tabs";
 import type { Tab, TabId } from "types";
-import type { TabStorage } from "storage/types";
+import type { Options, TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
 import { log } from "utils";
 
@@ -137,16 +137,19 @@ export async function expireLastTab(
   if (!newTab?.tabId) {
     return;
   }
-  await browser.alarms.clear(`${newTab.tabId}`);
-  let storage = await getStorage(["activatedTabs", "tabsMap"]);
+  const [when, ...rest] = await Promise.all([
+    getLifetime(currentMillis),
+    getStorage(["activatedTabs", "tabsMap"]),
+    browser.alarms.clear(`${newTab.tabId}`),
+  ]);
+  let [storage] = rest;
   const activatedTabs = new ActivatedTabs(storage.activatedTabs ?? {});
   const lastTabId = activatedTabs.getLastTabId(newTab.windowId);
   if (lastTabId) {
-    const when = await getLifetime(currentMillis);
     browser.alarms.create(`${lastTabId}`, { when });
     storage = {
       ...storage,
-      tabsMap: setLastInactivated(storage.tabsMap, lastTabId, currentMillis),
+      tabsMap: updateTabsMap(storage.tabsMap, lastTabId, currentMillis, when),
     };
   }
   updateStorage({
@@ -181,11 +184,27 @@ export async function expireInactiveTabs(tabs: Tab[], currentMillis: number) {
         ...tabsMap,
         [tabId]: { lastInactivated: when + totalDelay },
       };
-      tabsMap = setLastInactivated(tabsMap, tabId, currentMillis);
+      tabsMap = updateTabsMap(tabsMap, tabId, currentMillis, when);
       totalDelay += delayUnit;
     });
 
   updateStorage({ tabsMap, activatedTabs: createActivatedTabs(tabs).value });
+}
+
+function updateTabsMap(
+  tabsMap: TabsMap,
+  tabId: TabId,
+  currentMillis: number,
+  when: number
+) {
+  if (!tabsMap) {
+    tabsMap = {};
+  }
+  tabsMap = {
+    ...tabsMap,
+    [tabId]: { lastInactivated: currentMillis, scheduledTime: when },
+  };
+  return tabsMap;
 }
 
 function setLastInactivated(

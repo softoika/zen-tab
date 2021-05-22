@@ -25,14 +25,12 @@ export function useTimeLeftMap(msInterval = 1000) {
     const currentMillis = Date.now();
     if (timeLeftMap == null) {
       // Build the map instantly at first
-      setTimeLeftMap(calculateTimeLeft(baseLimit, tabsMap, currentMillis));
+      setTimeLeftMap(calculateTimeLeft(tabsMap, currentMillis));
       return;
     }
     const timer = setTimeout(
       () =>
-        setTimeLeftMap(
-          calculateTimeLeft(baseLimit, tabsMap, currentMillis + msInterval)
-        ),
+        setTimeLeftMap(calculateTimeLeft(tabsMap, currentMillis + msInterval)),
       msInterval
     );
     return () => clearTimeout(timer);
@@ -42,16 +40,15 @@ export function useTimeLeftMap(msInterval = 1000) {
 }
 
 function calculateTimeLeft(
-  baseLimit: Options["baseLimit"],
   tabsMap: TabStorage["tabsMap"],
   currentMillis: number
 ): TimeLeftMap {
   const timeLeftMap: TimeLeftMap = {};
   Object.entries(tabsMap ?? {}).forEach(([tabId, tabInfo]) => {
-    if (tabInfo.lastInactivated == null) {
+    if (tabInfo.scheduledTime == null) {
       return;
     }
-    const timeLeftMillis = baseLimit + tabInfo.lastInactivated - currentMillis;
+    const timeLeftMillis = tabInfo.scheduledTime - currentMillis;
     const minus = timeLeftMillis < 0;
     const absMillis = Math.abs(timeLeftMillis);
     const hours = Math.trunc(absMillis / 3_600_000);

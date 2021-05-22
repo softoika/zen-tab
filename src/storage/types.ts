@@ -17,6 +17,12 @@ export interface TabStorage {
        * When the tab is activated, its value is undefined.
        */
       lastInactivated?: number;
+
+      /**
+       * Timestamp when the tab is closed.
+       * When the tab is activated, its value is undefined.
+       */
+      scheduledTime?: number;
     };
   };
 
