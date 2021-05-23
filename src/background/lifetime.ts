@@ -8,9 +8,10 @@ import {
   updateStorage,
 } from "storage/tabs";
 import type { Tab, TabId } from "types";
-import type { Options, TabStorage } from "storage/types";
+import type { TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
 import { log } from "utils";
+import { isValidAsId } from "./utils";
 
 type Alarm = chrome.alarms.Alarm;
 
@@ -109,20 +110,6 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
   updateOutdatedTabs(outdatedTabs);
 }
 
-function isValidAsId(name: Alarm["name"]): boolean {
-  const id = +name;
-  if (isNaN(id)) {
-    return false;
-  }
-  if (!Number.isInteger(id)) {
-    return false;
-  }
-  if (id < 0) {
-    return false;
-  }
-  return true;
-}
-
 type TabsMap = TabStorage["tabsMap"];
 
 /**
@@ -204,18 +191,6 @@ function updateTabsMap(
     ...tabsMap,
     [tabId]: { lastInactivated: currentMillis, scheduledTime: when },
   };
-  return tabsMap;
-}
-
-function setLastInactivated(
-  tabsMap: TabsMap,
-  tabId: TabId,
-  currentMillis: number
-) {
-  if (!tabsMap) {
-    tabsMap = {};
-  }
-  tabsMap = { ...tabsMap, [tabId]: { lastInactivated: currentMillis } };
   return tabsMap;
 }
 

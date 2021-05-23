@@ -3,6 +3,7 @@ import { log } from "utils";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { removeTabOfAlarms } from "./lifetime";
+import { isValidAsId } from "./utils";
 
 export async function protectAlarmsOnChangeIdleState(
   state: chrome.idle.IdleState
@@ -46,6 +47,9 @@ async function recoverAlarms() {
   removeTabOfAlarms(toBeRemoved);
 
   toBeRecoverd.forEach((a) => {
+    if (!isValidAsId(a.name)) {
+      return;
+    }
     browser.alarms.create(a.name, { when: a.scheduledTime + diff });
     const tabId = +a.name;
     tabsMap = {
