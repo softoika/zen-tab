@@ -7,4 +7,5 @@ dayjs.extend(duration);
 export const defaultOptions: Options = {
   minTabs: 7,
   baseLimit: dayjs.duration(24, "hours").asMilliseconds(),
+  protectPinnedTabs: true,
 };

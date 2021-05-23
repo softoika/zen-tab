@@ -8,7 +8,7 @@ import {
   updateStorage,
 } from "storage/tabs";
 import type { Tab, TabId } from "types";
-import type { TabStorage } from "storage/types";
+import type { Options, TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
 import { log } from "utils";
 import { isValidAsId } from "./utils";
@@ -32,13 +32,20 @@ export async function removeTabOnAlarm(alarm: Alarm) {
     return;
   }
 
-  const [tabs, minTabs] = await Promise.all([
+  const [tabs, minTabs, protectPinnedTabs] = await Promise.all([
     browser.tabs.query({
       windowType: "normal",
       windowId: tab.windowId,
     }),
     loadOptions("minTabs"),
+    loadOptions("protectPinnedTabs"),
   ]);
+
+  if (isProtectedAsPinnedTab(tab, protectPinnedTabs)) {
+    log(`${tabId} is protected as a pinned tab`, tab);
+    return;
+  }
+
   if (tabs.length > minTabs) {
     log(`Removed ${tabId}`);
     browser.tabs.remove(tabId);
@@ -57,8 +64,9 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
   if (alarms.length === 0) {
     return;
   }
-  const [minTabs, outdatedTabs, tabs] = await Promise.all([
+  const [minTabs, protectPinnedTabs, outdatedTabs, tabs] = await Promise.all([
     loadOptions("minTabs"),
+    loadOptions("protectPinnedTabs"),
     getOutdatedTabs(),
     browser.tabs.query({ windowType: "normal" }),
   ]);
@@ -97,6 +105,13 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
   idOfAlarms.forEach((tabId) => {
     const windowId = tabIdToWindowIdMap[tabId];
     const tabCount = tabCountMap[windowId];
+    const tab = tabIdToTabMap[tabId];
+
+    if (isProtectedAsPinnedTab(tab, protectPinnedTabs)) {
+      log(`${tabId} is protected as a pinned tab`, tab);
+      return;
+    }
+
     if (tabCount > minTabs) {
       idsToBeRemoved.push(tabId);
       tabCountMap[windowId]--;
@@ -108,6 +123,13 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
   // Remove tabs and update outdateTabs at once.
   browser.tabs.remove(idsToBeRemoved);
   updateOutdatedTabs(outdatedTabs);
+}
+
+function isProtectedAsPinnedTab(
+  tab: Tabs.Tab,
+  protectPinnedTabs: Options["protectPinnedTabs"]
+) {
+  return tab.pinned && protectPinnedTabs;
 }
 
 type TabsMap = TabStorage["tabsMap"];

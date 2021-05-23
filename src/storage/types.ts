@@ -75,4 +75,9 @@ export interface Options {
    * The unit of this value is milliseconds.
    */
   baseLimit: number;
+
+  /**
+   * If true, the pinned tab isn't counted down and closed automatically.
+   */
+  protectPinnedTabs: boolean;
 }

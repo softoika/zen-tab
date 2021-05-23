@@ -20,6 +20,7 @@ const storage = browser.storage
 const DEFAULT_OPTIONS: Options = {
   minTabs: 3,
   baseLimit: 30000,
+  protectPinnedTabs: true,
 };
 
 describe("storage/options", () => {
