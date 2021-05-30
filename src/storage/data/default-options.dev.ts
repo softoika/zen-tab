@@ -5,7 +5,7 @@ import type { Options } from "storage/types";
 dayjs.extend(duration);
 
 export const defaultOptions: Options = {
-  minTabs: 3,
-  baseLimit: dayjs.duration(30, "seconds").asMilliseconds(),
+  minTabs: 5,
+  baseLimit: dayjs.duration(30, "minutes").asMilliseconds(),
   protectPinnedTabs: true,
 };
