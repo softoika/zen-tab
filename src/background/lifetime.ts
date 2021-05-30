@@ -42,8 +42,10 @@ export async function removeTabOnAlarm(alarm: Alarm) {
   ]);
 
   if (isProtectedAsPinnedTab(tab, protectPinnedTabs)) {
-    log(`${tabId} is protected as a pinned tab`, tab);
+    log(`${tabId} is protected as a pinned tab`, tab, protectPinnedTabs);
     return;
+  } else {
+    log(`${tabId} is not protected as a pinned tab`, tab, protectPinnedTabs);
   }
 
   if (tabs.length > minTabs) {
@@ -108,8 +110,10 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
     const tab = tabIdToTabMap[tabId];
 
     if (isProtectedAsPinnedTab(tab, protectPinnedTabs)) {
-      log(`${tabId} is protected as a pinned tab`, tab);
+      log(`${tabId} is protected as a pinned tab`, tab, protectPinnedTabs);
       return;
+    } else {
+      log(`${tabId} is not protected as a pinned tab`, tab, protectPinnedTabs);
     }
 
     if (tabCount > minTabs) {
