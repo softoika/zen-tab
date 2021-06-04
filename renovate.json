@@ -9,6 +9,20 @@
   },
   "packageRules": [
     {
+      "groupName": "for testing",
+      "matchPackageNames": [
+        "@testing-library/react-hooks",
+        "@types/jest",
+        "jest",
+        "jest-chrome",
+        "ts-jest"
+      ],
+      "automerge": true,
+      "major": {
+        "automerge": false
+      }
+    },
+    {
       "groupName": "webextension-polyfill",
       "matchPackageNames": [
         "webextension-polyfill-ts",
