@@ -5,8 +5,9 @@
   "author": "softoika <zwgntz@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "yarn clean && NODE_ENV=production webpack",
-    "build:dev": "yarn clean && NODE_ENV=development webpack",
+    "build": "yarn clean && TAILWIND_MODE=build NODE_ENV=production webpack",
+    "build:dev": "yarn clean && TAILWIND_MODE=build NODE_ENV=development webpack",
+    "build:watch": "yarn clean && TAILWIND_MODE=watch NODE_ENV=development webpack --watch",
     "test": "jest",
     "test:debug": "jest --silent false",
     "lint": "eslint src/ && prettier --check src/",
