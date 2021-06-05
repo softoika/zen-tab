@@ -11,7 +11,7 @@ const Popup: React.FC = () => {
   return (
     <>
       <Header page={page} onChangePage={(page) => setPage(page)} />
-      <main className="p-4 overflow-auto" style={{ maxHeight: "550px" }}>
+      <main className="p-4 overflow-auto max-h-[550px]">
         <TabsStatus page={page} />
         <History page={page} />
       </main>

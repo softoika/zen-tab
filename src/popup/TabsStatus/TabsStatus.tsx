@@ -38,9 +38,5 @@ const TimeLeftOfTab: React.FC<{ timeLeft?: TimeLeft; active?: boolean }> = ({
     timeLeft != null && !active
       ? `${timeLeft.minus ? "-" : ""}${timeLeft.hours}:${timeLeft.mins}`
       : "";
-  return (
-    <div className="flex justify-end" style={{ minWidth: "35px" }}>
-      {timeLeftText}
-    </div>
-  );
+  return <div className="flex justify-end min-w-[35px]">{timeLeftText}</div>;
 };
