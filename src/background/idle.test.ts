@@ -51,7 +51,7 @@ describe("idle", () => {
   });
 
   describe("evacuateAlarms()", () => {
-    test("saves alarms and current time to storage and clear it", async (done) => {
+    test("saves alarms and current time to storage and clear it", async () => {
       const alarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: 1616827701912 },
         { name: "2", scheduledTime: 1616829466759 },
@@ -65,12 +65,11 @@ describe("idle", () => {
         lastLockedAt: now,
       });
       expect(alarmsClearAllMock).toBeCalled();
-      done();
     });
   });
 
   describe("recoverAlarms()", () => {
-    test("recovers alarms if the scheduled times are not over", async (done) => {
+    test("recovers alarms if the scheduled times are not over", async () => {
       const baseTime = 1616827701912;
       const evacuatedAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: baseTime },
@@ -93,10 +92,9 @@ describe("idle", () => {
       expect(alarmsCreateMock).nthCalledWith(2, "2", {
         when: baseTime + 31 * 60 * 1000,
       });
-      done();
     });
 
-    test("updates the scheduledTime of the tabsMap", async (done) => {
+    test("updates the scheduledTime of the tabsMap", async () => {
       const baseTime = 1616827701912;
       const evacuatedAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: baseTime },
@@ -140,11 +138,9 @@ describe("idle", () => {
           },
         },
       });
-
-      done();
     });
 
-    test("the difference time should be 0 if lastLockedAt isn't set", async (done) => {
+    test("the difference time should be 0 if lastLockedAt isn't set", async () => {
       const baseTime = 1616827701912;
       const evacuatedAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: baseTime },
@@ -167,7 +163,6 @@ describe("idle", () => {
       expect(alarmsCreateMock).nthCalledWith(2, "2", {
         when: baseTime + 60 * 1000,
       });
-      done();
     });
   });
 });
