@@ -30,57 +30,51 @@ describe("storage/options", () => {
   });
 
   describe("initOptions()", () => {
-    test("sets default options for production", async (done) => {
+    test("sets default options for production", async () => {
       jest.mock("./data/default-options.prod", () => ({
         defaultOptions: { dummyOptions: "prod" },
       }));
       await initOptions("production");
       expect(storage.set).toBeCalledWith({ dummyOptions: "prod" });
-      done();
     });
 
-    test("sets default options for development", async (done) => {
+    test("sets default options for development", async () => {
       jest.mock("./data/default-options.dev", () => ({
         defaultOptions: { dummyOptions: "dev" },
       }));
       await initOptions("development");
       expect(storage.set).toBeCalledWith({ dummyOptions: "dev" });
-      done();
     });
 
-    test("fallbacks to production mode", async (done) => {
+    test("fallbacks to production mode", async () => {
       jest.mock("./data/default-options.prod", () => ({
         defaultOptions: { dummyOptions: "prod" },
       }));
       await initOptions("proudction"); // typo
       expect(storage.set).toBeCalledWith({ dummyOptions: "prod" });
-      done();
     });
 
-    test("does'nt set the default options if options exist in the storage", async (done) => {
+    test("does'nt set the default options if options exist in the storage", async () => {
       jest.mock("./data/default-options.dev", () => ({
         defaultOptions: { dummyOptions: "dev" },
       }));
       storage.get.mockResolvedValue(DEFAULT_OPTIONS);
       await initOptions("production");
       expect(storage.set).not.toBeCalled();
-      done();
     });
   });
 
-  test("getOptions() gets all options", async (done) => {
+  test("getOptions() gets all options", async () => {
     storage.get.mockResolvedValue(DEFAULT_OPTIONS);
     const options = await loadOptions();
     expect(storage.get).toBeCalledWith();
     expect(options).toEqual(DEFAULT_OPTIONS);
-    done();
   });
 
-  test("getOptions(key) gets the value of the given key", async (done) => {
+  test("getOptions(key) gets the value of the given key", async () => {
     storage.get.mockResolvedValue(DEFAULT_OPTIONS);
     const minTabs = await loadOptions("minTabs");
     expect(storage.get).toBeCalledWith("minTabs");
     expect(minTabs).toBe(DEFAULT_OPTIONS.minTabs);
-    done();
   });
 });

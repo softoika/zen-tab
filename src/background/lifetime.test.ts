@@ -61,7 +61,7 @@ describe("lifetime", () => {
   });
 
   describe("removeTabOnAlarm()", () => {
-    test("removes the tab if number of tabs is greater than minTabs option", async (done) => {
+    test("removes the tab if number of tabs is greater than minTabs option", async () => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockResolvedValue({
         ...DEFAULT_BROWSER_TAB,
@@ -78,10 +78,9 @@ describe("lifetime", () => {
       await removeTabOnAlarm(alarm);
 
       expect(browser.tabs.remove).toBeCalledWith(12);
-      done();
     });
 
-    test("pushes the tab to OutdatedTabs if number of tabs is equals to minTabs or smaller than it", async (done) => {
+    test("pushes the tab to OutdatedTabs if number of tabs is equals to minTabs or smaller than it", async () => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockResolvedValue({
         ...DEFAULT_BROWSER_TAB,
@@ -104,10 +103,9 @@ describe("lifetime", () => {
       });
       expect(browser.tabs.remove).not.toBeCalled();
       expect(updateOutdatedTabsMock).toBeCalled();
-      done();
     });
 
-    test("does nothing if the tab is pinned and the protectPinnedTabs option is enabled", async (done) => {
+    test("does nothing if the tab is pinned and the protectPinnedTabs option is enabled", async () => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockResolvedValue({
         ...DEFAULT_BROWSER_TAB,
@@ -132,10 +130,9 @@ describe("lifetime", () => {
       });
       expect(browser.tabs.remove).not.toBeCalled();
       expect(updateOutdatedTabsMock).not.toBeCalled();
-      done();
     });
 
-    test("removes the tab if the tab is pinned and the protectPinnedTabs option is disabled", async (done) => {
+    test("removes the tab if the tab is pinned and the protectPinnedTabs option is disabled", async () => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockResolvedValue({
         ...DEFAULT_BROWSER_TAB,
@@ -160,10 +157,9 @@ describe("lifetime", () => {
       });
       expect(browser.tabs.remove).toBeCalled();
       expect(updateOutdatedTabsMock).not.toBeCalled();
-      done();
     });
 
-    test("does nothing if the tabId does not exists", async (done) => {
+    test("does nothing if the tabId does not exists", async () => {
       const alarm: Alarm = { name: "12", scheduledTime: 1616805413763 };
       tabsGetMock.mockRejectedValue({});
 
@@ -173,7 +169,6 @@ describe("lifetime", () => {
       expect(loadOptionsMock).not.toBeCalled();
       expect(browser.tabs.remove).not.toBeCalled();
       expect(updateOutdatedTabsMock).not.toBeCalled();
-      done();
     });
   });
 
@@ -189,7 +184,7 @@ describe("lifetime", () => {
       getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
     });
 
-    test("removes multiple tabs at once", async (done) => {
+    test("removes multiple tabs at once", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
@@ -200,10 +195,9 @@ describe("lifetime", () => {
 
       expect(browser.tabs.remove).toBeCalledTimes(1);
       expect(browser.tabs.remove).toBeCalledWith([12, 23, 34]);
-      done();
     });
 
-    test("removes more tabs than minTabs", async (done) => {
+    test("removes more tabs than minTabs", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
@@ -221,10 +215,9 @@ describe("lifetime", () => {
       expect(updateOutdatedTabsMock).toBeCalledWith(
         new OutdatedTabs({ 1: [{ id: 23 }], 2: [{ id: 34 }] })
       );
-      done();
     });
 
-    test("pushes tabs to outdatedTabs if the number of tabs is minTabs or less", async (done) => {
+    test("pushes tabs to outdatedTabs if the number of tabs is minTabs or less", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
@@ -237,10 +230,9 @@ describe("lifetime", () => {
       expect(updateOutdatedTabsMock).toBeCalledWith(
         new OutdatedTabs({ 1: [{ id: 12 }, { id: 23 }], 2: [{ id: 34 }] })
       );
-      done();
     });
 
-    test("doesn't remove pinned tabs if the protectPinnedTabs option is enabled", async (done) => {
+    test("doesn't remove pinned tabs if the protectPinnedTabs option is enabled", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1, pinned: true },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1, pinned: false },
@@ -253,10 +245,9 @@ describe("lifetime", () => {
 
       expect(browser.tabs.remove).toBeCalledWith([23]);
       expect(updateOutdatedTabsMock).toBeCalledWith(new OutdatedTabs({}));
-      done();
     });
 
-    test("removes pinned tabs if the protectPinnedTabs option is disabled", async (done) => {
+    test("removes pinned tabs if the protectPinnedTabs option is disabled", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1, pinned: true },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1, pinned: false },
@@ -271,10 +262,9 @@ describe("lifetime", () => {
       expect(updateOutdatedTabsMock).toBeCalledWith(
         new OutdatedTabs({ 1: [{ id: 23 }], 2: [{ id: 34 }] })
       );
-      done();
     });
 
-    test("ignores alarms which the id doesn't exist", async (done) => {
+    test("ignores alarms which the id doesn't exist", async () => {
       tabsQueryMock.mockResolvedValue([
         { ...DEFAULT_BROWSER_TAB, id: 12, windowId: 1 },
         { ...DEFAULT_BROWSER_TAB, id: 23, windowId: 1 },
@@ -288,10 +278,9 @@ describe("lifetime", () => {
       ]);
 
       expect(browser.tabs.remove).toBeCalledWith([]);
-      done();
     });
 
-    test("ignores the invalid name of alarms", async (done) => {
+    test("ignores the invalid name of alarms", async () => {
       tabsQueryMock.mockResolvedValue([]);
 
       await removeTabOfAlarms([
@@ -300,12 +289,11 @@ describe("lifetime", () => {
         { name: "1.1", scheduledTime: 1616893707109 },
       ]);
       expect(browser.tabs.remove).toBeCalledWith([]);
-      done();
     });
   });
 
   describe("expireLastTab()", () => {
-    test("just updates the lastTabId if the current lastTabId is undefined", async (done) => {
+    test("just updates the lastTabId if the current lastTabId is undefined", async () => {
       getStorageMock.mockResolvedValue({});
       const tab = { tabId: 1234, windowId: 1 };
 
@@ -316,10 +304,9 @@ describe("lifetime", () => {
       });
       expect(browser.alarms.clear).toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
-      done();
     });
 
-    test("creates an alarm with lastTabId and unix timestamp", async (done) => {
+    test("creates an alarm with lastTabId and unix timestamp", async () => {
       const lastTabId = 111;
       const baseLimit = 1_800_000;
       getStorageMock.mockResolvedValue({
@@ -343,12 +330,11 @@ describe("lifetime", () => {
       expect(browser.alarms.create).toBeCalledWith(`${lastTabId}`, {
         when: currentMillis + baseLimit,
       });
-      done();
     });
   });
 
   describe("expireInactiveTabs()", () => {
-    test("creates alarms for given tabs", async (done) => {
+    test("creates alarms for given tabs", async () => {
       const tabs: Tab[] = [
         { ...DEFAULT_TAB, id: 1, windowId: 1, active: false },
         { ...DEFAULT_TAB, id: 2, windowId: 1, active: false },
@@ -390,14 +376,12 @@ describe("lifetime", () => {
           },
         },
       });
-      done();
     });
 
-    test("does nothing if the tabs are empty", async (done) => {
+    test("does nothing if the tabs are empty", async () => {
       await expireInactiveTabs([], 0);
       expect(updateStorageMock).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
-      done();
     });
   });
 });

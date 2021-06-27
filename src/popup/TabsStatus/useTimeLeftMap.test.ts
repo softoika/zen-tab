@@ -26,7 +26,7 @@ describe("useTimeLeftMap()", () => {
     jest.useRealTimers();
   });
 
-  test("returns time left in each tab", async (done) => {
+  test("returns time left in each tab", async () => {
     const { checkArgs } = mockResolvedValues({
       baseLimit: 60 * 60_000,
       tabsMap: {
@@ -54,10 +54,9 @@ describe("useTimeLeftMap()", () => {
       3: { timeLeftMillis: 0, minus: false, hours: 0, mins: 0 },
       4: { timeLeftMillis: -1, minus: true, hours: 0, mins: 0 },
     });
-    done();
   });
 
-  test("updates timeLeftMap every second", async (done) => {
+  test("updates timeLeftMap every second", async () => {
     const { checkArgs } = mockResolvedValues({
       baseLimit: 60 * 60_000,
       tabsMap: {
@@ -100,8 +99,6 @@ describe("useTimeLeftMap()", () => {
     expect(result.current).toEqual({
       1: { timeLeftMillis: 1_798_000, minus: false, hours: 0, mins: 29 },
     });
-
-    done();
   });
 });
 

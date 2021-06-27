@@ -23,7 +23,7 @@ describe("storage/tabs", () => {
   });
 
   describe("getStorage()", () => {
-    test("gets a whole object that has all values", async (done) => {
+    test("gets a whole object that has all values", async () => {
       const storage: TabStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
@@ -33,12 +33,11 @@ describe("storage/tabs", () => {
       const target = await getStorage();
 
       expect(target).toEqual(storage);
-      done();
     });
   });
 
   describe("getStorage(keys)", () => {
-    test("gets an object that has values of specified keys", async (done) => {
+    test("gets an object that has values of specified keys", async () => {
       const storage: TabStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
@@ -52,12 +51,11 @@ describe("storage/tabs", () => {
         "activatedTabs",
       ]);
       expect(target).toEqual(storage);
-      done();
     });
   });
 
   describe("getValue(key)", () => {
-    test("returns a value of the specified key", async (done) => {
+    test("returns a value of the specified key", async () => {
       const storage: TabStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
@@ -68,7 +66,6 @@ describe("storage/tabs", () => {
 
       expect(localStorage.get).toBeCalledWith("outdatedTabs");
       expect(value).toEqual({ 999: [{ id: 1 }] });
-      done();
     });
   });
 });
