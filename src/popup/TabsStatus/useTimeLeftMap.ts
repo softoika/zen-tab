@@ -9,6 +9,8 @@ export interface TimeLeft {
   minus: boolean;
   hours: number;
   mins: number;
+  // Percentage of remaining time to baseLimit
+  percentage: number;
 }
 
 type TimeLeftMap = { [_ in TabId]?: TimeLeft };
@@ -25,12 +27,14 @@ export function useTimeLeftMap(msInterval = 1000) {
     const currentMillis = Date.now();
     if (timeLeftMap == null) {
       // Build the map instantly at first
-      setTimeLeftMap(calculateTimeLeft(tabsMap, currentMillis));
+      setTimeLeftMap(calculateTimeLeft(baseLimit, tabsMap, currentMillis));
       return;
     }
     const timer = setTimeout(
       () =>
-        setTimeLeftMap(calculateTimeLeft(tabsMap, currentMillis + msInterval)),
+        setTimeLeftMap(
+          calculateTimeLeft(baseLimit, tabsMap, currentMillis + msInterval)
+        ),
       msInterval
     );
     return () => clearTimeout(timer);
@@ -40,6 +44,7 @@ export function useTimeLeftMap(msInterval = 1000) {
 }
 
 function calculateTimeLeft(
+  baseLimit: Options["baseLimit"],
   tabsMap: TabStorage["tabsMap"],
   currentMillis: number
 ): TimeLeftMap {
@@ -53,9 +58,26 @@ function calculateTimeLeft(
     const absMillis = Math.abs(timeLeftMillis);
     const hours = Math.trunc(absMillis / 3_600_000);
     const mins = Math.trunc((absMillis % 3_600_000) / 60_000);
-    timeLeftMap[+tabId] = { timeLeftMillis, minus, hours, mins };
+    const percentage = calculatePercentage(timeLeftMillis, baseLimit);
+    timeLeftMap[+tabId] = { timeLeftMillis, minus, hours, mins, percentage };
   });
   return timeLeftMap;
+}
+
+function calculatePercentage(
+  timeLeftMillis: number,
+  baseLimit: Options["baseLimit"]
+) {
+  if (timeLeftMillis >= 0 && baseLimit > 0) {
+    return Math.trunc((timeLeftMillis / baseLimit) * 100);
+  }
+
+  // abnormal case
+  if (timeLeftMillis > baseLimit) {
+    return 100;
+  }
+
+  return 0;
 }
 
 function useTabsMap() {

@@ -49,10 +49,22 @@ describe("useTimeLeftMap()", () => {
 
     checkArgs();
     expect(result.current).toEqual({
-      1: { timeLeftMillis: 1_800_000, minus: false, hours: 0, mins: 30 },
-      2: { timeLeftMillis: -1_800_000, minus: true, hours: 0, mins: 30 },
-      3: { timeLeftMillis: 0, minus: false, hours: 0, mins: 0 },
-      4: { timeLeftMillis: -1, minus: true, hours: 0, mins: 0 },
+      1: {
+        timeLeftMillis: 1_800_000,
+        minus: false,
+        hours: 0,
+        mins: 30,
+        percentage: 50,
+      },
+      2: {
+        timeLeftMillis: -1_800_000,
+        minus: true,
+        hours: 0,
+        mins: 30,
+        percentage: 0,
+      },
+      3: { timeLeftMillis: 0, minus: false, hours: 0, mins: 0, percentage: 0 },
+      4: { timeLeftMillis: -1, minus: true, hours: 0, mins: 0, percentage: 0 },
     });
   });
 
@@ -76,7 +88,13 @@ describe("useTimeLeftMap()", () => {
     // 1st update
     await waitForNextUpdate();
     expect(result.current).toEqual({
-      1: { timeLeftMillis: 1_800_000, minus: false, hours: 0, mins: 30 },
+      1: {
+        timeLeftMillis: 1_800_000,
+        minus: false,
+        hours: 0,
+        mins: 30,
+        percentage: 50,
+      },
     });
 
     // rerendering immediately after update
@@ -85,19 +103,37 @@ describe("useTimeLeftMap()", () => {
     // not update until 1000ms
     jest.advanceTimersByTime(999);
     expect(result.current).toEqual({
-      1: { timeLeftMillis: 1_800_000, minus: false, hours: 0, mins: 30 },
+      1: {
+        timeLeftMillis: 1_800_000,
+        minus: false,
+        hours: 0,
+        mins: 30,
+        percentage: 50,
+      },
     });
 
     jest.advanceTimersByTime(1);
     expect(result.current).toEqual({
-      1: { timeLeftMillis: 1_799_000, minus: false, hours: 0, mins: 29 },
+      1: {
+        timeLeftMillis: 1_799_000,
+        minus: false,
+        hours: 0,
+        mins: 29,
+        percentage: 49,
+      },
     });
 
     rerender();
 
     jest.advanceTimersByTime(1000);
     expect(result.current).toEqual({
-      1: { timeLeftMillis: 1_798_000, minus: false, hours: 0, mins: 29 },
+      1: {
+        timeLeftMillis: 1_798_000,
+        minus: false,
+        hours: 0,
+        mins: 29,
+        percentage: 49,
+      },
     });
   });
 });
