@@ -3,10 +3,8 @@ import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
 import { loadOptions, initOptions } from "storage/options";
 import {
-  getActivatedTabs,
   getClosedTabHistory,
   getOutdatedTabs,
-  updateActivatedTabs,
   updateClosedTabHistory,
   updateOutdatedTabs,
   updateStorage,
@@ -19,6 +17,7 @@ import {
 import { log } from "utils";
 import { protectAlarmsOnChangeIdleState } from "./idle";
 import { ClosedTabsHistory } from "tabs";
+import { handleTabsOnRemoved } from "./tabs/onRemoved";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   log("onCreated", tab);
@@ -49,18 +48,7 @@ chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId, { windowId }) => {
-  log("onRemoved", tabId);
-  chrome.alarms.clear(`${tabId}`);
-  const history = await getClosedTabHistory();
-  updateClosedTabHistory(history.closeTab(tabId, windowId));
-  const [activatedTabs, outdatedTabs] = await Promise.all([
-    getActivatedTabs(),
-    getOutdatedTabs(),
-  ]);
-  updateActivatedTabs(activatedTabs.remove(tabId, windowId));
-  updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
-});
+chrome.tabs.onRemoved.addListener(handleTabsOnRemoved);
 
 chrome.alarms.onAlarm.addListener((alarm) => removeTabOnAlarm(alarm));
 

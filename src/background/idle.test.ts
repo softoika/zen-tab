@@ -1,5 +1,5 @@
 import { getStorage, updateStorage } from "storage/tabs";
-import { TabStorage } from "storage/types";
+import type { TabStorage } from "storage/types";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { protectAlarmsOnChangeIdleState } from "./idle";
