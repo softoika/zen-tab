@@ -118,6 +118,7 @@ describe("tabs.onRemoved", () => {
 
     expect(updateOutdatedTabsMock).toBeCalledWith(new OutdatedTabs({ 12: [] }));
   });
+
   test.todo("stops counting down if tabs <= baseLimit");
   test.todo("do nothing if tabs > baseLimit");
 });

@@ -62,7 +62,7 @@ describe("idle", () => {
       await protectAlarmsOnChangeIdleState("locked");
       expect(updateStorageMock).toBeCalledWith({
         evacuatedAlarms: alarms,
-        lastLockedAt: now,
+        lastEvacuatedAt: now,
       });
       expect(alarmsClearAllMock).toBeCalled();
     });
@@ -75,15 +75,15 @@ describe("idle", () => {
         { name: "1", scheduledTime: baseTime },
         { name: "2", scheduledTime: baseTime + 60 * 1000 },
       ];
-      const lastLockedAt = baseTime - 50 * 60 * 1000;
-      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastLockedAt });
+      const lastEvacuatedAt = baseTime - 50 * 60 * 1000;
+      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
       await protectAlarmsOnChangeIdleState("active");
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
-        "lastLockedAt",
+        "lastEvacuatedAt",
         "tabsMap",
       ]);
       expect(alarmsCreateMock).nthCalledWith(1, "1", {
@@ -110,10 +110,10 @@ describe("idle", () => {
           scheduledTime: baseTime + 60 * 1000,
         },
       };
-      const lastLockedAt = baseTime - 50 * 60 * 1000;
+      const lastEvacuatedAt = baseTime - 50 * 60 * 1000;
       getStorageMock.mockResolvedValue({
         evacuatedAlarms,
-        lastLockedAt,
+        lastEvacuatedAt,
         tabsMap,
       });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
@@ -122,10 +122,10 @@ describe("idle", () => {
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
-        "lastLockedAt",
+        "lastEvacuatedAt",
         "tabsMap",
       ]);
-      expect(updateStorageMock).toBeCalledWith({
+      expect(updateStorageMock.mock.calls[0][0]).toStrictEqual({
         evacuatedAlarms: [],
         tabsMap: {
           1: {
@@ -137,24 +137,25 @@ describe("idle", () => {
             scheduledTime: baseTime + 31 * 60 * 1000,
           },
         },
+        lastEvacuatedAt: undefined,
       });
     });
 
-    test("the difference time should be 0 if lastLockedAt isn't set", async () => {
+    test("the difference time should be 0 if lastEvacuatedAt isn't set", async () => {
       const baseTime = 1616827701912;
       const evacuatedAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: baseTime },
         { name: "2", scheduledTime: baseTime + 60 * 1000 },
       ];
-      const lastLockedAt = undefined;
-      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastLockedAt });
+      const lastEvacuatedAt = undefined;
+      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
       await protectAlarmsOnChangeIdleState("active");
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
-        "lastLockedAt",
+        "lastEvacuatedAt",
         "tabsMap",
       ]);
       expect(alarmsCreateMock).nthCalledWith(1, "1", {

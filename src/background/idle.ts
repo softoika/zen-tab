@@ -17,7 +17,7 @@ export async function protectAlarmsOnChangeIdleState(
 
 async function evacuateAlarms() {
   const alarms = await browser.alarms.getAll();
-  updateStorage({ evacuatedAlarms: alarms, lastLockedAt: Date.now() });
+  updateStorage({ evacuatedAlarms: alarms, lastEvacuatedAt: Date.now() });
   browser.alarms.clearAll();
   log("evacuated alarms: ", alarms);
 }
@@ -25,12 +25,12 @@ async function evacuateAlarms() {
 async function recoverAlarms() {
   const storage = await getStorage([
     "evacuatedAlarms",
-    "lastLockedAt",
+    "lastEvacuatedAt",
     "tabsMap",
   ]);
   let tabsMap = storage.tabsMap;
   const alarms = storage.evacuatedAlarms ?? [];
-  const lastLockedAt = storage.lastLockedAt ?? 0;
+  const lastLockedAt = storage.lastEvacuatedAt ?? 0;
   log("recovered alarms:", alarms);
   log("lastLockedAt:", lastLockedAt);
   const diff = lastLockedAt > 0 ? Date.now() - lastLockedAt : 0;
@@ -62,5 +62,5 @@ async function recoverAlarms() {
   });
 
   // Clean up the evacuated alarms from storage and update tabsMap
-  updateStorage({ evacuatedAlarms: [], tabsMap });
+  updateStorage({ evacuatedAlarms: [], tabsMap, lastEvacuatedAt: undefined });
 }

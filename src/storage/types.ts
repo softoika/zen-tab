@@ -56,9 +56,10 @@ export interface TabStorage {
   evacuatedAlarms?: readonly chrome.alarms.Alarm[];
 
   /**
-   * Timestamp to calculate the time while a computer is locked.
+   * Timestamp to calculate the time while tabs are evacuated.
+   * This value should be undefined when tabs are'nt evacuated.
    */
-  lastLockedAt?: number;
+  lastEvacuatedAt?: number;
 }
 
 export interface Options {
