@@ -6,7 +6,10 @@ import {
   updateClosedTabHistory,
   updateOutdatedTabs,
 } from "storage/tabs";
+import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
+import { Tab } from "types";
 import { browser } from "webextension-polyfill-ts";
+import { handleTabsOnRemoved } from "./onRemoved";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -47,10 +50,74 @@ describe("tabs.onRemoved", () => {
     updateOutdatedTabsMock.mockReset();
   });
 
-  test.todo("the alarm of the tab should be cleared");
-  test.todo("the tab should be added to the history");
-  test.todo("the tab should be removed from ActivatedTabs");
-  test.todo("the tab should be removed from OutdatedTabs");
+  test("the alarm of the tab should be cleared", async () => {
+    getClosedTabHistoryMock.mockResolvedValue(new ClosedTabsHistory({}, {}));
+    getActivatedTabsMock.mockResolvedValue(new ActivatedTabs({}));
+    getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
+
+    await handleTabsOnRemoved(1, { windowId: 12, isWindowClosing: false });
+
+    expect(alarmsClearMock).toBeCalledWith("1");
+  });
+
+  test("the tab should be added to the history", async () => {
+    const tab: Tab = {
+      id: 1,
+      title: "dummy",
+      url: "https://dummy.com",
+      favIconUrl: "https://dummy.com/favicon",
+      pinned: true, // irrelevant property for the history
+    };
+    getClosedTabHistoryMock.mockResolvedValue(
+      new ClosedTabsHistory({ 12: [tab] }, {})
+    );
+    getActivatedTabsMock.mockResolvedValue(new ActivatedTabs({}));
+    getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
+
+    await handleTabsOnRemoved(1, { windowId: 12, isWindowClosing: false });
+
+    expect(updateClosedTabHistoryMock).toBeCalledWith(
+      new ClosedTabsHistory(
+        { 12: [] },
+        {
+          12: [
+            {
+              id: tab.id,
+              title: tab.title,
+              url: tab.url,
+              favIconUrl: tab.favIconUrl,
+            },
+          ],
+        }
+      )
+    );
+  });
+
+  test("the tab should be removed from ActivatedTabs", async () => {
+    getClosedTabHistoryMock.mockResolvedValue(new ClosedTabsHistory({}, {}));
+    getActivatedTabsMock.mockResolvedValue(
+      new ActivatedTabs({ 12: [{ id: 1 }] })
+    );
+    getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
+
+    await handleTabsOnRemoved(1, { windowId: 12, isWindowClosing: false });
+
+    expect(updateActivatedTabsMock).toBeCalledWith(
+      new ActivatedTabs({ 12: [] })
+    );
+  });
+
+  test("the tab should be removed from OutdatedTabs", async () => {
+    getClosedTabHistoryMock.mockResolvedValue(new ClosedTabsHistory({}, {}));
+    getActivatedTabsMock.mockResolvedValue(new ActivatedTabs({}));
+    getOutdatedTabsMock.mockResolvedValue(
+      new OutdatedTabs({ 12: [{ id: 1 }] })
+    );
+
+    await handleTabsOnRemoved(1, { windowId: 12, isWindowClosing: false });
+
+    expect(updateOutdatedTabsMock).toBeCalledWith(new OutdatedTabs({ 12: [] }));
+  });
   test.todo("stops counting down if tabs <= baseLimit");
   test.todo("do nothing if tabs > baseLimit");
 });
