@@ -7,7 +7,7 @@ import {
   updateOutdatedTabs,
 } from "storage/tabs";
 import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
-import { Tab } from "types";
+import type { Tab } from "types";
 import { browser } from "webextension-polyfill-ts";
 import { handleTabsOnRemoved } from "./onRemoved";
 
@@ -119,6 +119,8 @@ describe("tabs.onRemoved", () => {
     expect(updateOutdatedTabsMock).toBeCalledWith(new OutdatedTabs({ 12: [] }));
   });
 
+  // idle同様全てのアラームをクリアする。(新しくタブを作成した時に退避済みかつbaseLimitを超えたらカウント再開だがそれはまた別の話)
+  // lastEvacuatedAtが閉じられた時刻でセットされていること、evacuatedAlarmsが削除したアラームに対して保存されていること
   test.todo("stops counting down if tabs <= baseLimit");
   test.todo("do nothing if tabs > baseLimit");
 });

@@ -6,13 +6,12 @@ import {
   updateClosedTabHistory,
   updateOutdatedTabs,
 } from "storage/tabs";
+import type { Async } from "types";
 import { log } from "utils";
 import { browser } from "webextension-polyfill-ts";
 
-type OnRemovedBase = Parameters<typeof chrome.tabs.onRemoved["addListener"]>[0];
-type Return = ReturnType<OnRemovedBase>;
-type Params = Parameters<OnRemovedBase>;
-type OnRemovedAsync = (...params: Params) => Promise<Return>;
+type OnRemoved = Parameters<typeof chrome.tabs.onRemoved["addListener"]>[0];
+type OnRemovedAsync = Async<OnRemoved>;
 
 /**
  * Post-processing when a tab is removed.

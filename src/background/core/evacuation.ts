@@ -1,28 +1,18 @@
-import { getStorage, updateStorage } from "storage/tabs";
+import { removeTabOfAlarms } from "background/lifetime";
+import { isValidAsId } from "background/utils";
+import { updateStorage, getStorage } from "storage/tabs";
 import { log } from "utils";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
-import { removeTabOfAlarms } from "./lifetime";
-import { isValidAsId } from "./utils";
 
-export async function protectAlarmsOnChangeIdleState(
-  state: chrome.idle.IdleState
-) {
-  if (state === "locked") {
-    await evacuateAlarms();
-  } else if (state === "active") {
-    await recoverAlarms();
-  }
-}
-
-async function evacuateAlarms() {
+export async function evacuateAlarms() {
   const alarms = await browser.alarms.getAll();
   updateStorage({ evacuatedAlarms: alarms, lastEvacuatedAt: Date.now() });
   browser.alarms.clearAll();
   log("evacuated alarms: ", alarms);
 }
 
-async function recoverAlarms() {
+export async function recoverAlarms() {
   const storage = await getStorage([
     "evacuatedAlarms",
     "lastEvacuatedAt",

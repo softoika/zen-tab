@@ -1,9 +1,8 @@
-import { getStorage, updateStorage } from "storage/tabs";
+import { updateStorage, getStorage } from "storage/tabs";
 import type { TabStorage } from "storage/types";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
-import { protectAlarmsOnChangeIdleState } from "./idle";
-import { removeTabOfAlarms } from "./lifetime";
+import { evacuateAlarms, recoverAlarms } from "./evacuation";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -27,12 +26,9 @@ const updateStorageMock = updateStorage as jest.MockedFunction<
 >;
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 
-jest.mock("./lifetime");
-const removeTabOfAlarmsMock = removeTabOfAlarms as jest.MockedFunction<
-  typeof removeTabOfAlarms
->;
+jest.mock("background/lifetime");
 
-describe("idle", () => {
+describe("background/core/evacuation", () => {
   beforeAll(() => {
     jest.useFakeTimers("modern");
   });
@@ -47,7 +43,6 @@ describe("idle", () => {
     alarmsCreateMock.mockReset();
     updateStorageMock.mockReset();
     getStorageMock.mockReset();
-    removeTabOfAlarmsMock.mockReset();
   });
 
   describe("evacuateAlarms()", () => {
@@ -59,7 +54,7 @@ describe("idle", () => {
       const now = 1616824701912;
       jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(alarms);
-      await protectAlarmsOnChangeIdleState("locked");
+      await evacuateAlarms();
       expect(updateStorageMock).toBeCalledWith({
         evacuatedAlarms: alarms,
         lastEvacuatedAt: now,
@@ -79,7 +74,7 @@ describe("idle", () => {
       getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
-      await protectAlarmsOnChangeIdleState("active");
+      await recoverAlarms();
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
@@ -118,7 +113,7 @@ describe("idle", () => {
       });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
-      await protectAlarmsOnChangeIdleState("active");
+      await recoverAlarms();
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",
@@ -151,7 +146,7 @@ describe("idle", () => {
       getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
-      await protectAlarmsOnChangeIdleState("active");
+      await recoverAlarms();
 
       expect(getStorageMock).toBeCalledWith([
         "evacuatedAlarms",

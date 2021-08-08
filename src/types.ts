@@ -46,3 +46,10 @@ export type NotNull<T> = T extends null
   : T extends undefined
   ? never
   : T;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Async<T extends (...args: any[]) => any> = T extends (
+  ...args: infer P
+) => infer R
+  ? (...args: P) => Promise<R>
+  : T;

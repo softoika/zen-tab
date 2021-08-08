@@ -15,9 +15,9 @@ import {
   removeTabOnAlarm,
 } from "./lifetime";
 import { log } from "utils";
-import { protectAlarmsOnChangeIdleState } from "./idle";
 import { ClosedTabsHistory } from "tabs";
 import { handleTabsOnRemoved } from "./tabs/onRemoved";
+import { handleIdleOnStateChanged } from "./idle/onStateChanged";
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   log("onCreated", tab);
@@ -56,9 +56,7 @@ chrome.storage.onChanged.addListener((changes) => {
   log("debug storage: ", changes);
 });
 
-chrome.idle.onStateChanged.addListener((state) =>
-  protectAlarmsOnChangeIdleState(state)
-);
+chrome.idle.onStateChanged.addListener(handleIdleOnStateChanged);
 
 const onInitExtension = async () => {
   const tabs = await browser.tabs.query({
