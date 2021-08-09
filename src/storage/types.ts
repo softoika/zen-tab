@@ -52,14 +52,26 @@ export interface TabStorage {
   /**
    * Alarms that are temporarily evacuated when a computer is locked.
    * This is necessary because if it is locked, the alarms will not work properly.
+   * This is the value for all windows.
    */
   evacuatedAlarms?: readonly chrome.alarms.Alarm[];
 
   /**
    * Timestamp to calculate the time while tabs are evacuated.
    * This value should be undefined when tabs are'nt evacuated.
+   * This is the value for all windows.
    */
   lastEvacuatedAt?: number;
+
+  /**
+   * The lastEvacuatedAt and evacuatedAlarms map for each window.
+   */
+  evacuationMap?: {
+    readonly [_ in WindowId]?: {
+      lastEvacuatedAt: number;
+      evacuatedAlarms: readonly chrome.alarms.Alarm[];
+    };
+  };
 }
 
 export interface Options {

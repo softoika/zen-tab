@@ -6,6 +6,7 @@ import {
   updateClosedTabHistory,
   updateOutdatedTabs,
 } from "storage/tabs";
+import { loadOptions } from "storage/options";
 import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
 import type { Tab } from "types";
 import { browser } from "webextension-polyfill-ts";
@@ -39,6 +40,9 @@ const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
   typeof updateOutdatedTabs
 >;
 
+jest.mock("storage/options");
+const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
+
 describe("tabs.onRemoved", () => {
   afterEach(() => {
     alarmsClearMock.mockReset();
@@ -48,6 +52,7 @@ describe("tabs.onRemoved", () => {
     updateClosedTabHistoryMock.mockReset();
     updateActivatedTabsMock.mockReset();
     updateOutdatedTabsMock.mockReset();
+    loadOptionsMock.mockReset();
   });
 
   test("the alarm of the tab should be cleared", async () => {
