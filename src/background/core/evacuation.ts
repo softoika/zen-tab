@@ -46,10 +46,18 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
     tabs.filter((tab) => tab.id).map((tab) => `${tab.id}`)
   );
   const targetAlarms = allAlarms.filter((alarm) => tabIds.has(alarm.name));
+  const alarmNamesSet = new Set(targetAlarms.map((alarm) => alarm.name));
   let evacuationMap = _evacuationMap ?? {};
+  let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
+  evacuatedAlarms = evacuatedAlarms.filter(
+    (alarm) => !alarmNamesSet.has(alarm.name)
+  );
   evacuationMap = {
     ...evacuationMap,
-    [windowId]: { lastEvacuatedAt: Date.now(), evacuatedAlarms: targetAlarms },
+    [windowId]: {
+      lastEvacuatedAt: Date.now(),
+      evacuatedAlarms: [...evacuatedAlarms, ...targetAlarms],
+    },
   };
   updateStorage({ evacuationMap });
   targetAlarms.map((alarm) => browser.alarms.clear(alarm.name));

@@ -115,6 +115,90 @@ describe("background/core/evacuation", () => {
       expect(alarmsClearMock).not.toBeCalledWith("2");
       expect(alarmsClearMock).toBeCalledWith("3");
     });
+
+    test("keeps the existing evacuatedAlarms in the same window", async () => {
+      const allAlarms: Alarms.Alarm[] = [
+        { name: "2", scheduledTime: 1628480461293 },
+      ];
+      const targetTabs: Tabs.Tab[] = [
+        { ...DEFAULT_BROWSER_TAB, id: 1, windowId: 123 },
+        { ...DEFAULT_BROWSER_TAB, id: 2, windowId: 123 },
+        { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
+      ];
+      const now = 1628479261293;
+      jest.setSystemTime(now);
+      alarmsGetAllMock.mockResolvedValue(allAlarms);
+      tabsQueryMock.mockResolvedValue(targetTabs);
+      getValueMock.mockResolvedValue({
+        123: {
+          lastEvacuatedAt: now - 60_000,
+          evacuatedAlarms: [
+            { name: "1", scheduledTime: 1628479861293 },
+            { name: "3", scheduledTime: 1628481061293 },
+          ],
+        },
+      });
+
+      await evacuateAlarms(123);
+
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            lastEvacuatedAt: now,
+            evacuatedAlarms: [
+              { name: "1", scheduledTime: 1628479861293 },
+              { name: "3", scheduledTime: 1628481061293 },
+              { name: "2", scheduledTime: 1628480461293 },
+            ],
+          },
+        },
+      });
+      expect(alarmsClearMock).toBeCalledWith("2");
+    });
+
+    test("updates the alarm in the same window if the same name alarm exists", async () => {
+      const now = 1628479261293;
+      const allAlarms: Alarms.Alarm[] = [
+        { name: "2", scheduledTime: now + 60_000 },
+        { name: "3", scheduledTime: now + 120_000 },
+      ];
+      const targetTabs: Tabs.Tab[] = [
+        { ...DEFAULT_BROWSER_TAB, id: 1, windowId: 123 },
+        { ...DEFAULT_BROWSER_TAB, id: 2, windowId: 123 },
+        { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
+      ];
+      jest.setSystemTime(now);
+      alarmsGetAllMock.mockResolvedValue(allAlarms);
+      tabsQueryMock.mockResolvedValue(targetTabs);
+      getValueMock.mockResolvedValue({
+        123: {
+          lastEvacuatedAt: now - 60_000,
+          evacuatedAlarms: [
+            { name: "1", scheduledTime: now + 30_000 },
+            { name: "3", scheduledTime: now + 40_000 },
+          ],
+        },
+      });
+
+      await evacuateAlarms(123);
+
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            lastEvacuatedAt: now,
+            evacuatedAlarms: [
+              { name: "1", scheduledTime: now + 30_000 },
+              { name: "2", scheduledTime: now + 60_000 },
+              { name: "3", scheduledTime: now + 120_000 },
+            ],
+          },
+        },
+      });
+      expect(alarmsClearMock).toBeCalledWith("2");
+      expect(alarmsClearMock).toBeCalledWith("3");
+    });
   });
 
   describe("recoverAlarms()", () => {

@@ -1,3 +1,5 @@
+import { evacuateAlarms } from "background/core/evacuation";
+import { loadOptions } from "storage/options";
 import {
   getActivatedTabs,
   getClosedTabHistory,
@@ -26,10 +28,16 @@ export const handleTabsOnRemoved: OnRemovedAsync = async (
   browser.alarms.clear(`${tabId}`);
   const history = await getClosedTabHistory();
   updateClosedTabHistory(history.closeTab(tabId, windowId));
-  const [activatedTabs, outdatedTabs] = await Promise.all([
+  const [activatedTabs, outdatedTabs, minTabs, tabs] = await Promise.all([
     getActivatedTabs(),
     getOutdatedTabs(),
+    loadOptions("minTabs"),
+    browser.tabs.query({ windowId, windowType: "normal" }),
   ]);
   updateActivatedTabs(activatedTabs.remove(tabId, windowId));
   updateOutdatedTabs(outdatedTabs.remove(tabId, windowId));
+
+  if (tabs.length <= minTabs) {
+    await evacuateAlarms(windowId);
+  }
 };
