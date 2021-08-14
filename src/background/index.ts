@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
-
 import { browser } from "webextension-polyfill-ts";
-import { loadOptions, initOptions } from "storage/options";
+import { initOptions } from "storage/options";
 import {
   getClosedTabHistory,
   getOutdatedTabs,
@@ -16,23 +15,11 @@ import {
 } from "./lifetime";
 import { log } from "utils";
 import { ClosedTabsHistory } from "tabs";
+import { handleTabsOnCreated } from "./tabs/onCreated";
 import { handleTabsOnRemoved } from "./tabs/onRemoved";
 import { handleIdleOnStateChanged } from "./idle/onStateChanged";
 
-chrome.tabs.onCreated.addListener(async (tab) => {
-  log("onCreated", tab);
-  const history = await getClosedTabHistory();
-  updateClosedTabHistory(history.createTab(tab));
-  const [minTabs, tabs, outdatedTabs] = await Promise.all([
-    loadOptions("minTabs"),
-    browser.tabs.query({ windowType: "normal", windowId: tab.windowId }),
-    getOutdatedTabs(),
-  ]);
-  const lastTabId = outdatedTabs.getLastTabId(tab.windowId);
-  if (tabs.length > minTabs && lastTabId) {
-    chrome.tabs.remove(lastTabId);
-  }
-});
+chrome.tabs.onCreated.addListener(handleTabsOnCreated);
 
 chrome.tabs.onActivated.addListener(async (tab) => {
   expireLastTab(tab, dayjs().valueOf());

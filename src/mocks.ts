@@ -24,3 +24,17 @@ export const DEFAULT_BROWSER_TAB: BrowserTab = {
   incognito: false,
   highlighted: true,
 };
+
+export const DEFAULT_CHROME_TAB: chrome.tabs.Tab = {
+  id: 1,
+  windowId: 1,
+  index: 0,
+  groupId: 0,
+  autoDiscardable: false,
+  discarded: false,
+  pinned: false,
+  selected: false,
+  highlighted: false,
+  incognito: false,
+  active: true,
+};
