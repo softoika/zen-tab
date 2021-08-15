@@ -1,3 +1,4 @@
+import { recoverAlarms } from "background/core/evacuation";
 import { loadOptions } from "storage/options";
 import {
   getClosedTabHistory,
@@ -23,5 +24,8 @@ export const handleTabsOnCreated: OnCreatedAsync = async (tab) => {
   const lastTabId = outdatedTabs.getLastTabId(tab.windowId);
   if (tabs.length > minTabs && lastTabId) {
     chrome.tabs.remove(lastTabId);
+  }
+  if (tabs.length > minTabs) {
+    await recoverAlarms(tab.windowId);
   }
 };
