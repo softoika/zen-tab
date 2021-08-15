@@ -1,4 +1,3 @@
-import { removeTabOfAlarms } from "background/lifetime";
 import { isValidAsId } from "background/utils";
 import { updateStorage, getStorage, getValue } from "storage/tabs";
 import type { TabStorage } from "storage/types";
@@ -6,6 +5,7 @@ import type { NotNull, WindowId } from "types";
 import { log } from "utils";
 import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
+import { removeTabOfAlarms } from "./lifetime";
 
 export async function evacuateAlarms(): Promise<void>;
 export async function evacuateAlarms(windowId: WindowId): Promise<void>;

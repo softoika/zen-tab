@@ -7,11 +7,11 @@ import {
   updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
-import type { Tab, TabId } from "types";
+import { isValidAsId } from "background/utils";
 import type { Options, TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
+import type { Tab, TabId } from "types";
 import { log } from "utils";
-import { isValidAsId } from "./utils";
 
 type Alarm = chrome.alarms.Alarm;
 

@@ -12,7 +12,7 @@ import {
   expireInactiveTabs,
   expireLastTab,
   removeTabOnAlarm,
-} from "./lifetime";
+} from "./core/lifetime";
 import { log } from "utils";
 import { ClosedTabsHistory } from "tabs";
 import { handleTabsOnCreated } from "./tabs/onCreated";

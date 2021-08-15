@@ -40,7 +40,7 @@ const updateStorageMock = updateStorage as jest.MockedFunction<
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
-jest.mock("background/lifetime");
+jest.mock("./lifetime");
 
 describe("background/core/evacuation", () => {
   beforeAll(() => {
