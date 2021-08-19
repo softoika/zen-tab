@@ -3,6 +3,7 @@ import { DEFAULT_BROWSER_TAB, DEFAULT_TAB } from "mocks";
 import {
   getOutdatedTabs,
   getStorage,
+  getValue,
   updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
@@ -13,6 +14,7 @@ import {
   expireLastTab,
   removeTabOnAlarm,
   removeTabOfAlarms,
+  expireInactiveTab,
 } from "./lifetime";
 import { OutdatedTabs } from "tabs";
 
@@ -29,6 +31,12 @@ const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
 const tabsGetMock = browser.tabs.get as jest.MockedFunction<
   typeof browser.tabs.get
 >;
+const alarmsClearMock = browser.alarms.clear as jest.MockedFunction<
+  typeof browser.alarms.clear
+>;
+const alarmsCreateMock = browser.alarms.create as jest.MockedFunction<
+  typeof browser.alarms.create
+>;
 
 jest.mock("storage/tabs");
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
@@ -38,6 +46,8 @@ const updateStorageMock = updateStorage as jest.MockedFunction<
 const getOutdatedTabsMock = getOutdatedTabs as jest.MockedFunction<
   typeof getOutdatedTabs
 >;
+const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
+
 jest.mock("storage/options");
 const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
   typeof updateOutdatedTabs
@@ -49,12 +59,13 @@ type Alarm = chrome.alarms.Alarm;
 describe("lifetime", () => {
   afterEach(() => {
     getStorageMock.mockReset();
+    getValueMock.mockReset();
     updateStorageMock.mockReset();
     loadOptionsMock.mockReset();
     getOutdatedTabsMock.mockReset();
     updateOutdatedTabsMock.mockReset();
-    (browser.alarms.create as jest.Mock).mockReset();
-    (browser.alarms.clear as jest.Mock).mockReset();
+    alarmsClearMock.mockReset();
+    alarmsCreateMock.mockReset();
     (browser.tabs.query as jest.Mock).mockReset();
     (browser.tabs.remove as jest.Mock).mockReset();
     (browser.tabs.get as jest.Mock).mockReset();
@@ -382,6 +393,52 @@ describe("lifetime", () => {
       await expireInactiveTabs([], 0);
       expect(updateStorageMock).not.toBeCalled();
       expect(browser.alarms.create).not.toBeCalled();
+    });
+  });
+
+  describe("expireInactiveTab()", () => {
+    beforeEach(() => {
+      getValueMock.mockResolvedValue({});
+      loadOptionsMock.mockResolvedValue(0);
+    });
+
+    test("creates an alarm for the tab", async () => {
+      const baseLimit = 30 * 60_000;
+      loadOptionsMock.mockResolvedValue(baseLimit);
+      const tab: Tab = { ...DEFAULT_TAB, id: 1, active: false };
+      const now = 1629199760981;
+
+      await expireInactiveTab(tab, now);
+
+      expect(loadOptionsMock).toBeCalledWith("baseLimit");
+      expect(getValueMock).toBeCalledWith("tabsMap");
+      expect(alarmsCreateMock).toBeCalledWith("1", { when: now + baseLimit });
+    });
+
+    test("updates the tabsMap", async () => {
+      const baseLimit = 30 * 60_000;
+      loadOptionsMock.mockResolvedValue(baseLimit);
+      const tab: Tab = { ...DEFAULT_TAB, id: 1, active: false };
+      const now = 1629199760981;
+
+      await expireInactiveTab(tab, now);
+
+      expect(updateStorageMock).toBeCalledWith({
+        tabsMap: {
+          1: { lastInactivated: now, scheduledTime: now + baseLimit },
+        },
+      });
+    });
+
+    test("does nothing if the tab is active", async () => {
+      const tab: Tab = { ...DEFAULT_TAB, id: 1, active: true };
+      const now = 1629199760981;
+
+      await expireInactiveTab(tab, now);
+
+      expect(alarmsCreateMock).not.toBeCalled();
+      expect(alarmsClearMock).not.toBeCalled();
+      expect(updateStorageMock).not.toBeCalled();
     });
   });
 });

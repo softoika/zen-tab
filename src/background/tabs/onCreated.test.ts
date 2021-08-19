@@ -4,6 +4,7 @@ import {
   getClosedTabHistory,
   getOutdatedTabs,
   getStorage,
+  getValue,
   updateClosedTabHistory,
   updateStorage,
 } from "storage/tabs";
@@ -17,7 +18,7 @@ const chromeTabsRemoveMock = chrome.tabs.remove as jest.MockedFunction<
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
     tabs: { query: jest.fn() },
-    alarms: { create: jest.fn() },
+    alarms: { create: jest.fn(), clear: jest.fn() },
   },
 }));
 const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
@@ -40,6 +41,7 @@ const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
 >;
+const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
 jest.mock("storage/options");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
@@ -58,6 +60,7 @@ describe("tabs.onCreated", () => {
     getClosedTabHistoryMock.mockResolvedValue(new ClosedTabsHistory({}, {}));
     getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
     getStorageMock.mockResolvedValue({});
+    getValueMock.mockResolvedValue(undefined);
     loadOptionsMock.mockResolvedValue(0);
   });
 
@@ -69,6 +72,7 @@ describe("tabs.onCreated", () => {
     updateClosedTabHistoryMock.mockReset();
     getOutdatedTabsMock.mockReset();
     getStorageMock.mockReset();
+    getValueMock.mockReset();
     updateStorageMock.mockReset();
     loadOptionsMock.mockReset();
   });
@@ -158,5 +162,27 @@ describe("tabs.onCreated", () => {
         1: { lastInactivated: undefined, scheduledTime: now + 180_000 },
       },
     });
+  });
+
+  test("runs an alarm for the tab if the tab is inactive", async () => {
+    tabsQueryMock.mockResolvedValue([
+      { ...DEFAULT_BROWSER_TAB, id: 1, windowId: 123, active: true },
+      { ...DEFAULT_BROWSER_TAB, id: 2, windowId: 123, active: false },
+    ]);
+    loadOptionsMock.mockResolvedValueOnce(2); // minTabs
+    loadOptionsMock.mockResolvedValueOnce(30 * 60_000); // baseLimit
+    const now = 1628924465521;
+    jest.setSystemTime(now);
+
+    await handleTabsOnCreated({
+      ...DEFAULT_CHROME_TAB,
+      id: 2,
+      windowId: 123,
+      active: false,
+    });
+
+    expect(loadOptionsMock).nthCalledWith(1, "minTabs");
+    expect(loadOptionsMock).nthCalledWith(2, "baseLimit");
+    expect(alarmsCreateMock).toBeCalledWith("2", { when: now + 30 * 60_000 });
   });
 });

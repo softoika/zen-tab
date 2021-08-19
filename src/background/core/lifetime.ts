@@ -4,6 +4,7 @@ import { ActivatedTabs, createActivatedTabs } from "tabs";
 import {
   getOutdatedTabs,
   getStorage,
+  getValue,
   updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
@@ -139,7 +140,7 @@ function isProtectedAsPinnedTab(
 type TabsMap = TabStorage["tabsMap"];
 
 /**
- * Set alarm for a last activated tab.
+ * Set an alarm for the last activated tab.
  * If it exists, memorize its inactivated timestamp. This is useful for showing
  * time left to close the tab.
  */
@@ -202,6 +203,23 @@ export async function expireInactiveTabs(tabs: Tab[], currentMillis: number) {
     });
 
   updateStorage({ tabsMap, activatedTabs: createActivatedTabs(tabs).value });
+}
+
+export async function expireInactiveTab(tab: Tab, currentMillis: number) {
+  if (!tab.id) {
+    return;
+  }
+  if (tab.active) {
+    return;
+  }
+  const [_tabsMap, when] = await Promise.all([
+    getValue("tabsMap"),
+    getLifetime(currentMillis),
+    browser.alarms.clear(`${tab.id}`),
+  ]);
+  browser.alarms.create(`${tab.id}`, { when });
+  const tabsMap = updateTabsMap(_tabsMap, tab.id, currentMillis, when);
+  updateStorage({ tabsMap });
 }
 
 function updateTabsMap(
