@@ -3,30 +3,20 @@ import { browser } from "webextension-polyfill-ts";
 import { initOptions } from "storage/options";
 import {
   getClosedTabHistory,
-  getOutdatedTabs,
   updateClosedTabHistory,
-  updateOutdatedTabs,
   updateStorage,
 } from "storage/tabs";
-import {
-  expireInactiveTabs,
-  expireLastTab,
-  removeTabOnAlarm,
-} from "./core/lifetime";
+import { expireInactiveTabs, removeTabOnAlarm } from "./core/lifetime";
 import { log } from "utils";
 import { ClosedTabsHistory } from "tabs";
 import { handleTabsOnCreated } from "./tabs/onCreated";
 import { handleTabsOnRemoved } from "./tabs/onRemoved";
+import { handleTabsOnActivated } from "./tabs/onActivated";
 import { handleIdleOnStateChanged } from "./idle/onStateChanged";
 
 chrome.tabs.onCreated.addListener(handleTabsOnCreated);
 
-chrome.tabs.onActivated.addListener(async (tab) => {
-  expireLastTab(tab, dayjs().valueOf());
-  const outdatedTabs = await getOutdatedTabs();
-  updateOutdatedTabs(outdatedTabs.remove(tab.tabId, tab.windowId));
-  log("onActivated", tab);
-});
+chrome.tabs.onActivated.addListener(handleTabsOnActivated);
 
 chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete") {
