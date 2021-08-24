@@ -1,4 +1,5 @@
 import { DEFAULT_BROWSER_TAB } from "mocks";
+import { loadOptions } from "storage/options";
 import { updateStorage, getStorage, getValue } from "storage/tabs";
 import type { TabStorage } from "storage/types";
 import type { Alarms, Tabs } from "webextension-polyfill-ts";
@@ -42,6 +43,9 @@ const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
 jest.mock("./lifetime");
 
+jest.mock("storage/options");
+const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
+
 describe("background/core/evacuation", () => {
   beforeAll(() => {
     jest.useFakeTimers("modern");
@@ -60,6 +64,7 @@ describe("background/core/evacuation", () => {
     updateStorageMock.mockReset();
     getStorageMock.mockReset();
     getValueMock.mockReset();
+    loadOptionsMock.mockReset();
   });
 
   describe("evacuateAlarms()", () => {
@@ -91,6 +96,7 @@ describe("background/core/evacuation", () => {
         { ...DEFAULT_BROWSER_TAB, id: 1, windowId: 123 },
         { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
       ];
+      loadOptionsMock.mockResolvedValue(2);
       const now = 1628479261293;
       jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(allAlarms);
@@ -125,6 +131,7 @@ describe("background/core/evacuation", () => {
         { ...DEFAULT_BROWSER_TAB, id: 2, windowId: 123 },
         { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
       ];
+      loadOptionsMock.mockResolvedValue(3);
       const now = 1628479261293;
       jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(allAlarms);
@@ -168,6 +175,7 @@ describe("background/core/evacuation", () => {
         { ...DEFAULT_BROWSER_TAB, id: 2, windowId: 123 },
         { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
       ];
+      loadOptionsMock.mockResolvedValue(3);
       jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(allAlarms);
       tabsQueryMock.mockResolvedValue(targetTabs);
@@ -198,6 +206,31 @@ describe("background/core/evacuation", () => {
       });
       expect(alarmsClearMock).toBeCalledWith("2");
       expect(alarmsClearMock).toBeCalledWith("3");
+    });
+
+    test("does nothing if tabs > minTabs", async () => {
+      const allAlarms: Alarms.Alarm[] = [
+        { name: "1", scheduledTime: 1628479861293 },
+        { name: "2", scheduledTime: 1628480461293 },
+        { name: "3", scheduledTime: 1628481061293 },
+      ];
+      const targetTabs: Tabs.Tab[] = [
+        { ...DEFAULT_BROWSER_TAB, id: 1, windowId: 123 },
+        { ...DEFAULT_BROWSER_TAB, id: 3, windowId: 123 },
+      ];
+      loadOptionsMock.mockResolvedValue(1);
+      const now = 1628479261293;
+      jest.setSystemTime(now);
+      alarmsGetAllMock.mockResolvedValue(allAlarms);
+      tabsQueryMock.mockResolvedValue(targetTabs);
+      getValueMock.mockResolvedValue(undefined);
+
+      await evacuateAlarms(123);
+
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+      expect(loadOptionsMock).toBeCalledWith("minTabs");
+      expect(updateStorageMock).not.toBeCalled();
+      expect(alarmsClearMock).not.toBeCalled();
     });
   });
 

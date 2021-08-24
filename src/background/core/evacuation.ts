@@ -1,4 +1,5 @@
 import { isValidAsId } from "background/utils";
+import { loadOptions } from "storage/options";
 import { updateStorage, getStorage, getValue } from "storage/tabs";
 import type { TabStorage } from "storage/types";
 import type { NotNull, WindowId } from "types";
@@ -37,11 +38,17 @@ async function evacuateAlarmsOfAllWindows() {
 }
 
 async function evacuateAlarmsOfWindow(windowId: WindowId) {
-  const [tabs, allAlarms, _evacuationMap] = await Promise.all([
+  const [tabs, minTabs, allAlarms, _evacuationMap] = await Promise.all([
     browser.tabs.query({ windowId, windowType: "normal" }),
+    loadOptions("minTabs"),
     browser.alarms.getAll(),
     getValue("evacuationMap"),
   ]);
+
+  if (tabs.length > minTabs) {
+    return;
+  }
+
   const tabIds = new Set(
     tabs.filter((tab) => tab.id).map((tab) => `${tab.id}`)
   );
@@ -59,6 +66,7 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
       evacuatedAlarms: [...evacuatedAlarms, ...targetAlarms],
     },
   };
+
   updateStorage({ evacuationMap });
   targetAlarms.map((alarm) => browser.alarms.clear(alarm.name));
   log(`evacuated alarms(windowId: ${windowId})`, targetAlarms);
