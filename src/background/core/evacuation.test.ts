@@ -1,7 +1,7 @@
 import { DEFAULT_BROWSER_TAB } from "mocks";
 import { loadOptions } from "storage/options";
 import { updateStorage, getStorage, getValue } from "storage/tabs";
-import type { TabStorage } from "storage/types";
+import type { EvacuatedAlarm, TabStorage } from "storage/types";
 import type { Alarms, Tabs } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { evacuateAlarms, recoverAlarms } from "./evacuation";
@@ -69,23 +69,33 @@ describe("background/core/evacuation", () => {
 
   describe("evacuateAlarms()", () => {
     test("saves alarms and current time to storage and clear it", async () => {
-      const alarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: 1616827701912 },
-        { name: "2", scheduledTime: 1616829466759 },
-      ];
       const now = 1616824701912;
+      const alarms: Alarms.Alarm[] = [
+        { name: "1", scheduledTime: now + 30 * 60_000 },
+        { name: "2", scheduledTime: now + 40 * 60_000 },
+      ];
       jest.setSystemTime(now);
       alarmsGetAllMock.mockResolvedValue(alarms);
       await evacuateAlarms();
       expect(updateStorageMock).toBeCalledWith({
-        evacuatedAlarms: alarms,
-        lastEvacuatedAt: now,
+        evacuatedAlarms: [
+          {
+            name: "1",
+            scheduledTime: now + 30 * 60_000,
+            timeLeft: 30 * 60_000,
+          },
+          {
+            name: "2",
+            scheduledTime: now + 40 * 60_000,
+            timeLeft: 40 * 60_000,
+          },
+        ],
       });
       expect(alarmsClearAllMock).toBeCalled();
     });
   });
 
-  describe("evacuatedAlarms(windowId)", () => {
+  describe("evacuateAlarms(windowId)", () => {
     test("evacuates alarms for the target window", async () => {
       const allAlarms: Alarms.Alarm[] = [
         { name: "1", scheduledTime: 1628479861293 },
@@ -109,10 +119,17 @@ describe("background/core/evacuation", () => {
       expect(updateStorageMock).toBeCalledWith({
         evacuationMap: {
           123: {
-            lastEvacuatedAt: now,
             evacuatedAlarms: [
-              { name: "1", scheduledTime: 1628479861293 },
-              { name: "3", scheduledTime: 1628481061293 },
+              {
+                name: "1",
+                scheduledTime: 1628479861293,
+                timeLeft: 10 * 60_000,
+              },
+              {
+                name: "3",
+                scheduledTime: 1628481061293,
+                timeLeft: 30 * 60_000,
+              },
             ],
           },
         },
@@ -138,10 +155,9 @@ describe("background/core/evacuation", () => {
       tabsQueryMock.mockResolvedValue(targetTabs);
       getValueMock.mockResolvedValue({
         123: {
-          lastEvacuatedAt: now - 60_000,
           evacuatedAlarms: [
-            { name: "1", scheduledTime: 1628479861293 },
-            { name: "3", scheduledTime: 1628481061293 },
+            { name: "1", scheduledTime: 1628479861293, timeLeft: 10 * 60_000 },
+            { name: "3", scheduledTime: 1628481061293, timeLeft: 30 * 60_000 },
           ],
         },
       });
@@ -152,11 +168,22 @@ describe("background/core/evacuation", () => {
       expect(updateStorageMock).toBeCalledWith({
         evacuationMap: {
           123: {
-            lastEvacuatedAt: now,
             evacuatedAlarms: [
-              { name: "1", scheduledTime: 1628479861293 },
-              { name: "3", scheduledTime: 1628481061293 },
-              { name: "2", scheduledTime: 1628480461293 },
+              {
+                name: "1",
+                scheduledTime: 1628479861293,
+                timeLeft: 10 * 60_000,
+              },
+              {
+                name: "3",
+                scheduledTime: 1628481061293,
+                timeLeft: 30 * 60_000,
+              },
+              {
+                name: "2",
+                scheduledTime: 1628480461293,
+                timeLeft: 20 * 60_000,
+              },
             ],
           },
         },
@@ -181,10 +208,9 @@ describe("background/core/evacuation", () => {
       tabsQueryMock.mockResolvedValue(targetTabs);
       getValueMock.mockResolvedValue({
         123: {
-          lastEvacuatedAt: now - 60_000,
           evacuatedAlarms: [
-            { name: "1", scheduledTime: now + 30_000 },
-            { name: "3", scheduledTime: now + 40_000 },
+            { name: "1", scheduledTime: now + 30_000, timeLeft: 30_000 },
+            { name: "3", scheduledTime: now + 40_000, timeLeft: 40_000 },
           ],
         },
       });
@@ -195,11 +221,10 @@ describe("background/core/evacuation", () => {
       expect(updateStorageMock).toBeCalledWith({
         evacuationMap: {
           123: {
-            lastEvacuatedAt: now,
             evacuatedAlarms: [
-              { name: "1", scheduledTime: now + 30_000 },
-              { name: "2", scheduledTime: now + 60_000 },
-              { name: "3", scheduledTime: now + 120_000 },
+              { name: "1", scheduledTime: now + 30_000, timeLeft: 30_000 },
+              { name: "2", scheduledTime: now + 60_000, timeLeft: 60_000 },
+              { name: "3", scheduledTime: now + 120_000, timeLeft: 120_000 },
             ],
           },
         },
@@ -237,34 +262,34 @@ describe("background/core/evacuation", () => {
   describe("recoverAlarms()", () => {
     test("recovers alarms if the scheduled times are not over", async () => {
       const baseTime = 1616827701912;
-      const evacuatedAlarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: baseTime },
-        { name: "2", scheduledTime: baseTime + 60 * 1000 },
+      const evacuatedAlarms: EvacuatedAlarm[] = [
+        { name: "1", scheduledTime: baseTime, timeLeft: 30 * 60_000 },
+        {
+          name: "2",
+          scheduledTime: baseTime + 60_000,
+          timeLeft: 31 * 60_000,
+        },
       ];
-      const lastEvacuatedAt = baseTime - 50 * 60 * 1000;
-      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
-      jest.setSystemTime(baseTime - 20 * 60 * 1000);
+      getStorageMock.mockResolvedValue({ evacuatedAlarms });
+      const now = baseTime - 20 * 60_000;
+      jest.setSystemTime(now);
 
       await recoverAlarms();
 
-      expect(getStorageMock).toBeCalledWith([
-        "evacuatedAlarms",
-        "lastEvacuatedAt",
-        "tabsMap",
-      ]);
+      expect(getStorageMock).toBeCalledWith(["evacuatedAlarms", "tabsMap"]);
       expect(alarmsCreateMock).nthCalledWith(1, "1", {
-        when: baseTime + 30 * 60 * 1000,
+        when: now + 30 * 60_000,
       });
       expect(alarmsCreateMock).nthCalledWith(2, "2", {
-        when: baseTime + 31 * 60 * 1000,
+        when: now + 31 * 60_000,
       });
     });
 
     test("updates the scheduledTime of the tabsMap", async () => {
       const baseTime = 1616827701912;
-      const evacuatedAlarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: baseTime },
-        { name: "2", scheduledTime: baseTime + 60 * 1000 },
+      const evacuatedAlarms: EvacuatedAlarm[] = [
+        { name: "1", scheduledTime: baseTime, timeLeft: 50 * 60_000 },
+        { name: "2", scheduledTime: baseTime + 60_000, timeLeft: 51 * 60_000 },
       ];
       const tabsMap: TabStorage["tabsMap"] = {
         1: {
@@ -276,22 +301,16 @@ describe("background/core/evacuation", () => {
           scheduledTime: baseTime + 60 * 1000,
         },
       };
-      const lastEvacuatedAt = baseTime - 50 * 60 * 1000;
       getStorageMock.mockResolvedValue({
         evacuatedAlarms,
-        lastEvacuatedAt,
         tabsMap,
       });
       jest.setSystemTime(baseTime - 20 * 60 * 1000);
 
       await recoverAlarms();
 
-      expect(getStorageMock).toBeCalledWith([
-        "evacuatedAlarms",
-        "lastEvacuatedAt",
-        "tabsMap",
-      ]);
-      expect(updateStorageMock.mock.calls[0][0]).toStrictEqual({
+      expect(getStorageMock).toBeCalledWith(["evacuatedAlarms", "tabsMap"]);
+      expect(updateStorageMock).toBeCalledWith({
         evacuatedAlarms: [],
         tabsMap: {
           1: {
@@ -303,32 +322,6 @@ describe("background/core/evacuation", () => {
             scheduledTime: baseTime + 31 * 60 * 1000,
           },
         },
-        lastEvacuatedAt: undefined,
-      });
-    });
-
-    test("the difference time should be 0 if lastEvacuatedAt isn't set", async () => {
-      const baseTime = 1616827701912;
-      const evacuatedAlarms: Alarms.Alarm[] = [
-        { name: "1", scheduledTime: baseTime },
-        { name: "2", scheduledTime: baseTime + 60 * 1000 },
-      ];
-      const lastEvacuatedAt = undefined;
-      getStorageMock.mockResolvedValue({ evacuatedAlarms, lastEvacuatedAt });
-      jest.setSystemTime(baseTime - 20 * 60 * 1000);
-
-      await recoverAlarms();
-
-      expect(getStorageMock).toBeCalledWith([
-        "evacuatedAlarms",
-        "lastEvacuatedAt",
-        "tabsMap",
-      ]);
-      expect(alarmsCreateMock).nthCalledWith(1, "1", {
-        when: baseTime,
-      });
-      expect(alarmsCreateMock).nthCalledWith(2, "2", {
-        when: baseTime + 60 * 1000,
       });
     });
   });
@@ -338,42 +331,47 @@ describe("background/core/evacuation", () => {
       const baseTime = 1628502404949;
       const evacuationMap: TabStorage["evacuationMap"] = {
         123: {
-          lastEvacuatedAt: baseTime - 50 * 60 * 1000,
           evacuatedAlarms: [
-            { name: "1", scheduledTime: baseTime },
-            { name: "2", scheduledTime: baseTime + 60 * 1000 },
+            { name: "1", scheduledTime: baseTime, timeLeft: 50 * 60_000 },
+            {
+              name: "2",
+              scheduledTime: baseTime + 60 * 1000,
+              timeLeft: 51 * 60_000,
+            },
           ],
         },
         456: {
-          lastEvacuatedAt: baseTime,
-          evacuatedAlarms: [{ name: "3", scheduledTime: baseTime }],
+          evacuatedAlarms: [
+            { name: "3", scheduledTime: baseTime, timeLeft: 20 * 60_000 },
+          ],
         },
       };
       const tabsMap: TabStorage["tabsMap"] = {
         1: {
-          lastInactivated: baseTime - 61 * 60 * 1000,
+          lastInactivated: baseTime - 61 * 60_000,
           scheduledTime: baseTime,
         },
         2: {
-          lastInactivated: baseTime - 60 * 60 * 1000,
-          scheduledTime: baseTime + 60 * 1000,
+          lastInactivated: baseTime - 60 * 60_000,
+          scheduledTime: baseTime + 60_000,
         },
       };
       getStorageMock.mockResolvedValue({
         evacuationMap,
         tabsMap,
       });
-      jest.setSystemTime(baseTime - 20 * 60 * 1000);
+      jest.setSystemTime(baseTime - 20 * 60_000);
 
       await recoverAlarms(123);
 
       expect(getStorageMock).toBeCalledWith(["evacuationMap", "tabsMap"]);
       expect(updateStorageMock).toBeCalledWith({
         evacuationMap: {
-          // 123 should be removed (undefined).
+          123: undefined,
           456: {
-            lastEvacuatedAt: baseTime,
-            evacuatedAlarms: [{ name: "3", scheduledTime: baseTime }],
+            evacuatedAlarms: [
+              { name: "3", scheduledTime: baseTime, timeLeft: 20 * 60_000 },
+            ],
           },
         },
         tabsMap: {
@@ -400,8 +398,9 @@ describe("background/core/evacuation", () => {
       const evacuationMap: TabStorage["evacuationMap"] = {
         // 123 does not exist
         456: {
-          lastEvacuatedAt: baseTime,
-          evacuatedAlarms: [{ name: "3", scheduledTime: baseTime }],
+          evacuatedAlarms: [
+            { name: "3", scheduledTime: baseTime, timeLeft: 0 },
+          ],
         },
       };
       const tabsMap: TabStorage["tabsMap"] = {

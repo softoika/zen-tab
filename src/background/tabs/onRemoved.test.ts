@@ -181,16 +181,16 @@ describe("tabs.onRemoved", () => {
     expect(updateStorageMock).toBeCalledWith({
       evacuationMap: {
         123: {
-          lastEvacuatedAt: now,
           evacuatedAlarms: [
-            { name: "2", scheduledTime: now + 60_000 },
-            { name: "3", scheduledTime: now + 120_000 },
-            { name: "4", scheduledTime: now + 180_000 },
+            { name: "2", scheduledTime: now + 60_000, timeLeft: 60_000 },
+            { name: "3", scheduledTime: now + 120_000, timeLeft: 120_000 },
+            { name: "4", scheduledTime: now + 180_000, timeLeft: 180_000 },
           ],
         },
       },
     });
   });
+
   test("do nothing if tabs > baseLimit", async () => {
     loadOptionsMock.mockResolvedValue(3);
     tabsQueryMock.mockResolvedValue([

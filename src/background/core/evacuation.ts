@@ -1,10 +1,9 @@
 import { isValidAsId } from "background/utils";
 import { loadOptions } from "storage/options";
 import { updateStorage, getStorage, getValue } from "storage/tabs";
-import type { TabStorage } from "storage/types";
+import type { EvacuatedAlarm, TabStorage } from "storage/types";
 import type { NotNull, WindowId } from "types";
 import { log } from "utils";
-import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { removeTabOfAlarms } from "./lifetime";
 
@@ -32,7 +31,12 @@ export async function recoverAlarms(windowId?: WindowId) {
 
 async function evacuateAlarmsOfAllWindows() {
   const alarms = await browser.alarms.getAll();
-  updateStorage({ evacuatedAlarms: alarms, lastEvacuatedAt: Date.now() });
+  const lastEvacuatedAt = Date.now();
+  const evacuatedAlarms = alarms.map((alarm) => ({
+    ...alarm,
+    timeLeft: alarm.scheduledTime - lastEvacuatedAt,
+  }));
+  updateStorage({ evacuatedAlarms });
   browser.alarms.clearAll();
   log("evacuated alarms: ", alarms);
 }
@@ -56,14 +60,19 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
   const alarmNamesSet = new Set(targetAlarms.map((alarm) => alarm.name));
   let evacuationMap = _evacuationMap ?? {};
   let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
+  const lastEvacuatedAt = Date.now();
   evacuatedAlarms = evacuatedAlarms.filter(
     (alarm) => !alarmNamesSet.has(alarm.name)
   );
+  evacuatedAlarms = [...evacuatedAlarms, ...targetAlarms].map((alarm) => ({
+    ...alarm,
+    timeLeft: alarm.scheduledTime - lastEvacuatedAt,
+  }));
+
   evacuationMap = {
     ...evacuationMap,
     [windowId]: {
-      lastEvacuatedAt: Date.now(),
-      evacuatedAlarms: [...evacuatedAlarms, ...targetAlarms],
+      evacuatedAlarms,
     },
   };
 
@@ -73,18 +82,13 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
 }
 
 async function recoverAlarmsOfAllWindows() {
-  const storage = await getStorage([
-    "evacuatedAlarms",
-    "lastEvacuatedAt",
-    "tabsMap",
-  ]);
+  const storage = await getStorage(["evacuatedAlarms", "tabsMap"]);
   let tabsMap = storage.tabsMap ?? {};
   const alarms = storage.evacuatedAlarms ?? [];
-  const lastEvacuatedAt = storage.lastEvacuatedAt ?? 0;
-  tabsMap = _recoverAlarms(alarms, lastEvacuatedAt, tabsMap);
+  tabsMap = _recoverAlarms(alarms, tabsMap);
 
   // Clean up the evacuated alarms from storage and update tabsMap
-  updateStorage({ evacuatedAlarms: [], tabsMap, lastEvacuatedAt: undefined });
+  updateStorage({ evacuatedAlarms: [], tabsMap });
 }
 
 async function recoverAlarmsOfWindow(windowId: WindowId) {
@@ -99,11 +103,7 @@ async function recoverAlarmsOfWindow(windowId: WindowId) {
     );
     return;
   }
-  tabsMap = _recoverAlarms(
-    target.evacuatedAlarms,
-    target.lastEvacuatedAt,
-    tabsMap
-  );
+  tabsMap = _recoverAlarms(target.evacuatedAlarms, tabsMap);
   evacuationMap = {
     ...evacuationMap,
     [windowId]: undefined,
@@ -112,44 +112,30 @@ async function recoverAlarmsOfWindow(windowId: WindowId) {
   updateStorage({ evacuationMap, tabsMap });
 }
 
-type Alarms = readonly Alarms.Alarm[];
-type LastEvacuatedAt = TabStorage["lastEvacuatedAt"];
 type TabsMap = NotNull<TabStorage["tabsMap"]>;
 
-function _recoverAlarms(
-  alarms: Alarms,
-  lastEvacuatedAt: LastEvacuatedAt,
-  tabsMap: TabsMap
-): TabsMap {
+function _recoverAlarms(alarms: EvacuatedAlarm[], tabsMap: TabsMap): TabsMap {
   log("recovered alarms:", alarms);
-  log("lastEvacuatedAt:", lastEvacuatedAt);
-  if (lastEvacuatedAt === undefined) {
-    return tabsMap;
-  }
-  const diff = lastEvacuatedAt > 0 ? Date.now() - lastEvacuatedAt : 0;
-  const threshold = Date.now() + 60_000;
+  const threshold = 60_000;
 
-  const toBeRecoverd: Alarms.Alarm[] = alarms.filter(
-    (a) => threshold < a.scheduledTime + diff
-  );
+  const toBeRecoverd = alarms.filter((a) => a.timeLeft > threshold);
 
   // This case should never happen.
-  const toBeRemoved: Alarms.Alarm[] = alarms.filter(
-    (a) => threshold >= a.scheduledTime + diff
-  );
+  const toBeRemoved = alarms.filter((a) => a.timeLeft <= threshold);
   removeTabOfAlarms(toBeRemoved);
 
+  const now = Date.now();
   toBeRecoverd.forEach((a) => {
     if (!isValidAsId(a.name)) {
       return;
     }
-    browser.alarms.create(a.name, { when: a.scheduledTime + diff });
+    browser.alarms.create(a.name, { when: now + a.timeLeft });
     const tabId = +a.name;
     tabsMap = {
       ...tabsMap,
       [tabId]: {
         lastInactivated: tabsMap?.[tabId]?.lastInactivated,
-        scheduledTime: a.scheduledTime + diff,
+        scheduledTime: now + a.timeLeft,
       },
     };
   });

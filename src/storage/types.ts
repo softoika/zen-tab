@@ -1,6 +1,14 @@
 import type { Tab, TabId, WindowId } from "types";
+import type { Alarms } from "webextension-polyfill-ts";
 
 export type ClosedTab = Pick<Tab, "id" | "title" | "url" | "favIconUrl">;
+
+export type EvacuatedAlarm = Alarms.Alarm & {
+  /**
+   * Time left of the alarm for re-calculating its scheduledTime.
+   */
+  timeLeft: number;
+};
 
 export interface TabStorage {
   /**
@@ -54,22 +62,14 @@ export interface TabStorage {
    * This is necessary because if it is locked, the alarms will not work properly.
    * This is the value for all windows.
    */
-  evacuatedAlarms?: readonly chrome.alarms.Alarm[];
-
-  /**
-   * Timestamp to calculate the time while tabs are evacuated.
-   * This value should be undefined when tabs are'nt evacuated.
-   * This is the value for all windows.
-   */
-  lastEvacuatedAt?: number;
+  evacuatedAlarms?: EvacuatedAlarm[];
 
   /**
    * The lastEvacuatedAt and evacuatedAlarms map for each window.
    */
   evacuationMap?: {
     readonly [_ in WindowId]?: {
-      lastEvacuatedAt: number;
-      evacuatedAlarms: readonly chrome.alarms.Alarm[];
+      evacuatedAlarms: EvacuatedAlarm[];
     };
   };
 }

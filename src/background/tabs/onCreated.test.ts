@@ -144,8 +144,9 @@ describe("tabs.onCreated", () => {
     getStorageMock.mockResolvedValue({
       evacuationMap: {
         123: {
-          lastEvacuatedAt: now - 60_000,
-          evacuatedAlarms: [{ name: "1", scheduledTime: now + 120_000 }],
+          evacuatedAlarms: [
+            { name: "1", scheduledTime: now + 120_000, timeLeft: 180_000 },
+          ],
         },
       },
     });
