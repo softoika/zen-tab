@@ -13,6 +13,7 @@ import type { Options, TabStorage } from "storage/types";
 import { loadOptions } from "storage/options";
 import type { Tab, TabId } from "types";
 import { log } from "utils";
+import { appendToEvacuationMap, evacuateAlarms } from "./evacuation";
 
 type Alarm = chrome.alarms.Alarm;
 
@@ -151,21 +152,30 @@ export async function expireLastTab(
   if (!newTab?.tabId) {
     return;
   }
-  const [when, ...rest] = await Promise.all([
+
+  const [when, minTabs, tabs, ...rest] = await Promise.all([
     getLifetime(currentMillis),
+    loadOptions("minTabs"),
+    browser.tabs.query({ windowId: newTab.windowId, windowType: "normal" }),
     getStorage(["activatedTabs", "tabsMap"]),
     browser.alarms.clear(`${newTab.tabId}`),
   ]);
   let [storage] = rest;
   const activatedTabs = new ActivatedTabs(storage.activatedTabs ?? {});
   const lastTabId = activatedTabs.getLastTabId(newTab.windowId);
+
   if (lastTabId) {
-    browser.alarms.create(`${lastTabId}`, { when });
+    if (tabs.length > minTabs) {
+      browser.alarms.create(`${lastTabId}`, { when });
+    } else {
+      await appendToEvacuationMap(`${lastTabId}`, { when }, newTab.windowId);
+    }
     storage = {
       ...storage,
       tabsMap: updateTabsMap(storage.tabsMap, lastTabId, currentMillis, when),
     };
   }
+
   updateStorage({
     ...storage,
     activatedTabs: activatedTabs.push(newTab.tabId, newTab.windowId).value,

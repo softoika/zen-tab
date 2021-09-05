@@ -4,6 +4,7 @@ import { updateStorage, getStorage, getValue } from "storage/tabs";
 import type { EvacuatedAlarm, TabStorage } from "storage/types";
 import type { NotNull, WindowId } from "types";
 import { log } from "utils";
+import type { Alarms } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import { removeTabOfAlarms } from "./lifetime";
 
@@ -79,6 +80,39 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
   updateStorage({ evacuationMap });
   targetAlarms.map((alarm) => browser.alarms.clear(alarm.name));
   log(`evacuated alarms(windowId: ${windowId})`, targetAlarms);
+}
+
+export async function appendToEvacuationMap(
+  name: string,
+  alarmInfo: Alarms.CreateAlarmInfoType,
+  windowId: WindowId
+) {
+  if (!alarmInfo.when) {
+    return;
+  }
+
+  const now = Date.now();
+  const _evacuationMap = await getValue("evacuationMap");
+  let evacuationMap = _evacuationMap ?? {};
+
+  let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
+  evacuatedAlarms = evacuatedAlarms.filter((alarm) => alarm.name !== name);
+
+  evacuationMap = {
+    ...evacuationMap,
+    [windowId]: {
+      evacuatedAlarms: [
+        ...evacuatedAlarms,
+        {
+          name,
+          scheduledTime: alarmInfo.when,
+          timeLeft: alarmInfo.when - now,
+        },
+      ],
+    },
+  };
+
+  updateStorage({ evacuationMap });
 }
 
 async function recoverAlarmsOfAllWindows() {

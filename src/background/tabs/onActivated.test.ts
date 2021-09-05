@@ -1,3 +1,4 @@
+import { DEFAULT_BROWSER_TAB } from "mocks";
 import { loadOptions } from "storage/options";
 import {
   getOutdatedTabs,
@@ -12,6 +13,7 @@ import { handleTabsOnActivated } from "./onActivated";
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
     alarms: { clear: jest.fn(), create: jest.fn() },
+    tabs: { query: jest.fn() },
   },
 }));
 const alarmsClearMock = browser.alarms.clear as jest.MockedFunction<
@@ -19,6 +21,9 @@ const alarmsClearMock = browser.alarms.clear as jest.MockedFunction<
 >;
 const alarmsCreateMock = browser.alarms.create as jest.MockedFunction<
   typeof browser.alarms.create
+>;
+const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
+  typeof browser.tabs.query
 >;
 
 jest.mock("storage/tabs");
@@ -49,6 +54,7 @@ describe("tabs.onActivated", () => {
     getStorageMock.mockResolvedValue({});
     getOutdatedTabsMock.mockResolvedValue(new OutdatedTabs({}));
     loadOptionsMock.mockResolvedValue(0);
+    tabsQueryMock.mockResolvedValue([DEFAULT_BROWSER_TAB]);
   });
 
   afterEach(() => {
@@ -59,10 +65,13 @@ describe("tabs.onActivated", () => {
     getOutdatedTabsMock.mockReset();
     updateOutdatedTabsMock.mockReset();
     loadOptionsMock.mockReset();
+    tabsQueryMock.mockReset();
   });
 
   test("starts counting down the last activated tab", async () => {
-    loadOptionsMock.mockResolvedValue(30 * 60_000);
+    loadOptionsMock.mockReset();
+    loadOptionsMock.mockResolvedValueOnce(30 * 60_000);
+    loadOptionsMock.mockResolvedValueOnce(0); // minTabs
     getStorageMock.mockResolvedValue({ activatedTabs: { 123: [{ id: 1 }] } });
     const now = 1629507415058;
     jest.setSystemTime(now);

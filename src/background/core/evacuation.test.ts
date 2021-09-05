@@ -4,7 +4,11 @@ import { updateStorage, getStorage, getValue } from "storage/tabs";
 import type { EvacuatedAlarm, TabStorage } from "storage/types";
 import type { Alarms, Tabs } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
-import { evacuateAlarms, recoverAlarms } from "./evacuation";
+import {
+  appendToEvacuationMap,
+  evacuateAlarms,
+  recoverAlarms,
+} from "./evacuation";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -256,6 +260,112 @@ describe("background/core/evacuation", () => {
       expect(loadOptionsMock).toBeCalledWith("minTabs");
       expect(updateStorageMock).not.toBeCalled();
       expect(alarmsClearMock).not.toBeCalled();
+    });
+  });
+
+  describe("appendToEvacuationMap()", () => {
+    test("appends alarm info to the existing map", async () => {
+      const now = 1630828094955;
+      jest.setSystemTime(now);
+      getValueMock.mockResolvedValue({
+        123: {
+          evacuatedAlarms: [
+            {
+              name: "1",
+              scheduledTime: now + 30 * 60_000,
+              timeLeft: 30 * 60_000,
+            },
+          ],
+        },
+      });
+
+      await appendToEvacuationMap("2", { when: now + 40 * 60_000 }, 123);
+
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            evacuatedAlarms: [
+              {
+                name: "1",
+                scheduledTime: now + 30 * 60_000,
+                timeLeft: 30 * 60_000,
+              },
+              {
+                name: "2",
+                scheduledTime: now + 40 * 60_000,
+                timeLeft: 40 * 60_000,
+              },
+            ],
+          },
+        },
+      });
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+    });
+
+    test("creates the evacuated alarms list for the window if not exist", async () => {
+      const now = 1630828094955;
+      jest.setSystemTime(now);
+      getValueMock.mockResolvedValue(undefined);
+
+      await appendToEvacuationMap("1", { when: now + 30 * 60_000 }, 123);
+
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            evacuatedAlarms: [
+              {
+                name: "1",
+                scheduledTime: now + 30 * 60_000,
+                timeLeft: 30 * 60_000,
+              },
+            ],
+          },
+        },
+      });
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+    });
+
+    test("overrides the alarm if the name is duplicated", async () => {
+      const now = 1630828094955;
+      jest.setSystemTime(now);
+      getValueMock.mockResolvedValue({
+        123: {
+          evacuatedAlarms: [
+            {
+              name: "1",
+              scheduledTime: now + 30 * 60_000,
+              timeLeft: 30 * 60_000,
+            },
+            {
+              name: "2",
+              scheduledTime: now + 40 * 60_000,
+              timeLeft: 40 * 60_000,
+            },
+          ],
+        },
+      });
+
+      await appendToEvacuationMap("2", { when: now + 50 * 60_000 }, 123);
+
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            evacuatedAlarms: [
+              {
+                name: "1",
+                scheduledTime: now + 30 * 60_000,
+                timeLeft: 30 * 60_000,
+              },
+              {
+                name: "2",
+                scheduledTime: now + 50 * 60_000,
+                timeLeft: 50 * 60_000,
+              },
+            ],
+          },
+        },
+      });
+      expect(getValueMock).toBeCalledWith("evacuationMap");
     });
   });
 
