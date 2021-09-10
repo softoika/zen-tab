@@ -315,7 +315,11 @@ describe("lifetime", () => {
     test("just updates the lastTabId if the current lastTabId is undefined", async () => {
       const baseLimit = 1_800_000;
       const minTabs = 2;
-      tabsQueryMock.mockResolvedValue([]);
+      tabsQueryMock.mockResolvedValue([
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+        DEFAULT_BROWSER_TAB,
+      ]);
       loadOptionsMock.mockResolvedValueOnce(baseLimit);
       loadOptionsMock.mockResolvedValueOnce(minTabs);
       getStorageMock.mockResolvedValue({});
@@ -413,6 +417,40 @@ describe("lifetime", () => {
         activatedTabs: { 1: [{ id: 1234 }, { id: 111 }] },
       });
       expect(browser.alarms.create).not.toBeCalled();
+    });
+
+    test("removes the alarm from the evacuationMap if tabs <= minTabs", async () => {
+      const baseLimit = 1_800_000;
+      const minTabs = 2;
+      const tabs = [
+        { ...DEFAULT_BROWSER_TAB, id: 1234, windowId: 1 },
+        { ...DEFAULT_BROWSER_TAB, id: 111, windowId: 1 },
+      ];
+      const tab = { tabId: 1234, windowId: 1 };
+      const currentMillis = 1605316150185;
+      jest.setSystemTime(currentMillis);
+      tabsQueryMock.mockResolvedValue(tabs);
+      loadOptionsMock.mockResolvedValueOnce(baseLimit);
+      loadOptionsMock.mockResolvedValueOnce(minTabs);
+      getStorageMock.mockResolvedValue({});
+      getValueMock.mockResolvedValue({
+        1: {
+          evacuatedAlarms: [
+            {
+              name: "1234",
+              scheduledTime: currentMillis + 30 * 60_000,
+              timeLeft: 30 * 60_000,
+            },
+          ],
+        },
+      });
+
+      await expireLastTab(tab, currentMillis);
+
+      expect(getValueMock).toBeCalledWith("evacuationMap");
+      expect(updateStorageMock).nthCalledWith(1, {
+        evacuationMap: { 1: { evacuatedAlarms: [] } },
+      });
     });
   });
 

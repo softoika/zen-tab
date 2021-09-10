@@ -115,6 +115,31 @@ export async function appendToEvacuationMap(
   updateStorage({ evacuationMap });
 }
 
+export async function removeFromEvacuationMap(
+  name: string,
+  windowId: WindowId
+) {
+  const _evacuationMap = await getValue("evacuationMap");
+  let evacuationMap = _evacuationMap ?? {};
+
+  let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
+
+  if (evacuatedAlarms.length === 0) {
+    return;
+  }
+
+  evacuatedAlarms = evacuatedAlarms.filter((alarm) => alarm.name !== name);
+
+  evacuationMap = {
+    ...evacuationMap,
+    [windowId]: {
+      evacuatedAlarms,
+    },
+  };
+
+  updateStorage({ evacuationMap });
+}
+
 async function recoverAlarmsOfAllWindows() {
   const storage = await getStorage(["evacuatedAlarms", "tabsMap"]);
   let tabsMap = storage.tabsMap ?? {};

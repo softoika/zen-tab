@@ -7,6 +7,7 @@ import {
   updateStorage,
 } from "storage/tabs";
 import { OutdatedTabs } from "tabs";
+import { flushPromises } from "testUtils";
 import { browser } from "webextension-polyfill-ts";
 import { handleTabsOnActivated } from "./onActivated";
 
@@ -77,7 +78,7 @@ describe("tabs.onActivated", () => {
     jest.setSystemTime(now);
 
     await handleTabsOnActivated({ tabId: 2, windowId: 123 });
-    await Promise.resolve();
+    await flushPromises();
 
     expect(loadOptionsMock).toBeCalledWith("baseLimit");
     expect(alarmsCreateMock).toBeCalledWith("1", { when: now + 30 * 60_000 });
@@ -93,7 +94,7 @@ describe("tabs.onActivated", () => {
     getStorageMock.mockResolvedValue({ activatedTabs: { 123: [{ id: 1 }] } });
 
     await handleTabsOnActivated({ tabId: 2, windowId: 123 });
-    await Promise.resolve();
+    await flushPromises();
 
     expect(loadOptionsMock).toBeCalledWith("baseLimit");
     expect(alarmsClearMock).toBeCalledWith("2");

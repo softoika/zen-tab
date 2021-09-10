@@ -8,6 +8,7 @@ import {
   appendToEvacuationMap,
   evacuateAlarms,
   recoverAlarms,
+  removeFromEvacuationMap,
 } from "./evacuation";
 
 jest.mock("webextension-polyfill-ts", () => ({
@@ -367,6 +368,65 @@ describe("background/core/evacuation", () => {
       });
       expect(getValueMock).toBeCalledWith("evacuationMap");
     });
+  });
+
+  describe("removeFromEvacuationMap()", () => {
+    test("removes the alarm info from the evacuationMap", async () => {
+      const now = 1630828094955;
+      jest.setSystemTime(now);
+      getValueMock.mockResolvedValue({
+        123: {
+          evacuatedAlarms: [
+            {
+              name: "1",
+              scheduledTime: now + 30 * 60_000,
+              timeLeft: 30 * 60_000,
+            },
+            {
+              name: "2",
+              scheduledTime: now + 40 * 60_000,
+              timeLeft: 40 * 60_000,
+            },
+          ],
+        },
+      });
+
+      await removeFromEvacuationMap("1", 123);
+
+      expect(updateStorageMock).toBeCalledWith({
+        evacuationMap: {
+          123: {
+            evacuatedAlarms: [
+              {
+                name: "2",
+                scheduledTime: now + 40 * 60_000,
+                timeLeft: 40 * 60_000,
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test.each`
+      evacuationMap
+      ${{ 123: { evacuateAlarms: [] } }}
+      ${{ 234: { evacuateAlarms: [{ name: "1", scheduledTime: 1628479861293, timeLeft: 0 }] } }}
+      ${{ 123: {} }}
+      ${{ 123: undefined }}
+      ${undefined}
+    `(
+      `skips the storage update if the alarms for the window are empty`,
+      async ({ evacuationMap }) => {
+        const now = 1630828094955;
+        jest.setSystemTime(now);
+        getValueMock.mockResolvedValue(evacuationMap);
+
+        await removeFromEvacuationMap("1", 123);
+
+        expect(updateStorageMock).not.toBeCalled();
+      }
+    );
   });
 
   describe("recoverAlarms()", () => {
