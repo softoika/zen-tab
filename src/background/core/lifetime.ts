@@ -161,7 +161,7 @@ export async function expireLastTab(
     getLifetime(currentMillis),
     loadOptions("minTabs"),
     browser.tabs.query({ windowId: newTab.windowId, windowType: "normal" }),
-    getStorage(["activatedTabs", "tabsMap"]),
+    getStorage(["activatedTabs", "tabsMap", "evacuationMap"]),
   ]);
   let storage = _storage;
   const activatedTabs = new ActivatedTabs(storage.activatedTabs ?? {});
@@ -170,14 +170,23 @@ export async function expireLastTab(
   if (tabs.length > minTabs) {
     await browser.alarms.clear(`${newTab.tabId}`);
   } else {
-    await removeFromEvacuationMap(`${newTab.tabId}`, newTab.windowId);
+    storage.evacuationMap = removeFromEvacuationMap(
+      storage.evacuationMap ?? {},
+      `${newTab.tabId}`,
+      newTab.windowId
+    );
   }
 
   if (lastTabId) {
     if (tabs.length > minTabs) {
       browser.alarms.create(`${lastTabId}`, { when });
     } else {
-      await appendToEvacuationMap(`${lastTabId}`, { when }, newTab.windowId);
+      storage.evacuationMap = appendToEvacuationMap(
+        storage.evacuationMap ?? {},
+        `${lastTabId}`,
+        { when },
+        newTab.windowId
+      );
     }
     storage = {
       ...storage,

@@ -381,11 +381,11 @@ describe("lifetime", () => {
       jest.setSystemTime(currentMillis);
       getStorageMock.mockResolvedValue({
         activatedTabs: { 1: [{ id: lastTabId }] },
+        evacuationMap: { 1: { evacuatedAlarms: [] } },
       });
       tabsQueryMock.mockResolvedValue(tabs);
       loadOptionsMock.mockResolvedValueOnce(baseLimit);
       loadOptionsMock.mockResolvedValueOnce(minTabs);
-      getValueMock.mockResolvedValue({ 1: { evacuatedAlarms: [] } });
 
       await expireLastTab(tab, currentMillis);
 
@@ -395,6 +395,12 @@ describe("lifetime", () => {
       });
       expect(loadOptionsMock).toBeCalledWith("minTabs");
       expect(updateStorageMock).toBeCalledWith({
+        tabsMap: {
+          [lastTabId]: {
+            lastInactivated: currentMillis,
+            scheduledTime: currentMillis + baseLimit,
+          },
+        },
         evacuationMap: {
           1: {
             evacuatedAlarms: [
@@ -404,14 +410,6 @@ describe("lifetime", () => {
                 timeLeft: baseLimit,
               },
             ],
-          },
-        },
-      });
-      expect(updateStorageMock).toBeCalledWith({
-        tabsMap: {
-          [lastTabId]: {
-            lastInactivated: currentMillis,
-            scheduledTime: currentMillis + baseLimit,
           },
         },
         activatedTabs: { 1: [{ id: 1234 }, { id: 111 }] },
@@ -432,23 +430,24 @@ describe("lifetime", () => {
       tabsQueryMock.mockResolvedValue(tabs);
       loadOptionsMock.mockResolvedValueOnce(baseLimit);
       loadOptionsMock.mockResolvedValueOnce(minTabs);
-      getStorageMock.mockResolvedValue({});
-      getValueMock.mockResolvedValue({
-        1: {
-          evacuatedAlarms: [
-            {
-              name: "1234",
-              scheduledTime: currentMillis + 30 * 60_000,
-              timeLeft: 30 * 60_000,
-            },
-          ],
+      getStorageMock.mockResolvedValue({
+        evacuationMap: {
+          1: {
+            evacuatedAlarms: [
+              {
+                name: "1234",
+                scheduledTime: currentMillis + 30 * 60_000,
+                timeLeft: 30 * 60_000,
+              },
+            ],
+          },
         },
       });
 
       await expireLastTab(tab, currentMillis);
 
-      expect(getValueMock).toBeCalledWith("evacuationMap");
       expect(updateStorageMock).nthCalledWith(1, {
+        activatedTabs: { 1: [{ id: 1234 }] },
         evacuationMap: { 1: { evacuatedAlarms: [] } },
       });
     });

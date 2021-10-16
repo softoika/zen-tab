@@ -82,18 +82,17 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
   log(`evacuated alarms(windowId: ${windowId})`, targetAlarms);
 }
 
-export async function appendToEvacuationMap(
+export function appendToEvacuationMap(
+  evacuationMap: NotNull<TabStorage["evacuationMap"]>,
   name: string,
   alarmInfo: Alarms.CreateAlarmInfoType,
   windowId: WindowId
 ) {
   if (!alarmInfo.when) {
-    return;
+    return evacuationMap;
   }
 
   const now = Date.now();
-  const _evacuationMap = await getValue("evacuationMap");
-  let evacuationMap = _evacuationMap ?? {};
 
   let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
   evacuatedAlarms = evacuatedAlarms.filter((alarm) => alarm.name !== name);
@@ -112,20 +111,18 @@ export async function appendToEvacuationMap(
     },
   };
 
-  updateStorage({ evacuationMap });
+  return evacuationMap;
 }
 
-export async function removeFromEvacuationMap(
+export function removeFromEvacuationMap(
+  evacuationMap: NotNull<TabStorage["evacuationMap"]>,
   name: string,
   windowId: WindowId
 ) {
-  const _evacuationMap = await getValue("evacuationMap");
-  let evacuationMap = _evacuationMap ?? {};
-
   let evacuatedAlarms = evacuationMap[windowId]?.evacuatedAlarms ?? [];
 
   if (evacuatedAlarms.length === 0) {
-    return;
+    return evacuationMap;
   }
 
   evacuatedAlarms = evacuatedAlarms.filter((alarm) => alarm.name !== name);
@@ -137,7 +134,7 @@ export async function removeFromEvacuationMap(
     },
   };
 
-  updateStorage({ evacuationMap });
+  return evacuationMap;
 }
 
 async function recoverAlarmsOfAllWindows() {
