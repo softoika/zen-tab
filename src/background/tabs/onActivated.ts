@@ -1,5 +1,5 @@
 import { expireLastTab } from "background/core/lifetime";
-import { getOutdatedTabs, updateOutdatedTabs } from "storage/tabs";
+import { getOutdatedTabs, updateOutdatedTabs } from "storage/local";
 import type { Async } from "types";
 import { log } from "utils";
 

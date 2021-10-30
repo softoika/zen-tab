@@ -10,7 +10,7 @@ export type EvacuatedAlarm = Alarms.Alarm & {
   timeLeft: number;
 };
 
-export interface TabStorage {
+export interface LocalStorage {
   /**
    * The stored tab objects that are currently opened.
    * This is necessary because the tab object cannot be retrieved
@@ -74,7 +74,7 @@ export interface TabStorage {
   };
 }
 
-export interface Options {
+export interface SyncStorage {
   /**
    * The mininum number that this extension can keep tabs.
    * The number of tabs can never be less than this number.

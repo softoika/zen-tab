@@ -1,12 +1,12 @@
 import { useTimeLeftMap } from "./useTimeLeftMap";
 import { renderHook } from "@testing-library/react-hooks";
-import { loadOptions } from "storage/options";
-import { getValue } from "storage/tabs";
-import type { Options, TabStorage } from "storage/types";
+import { loadOptions } from "storage/sync";
+import { getValue } from "storage/local";
+import type { SyncStorage, LocalStorage } from "storage/types";
 
-jest.mock("storage/options");
+jest.mock("storage/sync");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
 const now = 1617535933951;
@@ -139,8 +139,8 @@ describe("useTimeLeftMap()", () => {
 });
 
 function mockResolvedValues(values: {
-  baseLimit: Options["baseLimit"];
-  tabsMap: TabStorage["tabsMap"];
+  baseLimit: SyncStorage["baseLimit"];
+  tabsMap: LocalStorage["tabsMap"];
 }) {
   loadOptionsMock.mockResolvedValue(values.baseLimit);
   getValueMock.mockResolvedValue(values.tabsMap);

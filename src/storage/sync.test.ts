@@ -1,7 +1,7 @@
 import { browser } from "webextension-polyfill-ts";
 import type { Storage } from "webextension-polyfill-ts";
-import type { Options } from "./types";
-import { loadOptions, initOptions } from "./options";
+import type { SyncStorage } from "./types";
+import { loadOptions, initOptions } from "./sync";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -17,13 +17,13 @@ jest.mock("webextension-polyfill-ts", () => ({
 const storage = browser.storage
   .sync as jest.Mocked<Storage.SyncStorageAreaSync>;
 
-const DEFAULT_OPTIONS: Options = {
+const DEFAULT_OPTIONS: SyncStorage = {
   minTabs: 3,
   baseLimit: 30000,
   protectPinnedTabs: true,
 };
 
-describe("storage/options", () => {
+describe("storage/sync", () => {
   afterEach(() => {
     storage.get.mockReset();
     storage.set.mockReset();

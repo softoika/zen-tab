@@ -7,17 +7,13 @@ import {
   getValue,
   updateOutdatedTabs,
   updateStorage,
-} from "storage/tabs";
+} from "storage/local";
 import { isValidAsId } from "background/utils";
-import type { Options, TabStorage } from "storage/types";
-import { loadOptions } from "storage/options";
+import type { SyncStorage, LocalStorage } from "storage/types";
+import { loadOptions } from "storage/sync";
 import type { Tab, TabId } from "types";
 import { log } from "utils";
-import {
-  appendToEvacuationMap,
-  evacuateAlarms,
-  removeFromEvacuationMap,
-} from "./evacuation";
+import { appendToEvacuationMap, removeFromEvacuationMap } from "./evacuation";
 
 type Alarm = chrome.alarms.Alarm;
 
@@ -137,12 +133,12 @@ export async function removeTabOfAlarms(alarms: Alarm[]) {
 
 function isProtectedAsPinnedTab(
   tab: Tabs.Tab,
-  protectPinnedTabs: Options["protectPinnedTabs"]
+  protectPinnedTabs: SyncStorage["protectPinnedTabs"]
 ) {
   return tab.pinned && protectPinnedTabs;
 }
 
-type TabsMap = TabStorage["tabsMap"];
+type TabsMap = LocalStorage["tabsMap"];
 
 /**
  * Set an alarm for the last activated tab.
@@ -212,7 +208,7 @@ export async function expireInactiveTabs(tabs: Tab[], currentMillis: number) {
   const delayUnit = 1000;
   const when = await getLifetime(currentMillis);
   let totalDelay = 0;
-  let tabsMap: TabStorage["tabsMap"] = {};
+  let tabsMap: LocalStorage["tabsMap"] = {};
   tabs
     .filter((tab) => !tab.active)
     .map((tab) => tab.id)

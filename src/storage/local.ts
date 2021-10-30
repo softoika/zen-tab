@@ -1,29 +1,29 @@
 import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
-import type { TabStorage } from "./types";
+import type { LocalStorage } from "./types";
 
 const storage = () => browser.storage.local;
 
-export function getStorage(): Promise<TabStorage>;
-export function getStorage<K extends keyof TabStorage>(
+export function getStorage(): Promise<LocalStorage>;
+export function getStorage<K extends keyof LocalStorage>(
   keys: K[]
-): Promise<Pick<TabStorage, K>>;
-export function getStorage<K extends keyof TabStorage>(
+): Promise<Pick<LocalStorage, K>>;
+export function getStorage<K extends keyof LocalStorage>(
   keys?: K[]
-): Promise<Pick<TabStorage, K> | TabStorage> {
+): Promise<Pick<LocalStorage, K> | LocalStorage> {
   if (!keys) {
     return storage().get();
   }
   return storage().get(keys);
 }
 
-export function updateStorage(value: TabStorage) {
+export function updateStorage(value: LocalStorage) {
   storage().set(value);
 }
 
-export async function getValue<K extends keyof TabStorage>(
+export async function getValue<K extends keyof LocalStorage>(
   key: K
-): Promise<TabStorage[K] | undefined> {
+): Promise<LocalStorage[K] | undefined> {
   const result = await storage().get(key);
   return result[key];
 }

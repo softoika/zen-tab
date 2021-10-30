@@ -1,10 +1,10 @@
 import React from "react";
-import type { Options } from "storage/types";
+import type { SyncStorage } from "storage/types";
 import { Input } from "./components/Input";
 
-type BaseLimit = Options["baseLimit"];
+type BaseLimit = SyncStorage["baseLimit"];
 
-type Props = Pick<Options, "baseLimit"> & {
+type Props = Pick<SyncStorage, "baseLimit"> & {
   onUpdate(baseLimit: BaseLimit): void;
 };
 

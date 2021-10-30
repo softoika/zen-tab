@@ -1,5 +1,5 @@
 import { browser } from "webextension-polyfill-ts";
-import type { Options } from "./types";
+import type { SyncStorage } from "./types";
 
 const storage = () => browser.storage.sync;
 
@@ -15,11 +15,11 @@ export async function initOptions(nodeEnv = "production") {
   return saveOptions(defaultOptions);
 }
 
-export async function loadOptions(): Promise<Options>;
-export async function loadOptions<K extends keyof Options>(
+export async function loadOptions(): Promise<SyncStorage>;
+export async function loadOptions<K extends keyof SyncStorage>(
   key: K
-): Promise<Options[K]>;
-export async function loadOptions<K extends keyof Options>(key?: K) {
+): Promise<SyncStorage[K]>;
+export async function loadOptions<K extends keyof SyncStorage>(key?: K) {
   if (!key) {
     return storage().get();
   }
@@ -27,6 +27,6 @@ export async function loadOptions<K extends keyof Options>(key?: K) {
   return options[key];
 }
 
-export function saveOptions(options: Options) {
+export function saveOptions(options: SyncStorage) {
   storage().set(options);
 }

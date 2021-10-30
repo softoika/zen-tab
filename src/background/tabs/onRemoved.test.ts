@@ -7,8 +7,8 @@ import {
   updateClosedTabHistory,
   updateOutdatedTabs,
   updateStorage,
-} from "storage/tabs";
-import { loadOptions } from "storage/options";
+} from "storage/local";
+import { loadOptions } from "storage/sync";
 import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
 import type { Tab } from "types";
 import { browser } from "webextension-polyfill-ts";
@@ -31,7 +31,7 @@ const alarmsGetAllMock = browser.alarms.getAll as jest.MockedFunction<
   typeof browser.alarms.getAll
 >;
 
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const getClosedTabHistoryMock = getClosedTabHistory as jest.MockedFunction<
   typeof getClosedTabHistory
 >;
@@ -49,15 +49,13 @@ const updateActivatedTabsMock = updateActivatedTabs as jest.MockedFunction<
 const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
   typeof updateOutdatedTabs
 >;
-
-jest.mock("storage/options");
-const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
-
-jest.mock("storage/tabs");
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
 >;
 const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
+
+jest.mock("storage/sync");
+const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("tabs.onRemoved", () => {
   beforeAll(() => {

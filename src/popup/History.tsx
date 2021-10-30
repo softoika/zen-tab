@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getClosedTabHistory } from "storage/tabs";
+import { getClosedTabHistory } from "storage/local";
 import type { ClosedTab } from "storage/types";
 import { browser } from "webextension-polyfill-ts";
 import { FavIcon } from "./components/FavIcon";

@@ -1,7 +1,7 @@
 import { DEFAULT_BROWSER_TAB } from "mocks";
-import { loadOptions } from "storage/options";
-import { updateStorage, getStorage, getValue } from "storage/tabs";
-import type { EvacuatedAlarm, TabStorage } from "storage/types";
+import { loadOptions } from "storage/sync";
+import { updateStorage, getStorage, getValue } from "storage/local";
+import type { EvacuatedAlarm, LocalStorage } from "storage/types";
 import type { Alarms, Tabs } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
 import {
@@ -39,7 +39,7 @@ const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
   typeof browser.tabs.query
 >;
 
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
 >;
@@ -48,7 +48,7 @@ const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
 jest.mock("./lifetime");
 
-jest.mock("storage/options");
+jest.mock("storage/sync");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("background/core/evacuation", () => {
@@ -464,7 +464,7 @@ describe("background/core/evacuation", () => {
         { name: "1", scheduledTime: baseTime, timeLeft: 50 * 60_000 },
         { name: "2", scheduledTime: baseTime + 60_000, timeLeft: 51 * 60_000 },
       ];
-      const tabsMap: TabStorage["tabsMap"] = {
+      const tabsMap: LocalStorage["tabsMap"] = {
         1: {
           lastInactivated: baseTime - 61 * 60 * 1000,
           scheduledTime: baseTime,
@@ -502,7 +502,7 @@ describe("background/core/evacuation", () => {
   describe("recoverAlarms(windowId)", () => {
     test("recovers alarms for the window", async () => {
       const baseTime = 1628502404949;
-      const evacuationMap: TabStorage["evacuationMap"] = {
+      const evacuationMap: LocalStorage["evacuationMap"] = {
         123: {
           evacuatedAlarms: [
             { name: "1", scheduledTime: baseTime, timeLeft: 50 * 60_000 },
@@ -519,7 +519,7 @@ describe("background/core/evacuation", () => {
           ],
         },
       };
-      const tabsMap: TabStorage["tabsMap"] = {
+      const tabsMap: LocalStorage["tabsMap"] = {
         1: {
           lastInactivated: baseTime - 61 * 60_000,
           scheduledTime: baseTime,
@@ -568,7 +568,7 @@ describe("background/core/evacuation", () => {
 
     test("does nothing if the alarms of the window aren't evacuated", async () => {
       const baseTime = 1628502404949;
-      const evacuationMap: TabStorage["evacuationMap"] = {
+      const evacuationMap: LocalStorage["evacuationMap"] = {
         // 123 does not exist
         456: {
           evacuatedAlarms: [
@@ -576,7 +576,7 @@ describe("background/core/evacuation", () => {
           ],
         },
       };
-      const tabsMap: TabStorage["tabsMap"] = {
+      const tabsMap: LocalStorage["tabsMap"] = {
         1: {
           lastInactivated: baseTime - 61 * 60 * 1000,
           scheduledTime: baseTime,

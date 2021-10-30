@@ -6,9 +6,9 @@ import {
   getValue,
   updateOutdatedTabs,
   updateStorage,
-} from "storage/tabs";
+} from "storage/local";
 import type { Tab } from "types";
-import { loadOptions } from "storage/options";
+import { loadOptions } from "storage/sync";
 import {
   expireInactiveTabs,
   expireLastTab,
@@ -38,7 +38,7 @@ const alarmsCreateMock = browser.alarms.create as jest.MockedFunction<
   typeof browser.alarms.create
 >;
 
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
@@ -48,7 +48,7 @@ const getOutdatedTabsMock = getOutdatedTabs as jest.MockedFunction<
 >;
 const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
-jest.mock("storage/options");
+jest.mock("storage/sync");
 const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
   typeof updateOutdatedTabs
 >;

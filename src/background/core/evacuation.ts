@@ -1,7 +1,7 @@
 import { isValidAsId } from "background/utils";
-import { loadOptions } from "storage/options";
-import { updateStorage, getStorage, getValue } from "storage/tabs";
-import type { EvacuatedAlarm, TabStorage } from "storage/types";
+import { loadOptions } from "storage/sync";
+import { updateStorage, getStorage, getValue } from "storage/local";
+import type { EvacuatedAlarm, LocalStorage } from "storage/types";
 import type { NotNull, WindowId } from "types";
 import { log } from "utils";
 import type { Alarms } from "webextension-polyfill-ts";
@@ -83,7 +83,7 @@ async function evacuateAlarmsOfWindow(windowId: WindowId) {
 }
 
 export function appendToEvacuationMap(
-  evacuationMap: NotNull<TabStorage["evacuationMap"]>,
+  evacuationMap: NotNull<LocalStorage["evacuationMap"]>,
   name: string,
   alarmInfo: Alarms.CreateAlarmInfoType,
   windowId: WindowId
@@ -115,7 +115,7 @@ export function appendToEvacuationMap(
 }
 
 export function removeFromEvacuationMap(
-  evacuationMap: NotNull<TabStorage["evacuationMap"]>,
+  evacuationMap: NotNull<LocalStorage["evacuationMap"]>,
   name: string,
   windowId: WindowId
 ) {
@@ -168,7 +168,7 @@ async function recoverAlarmsOfWindow(windowId: WindowId) {
   updateStorage({ evacuationMap, tabsMap });
 }
 
-type TabsMap = NotNull<TabStorage["tabsMap"]>;
+type TabsMap = NotNull<LocalStorage["tabsMap"]>;
 
 function _recoverAlarms(alarms: EvacuatedAlarm[], tabsMap: TabsMap): TabsMap {
   log("recovered alarms:", alarms);

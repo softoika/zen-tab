@@ -1,8 +1,8 @@
-import type { TabStorage } from "storage/types";
+import type { LocalStorage } from "storage/types";
 import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class OutdatedTabs {
-  constructor(private outdatedTabs: NotNull<TabStorage["outdatedTabs"]>) {}
+  constructor(private outdatedTabs: NotNull<LocalStorage["outdatedTabs"]>) {}
 
   get value() {
     return this.outdatedTabs;

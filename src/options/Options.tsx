@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import "styles.css";
-import { loadOptions, saveOptions } from "storage/options";
-import type { Options as OptionsType } from "storage/types";
+import { loadOptions, saveOptions } from "storage/sync";
+import type { SyncStorage as OptionsType } from "storage/types";
 import { InputBaseLimit } from "./InputBaseLimit";
 import { InputMinTabs } from "./InputMinTabs";
 

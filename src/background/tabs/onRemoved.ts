@@ -6,7 +6,7 @@ import {
   updateActivatedTabs,
   updateClosedTabHistory,
   updateOutdatedTabs,
-} from "storage/tabs";
+} from "storage/local";
 import type { Async } from "types";
 import { log } from "utils";
 import { browser } from "webextension-polyfill-ts";

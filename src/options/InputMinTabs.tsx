@@ -1,9 +1,9 @@
 import React from "react";
-import type { Options } from "storage/types";
+import type { SyncStorage } from "storage/types";
 import { Input } from "./components/Input";
 
-type Props = Pick<Options, "minTabs"> & {
-  onUpdate(minTabs: Options["minTabs"]): void;
+type Props = Pick<SyncStorage, "minTabs"> & {
+  onUpdate(minTabs: SyncStorage["minTabs"]): void;
 };
 
 export const InputMinTabs: React.FC<Props> = (props) => {

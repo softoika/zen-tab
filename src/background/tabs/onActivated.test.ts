@@ -1,11 +1,11 @@
 import { DEFAULT_BROWSER_TAB } from "mocks";
-import { loadOptions } from "storage/options";
+import { loadOptions } from "storage/sync";
 import {
   getOutdatedTabs,
   getStorage,
   updateOutdatedTabs,
   updateStorage,
-} from "storage/tabs";
+} from "storage/local";
 import { OutdatedTabs } from "tabs";
 import { flushPromises } from "testUtils";
 import { browser } from "webextension-polyfill-ts";
@@ -27,7 +27,7 @@ const tabsQueryMock = browser.tabs.query as jest.MockedFunction<
   typeof browser.tabs.query
 >;
 
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const getStorageMock = getStorage as jest.MockedFunction<typeof getStorage>;
 const updateStorageMock = updateStorage as jest.MockedFunction<
   typeof updateStorage
@@ -39,7 +39,7 @@ const updateOutdatedTabsMock = updateOutdatedTabs as jest.MockedFunction<
   typeof updateOutdatedTabs
 >;
 
-jest.mock("storage/options");
+jest.mock("storage/sync");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("tabs.onActivated", () => {

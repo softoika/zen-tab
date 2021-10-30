@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import { browser } from "webextension-polyfill-ts";
-import { initOptions } from "storage/options";
+import { initOptions } from "storage/sync";
 import {
   getClosedTabHistory,
   updateClosedTabHistory,
   updateStorage,
-} from "storage/tabs";
+} from "storage/local";
 import { expireInactiveTabs, removeTabOnAlarm } from "./core/lifetime";
 import { log } from "utils";
 import { ClosedTabsHistory } from "tabs";

@@ -1,11 +1,11 @@
 import { recoverAlarms } from "background/core/evacuation";
 import { expireInactiveTab } from "background/core/lifetime";
-import { loadOptions } from "storage/options";
+import { loadOptions } from "storage/sync";
 import {
   getClosedTabHistory,
   getOutdatedTabs,
   updateClosedTabHistory,
-} from "storage/tabs";
+} from "storage/local";
 import type { Async } from "types";
 import { log } from "utils";
 import { browser } from "webextension-polyfill-ts";

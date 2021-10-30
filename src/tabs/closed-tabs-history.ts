@@ -1,10 +1,10 @@
-import type { ClosedTab, TabStorage } from "storage/types";
+import type { ClosedTab, LocalStorage } from "storage/types";
 import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class ClosedTabsHistory {
   constructor(
-    private _tabs: NotNull<TabStorage["tabs"]>,
-    private _history: NotNull<TabStorage["history"]>
+    private _tabs: NotNull<LocalStorage["tabs"]>,
+    private _history: NotNull<LocalStorage["history"]>
   ) {}
 
   get tabs() {

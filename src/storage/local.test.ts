@@ -1,7 +1,7 @@
 import type { Storage } from "webextension-polyfill-ts";
 import { browser } from "webextension-polyfill-ts";
-import { getStorage, getValue } from "./tabs";
-import type { TabStorage } from "./types";
+import { getStorage, getValue } from "./local";
+import type { LocalStorage } from "./types";
 
 jest.mock("webextension-polyfill-ts", () => ({
   browser: {
@@ -16,7 +16,7 @@ jest.mock("webextension-polyfill-ts", () => ({
 const localStorage = browser.storage
   .local as jest.Mocked<Storage.LocalStorageArea>;
 
-describe("storage/tabs", () => {
+describe("storage/local", () => {
   beforeEach(() => {
     localStorage.get.mockReset();
     localStorage.set.mockReset();
@@ -24,7 +24,7 @@ describe("storage/tabs", () => {
 
   describe("getStorage()", () => {
     test("gets a whole object that has all values", async () => {
-      const storage: TabStorage = {
+      const storage: LocalStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
       };
@@ -38,7 +38,7 @@ describe("storage/tabs", () => {
 
   describe("getStorage(keys)", () => {
     test("gets an object that has values of specified keys", async () => {
-      const storage: TabStorage = {
+      const storage: LocalStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
       };
@@ -56,7 +56,7 @@ describe("storage/tabs", () => {
 
   describe("getValue(key)", () => {
     test("returns a value of the specified key", async () => {
-      const storage: TabStorage = {
+      const storage: LocalStorage = {
         activatedTabs: { 999: [{ id: 2 }, { id: 1 }] },
         outdatedTabs: { 999: [{ id: 1 }] },
       };

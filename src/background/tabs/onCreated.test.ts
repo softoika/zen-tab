@@ -1,5 +1,5 @@
 import { DEFAULT_BROWSER_TAB, DEFAULT_CHROME_TAB } from "mocks";
-import { loadOptions } from "storage/options";
+import { loadOptions } from "storage/sync";
 import {
   getClosedTabHistory,
   getOutdatedTabs,
@@ -7,7 +7,7 @@ import {
   getValue,
   updateClosedTabHistory,
   updateStorage,
-} from "storage/tabs";
+} from "storage/local";
 import { ClosedTabsHistory, OutdatedTabs } from "tabs";
 import { browser } from "webextension-polyfill-ts";
 import { handleTabsOnCreated } from "./onCreated";
@@ -28,7 +28,7 @@ const alarmsCreateMock = browser.alarms.create as jest.MockedFunction<
   typeof browser.alarms.create
 >;
 
-jest.mock("storage/tabs");
+jest.mock("storage/local");
 const getClosedTabHistoryMock = getClosedTabHistory as jest.MockedFunction<
   typeof getClosedTabHistory
 >;
@@ -43,7 +43,7 @@ const updateStorageMock = updateStorage as jest.MockedFunction<
 >;
 const getValueMock = getValue as jest.MockedFunction<typeof getValue>;
 
-jest.mock("storage/options");
+jest.mock("storage/sync");
 const loadOptionsMock = loadOptions as jest.MockedFunction<typeof loadOptions>;
 
 describe("tabs.onCreated", () => {

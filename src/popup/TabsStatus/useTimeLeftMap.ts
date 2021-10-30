@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { loadOptions } from "storage/options";
-import { getValue } from "storage/tabs";
-import type { Options, TabStorage } from "storage/types";
+import { loadOptions } from "storage/sync";
+import { getValue } from "storage/local";
+import type { SyncStorage, LocalStorage } from "storage/types";
 import type { TabId } from "types";
 
 export interface TimeLeft {
@@ -44,8 +44,8 @@ export function useTimeLeftMap(msInterval = 1000) {
 }
 
 function calculateTimeLeft(
-  baseLimit: Options["baseLimit"],
-  tabsMap: TabStorage["tabsMap"],
+  baseLimit: SyncStorage["baseLimit"],
+  tabsMap: LocalStorage["tabsMap"],
   currentMillis: number
 ): TimeLeftMap {
   const timeLeftMap: TimeLeftMap = {};
@@ -66,7 +66,7 @@ function calculateTimeLeft(
 
 function calculatePercentage(
   timeLeftMillis: number,
-  baseLimit: Options["baseLimit"]
+  baseLimit: SyncStorage["baseLimit"]
 ) {
   if (timeLeftMillis >= 0 && baseLimit > 0) {
     return Math.trunc((timeLeftMillis / baseLimit) * 100);
@@ -81,7 +81,7 @@ function calculatePercentage(
 }
 
 function useTabsMap() {
-  const [tabsMap, setTabsMap] = useState<TabStorage["tabsMap"]>(undefined);
+  const [tabsMap, setTabsMap] = useState<LocalStorage["tabsMap"]>(undefined);
   useEffect(() => {
     fetchTabsMap().then((t) => setTabsMap(t));
   }, []);
@@ -97,7 +97,7 @@ async function fetchTabsMap() {
 }
 
 function useBaseLimit() {
-  const [baseLimit, setBaseLimit] = useState<Options["baseLimit"]>(0);
+  const [baseLimit, setBaseLimit] = useState<SyncStorage["baseLimit"]>(0);
   useEffect(() => {
     loadOptions("baseLimit").then((b) => setBaseLimit(b));
   }, []);

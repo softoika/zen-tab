@@ -1,8 +1,8 @@
-import type { TabStorage } from "storage/types";
+import type { LocalStorage } from "storage/types";
 import type { NotNull, Tab, TabId, WindowId } from "types";
 
 export class ActivatedTabs {
-  constructor(private activatedTabs: NotNull<TabStorage["activatedTabs"]>) {}
+  constructor(private activatedTabs: NotNull<LocalStorage["activatedTabs"]>) {}
 
   get value() {
     return this.activatedTabs;
