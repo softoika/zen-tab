@@ -634,10 +634,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/chrome@0.0.162":
-  version "0.0.162"
-  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.162.tgz"
-  integrity sha512-DiMo9SrOhkb49bXPRke41Nvd9rgDgxn/mqyZ5gQnU+ST3H/vcnnvtwCkpuUl7O9FwoUwECfMSZiBTXuK8sMSwQ==
+"@types/chrome@0.0.163":
+  version "0.0.163"
+  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.163.tgz"
+  integrity sha512-g+3E2tg/ukFsEgH+tB3a/b+J1VSvq/8gh2Jwih9eq+T3Idrz7ngj97u+/ya58Bfei2TQtPlRivj1FsCaSnukDA==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -752,10 +752,10 @@
   resolved "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.3.tgz"
   integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
 
-"@types/react-dom@17.0.10", "@types/react-dom@>=16.9.0":
-  version "17.0.10"
-  resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-17.0.10.tgz"
-  integrity sha512-8oz3NAUId2z/zQdFI09IMhQPNgIbiP8Lslhv39DIDamr846/0spjZK0vnrMak0iB8EKb9QFTTIdg2Wj2zH5a3g==
+"@types/react-dom@17.0.11", "@types/react-dom@>=16.9.0":
+  version "17.0.11"
+  resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-17.0.11.tgz"
+  integrity sha512-f96K3k+24RaLGVu/Y2Ng3e1EbZ8/cVJvypZWd7cy0ofCBaf2lcM46xNhycMZ2xGwbBjRql7hOlZ+e2WlJ5MH3Q==
   dependencies:
     "@types/react" "*"
 
@@ -766,10 +766,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@17.0.33", "@types/react@>=16.9.0":
-  version "17.0.33"
-  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.33.tgz"
-  integrity sha512-pLWntxXpDPaU+RTAuSGWGSEL2FRTNyRQOjSWDke/rxRg14ncsZvx8AKWMWZqvc1UOaJIAoObdZhAWvRaHFi5rw==
+"@types/react@*", "@types/react@17.0.34", "@types/react@>=16.9.0":
+  version "17.0.34"
+  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.34.tgz"
+  integrity sha512-46FEGrMjc2+8XhHXILr+3+/sTe3OfzSPU9YGKILLrUYbQ1CLQC9Daqo1KzENGXAWwrFwiY0l4ZbF20gRvgpWTg==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -1029,9 +1029,9 @@ acorn-globals@^6.0.0:
     acorn-walk "^7.1.1"
 
 acorn-import-assertions@^1.7.6:
-  version "1.7.6"
-  resolved "https://registry.npmjs.org/acorn-import-assertions/-/acorn-import-assertions-1.7.6.tgz"
-  integrity sha512-FlVvVFA1TX6l3lp8VjDnYYq7R1nyW6x3svAt4nDgrWQ9SBaSh9CnbwgSUTasgfNfOG5HlM1ehugCvM+hjo56LA==
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/acorn-import-assertions/-/acorn-import-assertions-1.8.0.tgz"
+  integrity sha512-m7VZ3jwz4eK6A4Vtt8Ew1/mNbP24u0FhdyfA7fSvnJR6LMdfOYnmuIrrJAgrYfYJ10F/otaHTtrtrtmHdMNzEw==
 
 acorn-jsx@^5.3.1:
   version "5.3.2"
@@ -1057,15 +1057,10 @@ acorn@^7.0.0, acorn@^7.1.1:
   resolved "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-acorn@^8.2.4, acorn@^8.5.0:
+acorn@^8.2.4, acorn@^8.4.1, acorn@^8.5.0:
   version "8.5.0"
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.5.0.tgz"
   integrity sha512-yXbYeFy+jUuYd3/CDcg2NkIYE991XYX/bje7LmjJigUciaeO1JR4XxXgCIV1/Zc/dRuFEyw1L0pbA+qynJkW5Q==
-
-acorn@^8.4.1:
-  version "8.4.1"
-  resolved "https://registry.npmjs.org/acorn/-/acorn-8.4.1.tgz"
-  integrity sha512-asabaBSkEKosYKMITunzX177CXxQ4Q8BSSzMTKD+FefUhipQC70gfW5SiUDhYQ3vk8G+81HqQk7Fv9OXwwn9KA==
 
 agent-base@6:
   version "6.0.2"
@@ -1599,10 +1594,10 @@ css-color-names@^0.0.4:
   resolved "https://registry.npmjs.org/css-color-names/-/css-color-names-0.0.4.tgz"
   integrity sha1-gIrcLnnPhHOAabZGyyDsJ762KeA=
 
-css-loader@6.5.0:
-  version "6.5.0"
-  resolved "https://registry.npmjs.org/css-loader/-/css-loader-6.5.0.tgz"
-  integrity sha512-VmuSdQa3K+wJsl39i7X3qGBM5+ZHmtTnv65fqMGI+fzmHoYmszTVvTqC1XN8JwWDViCB1a8wgNim5SV4fb37xg==
+css-loader@6.5.1:
+  version "6.5.1"
+  resolved "https://registry.npmjs.org/css-loader/-/css-loader-6.5.1.tgz"
+  integrity sha512-gEy2w9AnJNnD9Kuo4XAP9VflW/ujKoS9c/syO+uWMlm5igc7LysKzPXaDoR2vroROkSwsTS2tGr1yGGEbZOYZQ==
   dependencies:
     icss-utils "^5.1.0"
     postcss "^8.2.15"
@@ -4609,10 +4604,10 @@ webpack-sources@^3.2.0:
   resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-3.2.0.tgz"
   integrity sha512-fahN08Et7P9trej8xz/Z7eRu8ltyiygEo/hnRi9KqBUs80KeDcnf96ZJo++ewWd84fEf3xSX9bp4ZS9hbw0OBw==
 
-webpack@5.61.0:
-  version "5.61.0"
-  resolved "https://registry.npmjs.org/webpack/-/webpack-5.61.0.tgz"
-  integrity sha512-fPdTuaYZ/GMGFm4WrPi2KRCqS1vDp773kj9S0iI5Uc//5cszsFEDgHNaX4Rj1vobUiU1dFIV3mA9k1eHeluFpw==
+webpack@5.62.1:
+  version "5.62.1"
+  resolved "https://registry.npmjs.org/webpack/-/webpack-5.62.1.tgz"
+  integrity sha512-jNLtnWChS2CMZ7vqWtztv0G6fYB5hz11Zsadp5tE7e4/66zVDj7/KUeQZOsOl8Hz5KrLJH1h2eIDl6AnlyE12Q==
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.50"
