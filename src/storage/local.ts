@@ -1,30 +1,46 @@
 import { browser } from "webextension-polyfill-ts";
 import { ActivatedTabs, ClosedTabsHistory, OutdatedTabs } from "tabs";
 import type { LocalStorage } from "./types";
+import { CacheController } from "./cache";
+import { log } from "utils";
 
 const storage = () => browser.storage.local;
 
-export function getStorage(): Promise<LocalStorage>;
-export function getStorage<K extends keyof LocalStorage>(
+export const cache = new CacheController<LocalStorage>();
+
+export async function getStorage(): Promise<LocalStorage>;
+export async function getStorage<K extends keyof LocalStorage>(
   keys: K[]
 ): Promise<Pick<LocalStorage, K>>;
-export function getStorage<K extends keyof LocalStorage>(
+export async function getStorage<K extends keyof LocalStorage>(
   keys?: K[]
 ): Promise<Pick<LocalStorage, K> | LocalStorage> {
   if (!keys) {
     return storage().get();
   }
-  return storage().get(keys);
+
+  const cacheResult = cache.get(keys);
+  if (cacheResult.missHitKeys < keys) {
+    log("cache hit:", cacheResult.data, "miss hit: ", cacheResult.missHitKeys);
+  } else {
+    log("miss hit:", cacheResult.missHitKeys);
+  }
+  let storageResult: LocalStorage = {};
+  if (cacheResult.missHitKeys.length > 0) {
+    storageResult = await storage().get(cacheResult.missHitKeys);
+  }
+  return { ...cacheResult.data, ...storageResult };
 }
 
 export function updateStorage(value: LocalStorage) {
+  cache.put(value);
   storage().set(value);
 }
 
 export async function getValue<K extends keyof LocalStorage>(
   key: K
 ): Promise<LocalStorage[K] | undefined> {
-  const result = await storage().get(key);
+  const result = await getStorage([key]);
   return result[key];
 }
 
