@@ -30,4 +30,8 @@ export class CacheController<T> {
   put(partialData: Partial<T>) {
     this.data = { ...this.data, ...partialData };
   }
+
+  clear() {
+    this.data = {};
+  }
 }

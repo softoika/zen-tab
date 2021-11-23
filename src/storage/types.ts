@@ -16,7 +16,7 @@ export interface LocalStorage {
    * This is necessary because the tab object cannot be retrieved
    * when closing a tab.
    */
-  tabs?: { readonly [_ in WindowId]: readonly Tab[] };
+  tabs?: { [_ in WindowId]: readonly Tab[] };
 
   tabsMap?: {
     readonly [_ in TabId]: {
@@ -34,7 +34,7 @@ export interface LocalStorage {
     };
   };
 
-  history?: { readonly [_ in WindowId]: readonly ClosedTab[] };
+  history?: { [_ in WindowId]: readonly ClosedTab[] };
 
   /**
    * Stacks of last activated tabs in each window.
@@ -43,7 +43,7 @@ export interface LocalStorage {
    * in index signatures, the `in` keyword is used instead.
    */
   activatedTabs?: {
-    readonly [_ in WindowId]: readonly { id: TabId }[];
+    [_ in WindowId]: readonly { id: TabId }[];
   };
 
   /**
@@ -54,7 +54,7 @@ export interface LocalStorage {
    * in index signatures, the `in` keyword is used instead.
    */
   outdatedTabs?: {
-    readonly [_ in WindowId]: readonly { id: TabId }[];
+    [_ in WindowId]: readonly { id: TabId }[];
   };
 
   /**
@@ -68,7 +68,7 @@ export interface LocalStorage {
    * The lastEvacuatedAt and evacuatedAlarms map for each window.
    */
   evacuationMap?: {
-    readonly [_ in WindowId]?: {
+    [_ in WindowId]?: {
       evacuatedAlarms: EvacuatedAlarm[];
     };
   };

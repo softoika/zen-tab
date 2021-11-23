@@ -13,6 +13,7 @@ import { handleTabsOnCreated } from "./tabs/onCreated";
 import { handleTabsOnRemoved } from "./tabs/onRemoved";
 import { handleTabsOnActivated } from "./tabs/onActivated";
 import { handleIdleOnStateChanged } from "./idle/onStateChanged";
+import { handleWindowsOnRemoved } from "./windows/onRemoved";
 
 chrome.tabs.onCreated.addListener(handleTabsOnCreated);
 
@@ -26,6 +27,8 @@ chrome.tabs.onUpdated.addListener(async (_tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(handleTabsOnRemoved);
+
+chrome.windows.onRemoved.addListener(handleWindowsOnRemoved);
 
 chrome.alarms.onAlarm.addListener((alarm) => removeTabOnAlarm(alarm));
 
