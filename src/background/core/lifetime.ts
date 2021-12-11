@@ -51,7 +51,11 @@ export async function removeTabOnAlarm(alarm: Alarm) {
   }
 
   if (tabs.length > minTabs) {
-    log(`Removed ${tabId}`);
+    log(
+      `Removed ${tabId}`,
+      `tabs.length: ${tabs.length}`,
+      `minTabs: ${minTabs}`
+    );
     browser.tabs.remove(tabId);
   } else {
     const outdatedTabs = await getOutdatedTabs();
