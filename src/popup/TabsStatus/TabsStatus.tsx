@@ -46,7 +46,7 @@ const StatusLabel: React.VFC<{ timeLeft?: TimeLeft; tab: Tab }> = ({
   };
 
   return (
-    <div className="flex-grow-0 flex-shrink-0 w-[50px]">
+    <div className="grow-0 shrink-0 w-[50px]">
       <LabelContent />
     </div>
   );
@@ -54,7 +54,7 @@ const StatusLabel: React.VFC<{ timeLeft?: TimeLeft; tab: Tab }> = ({
 
 const ActiveLabel: React.VFC = () => {
   return (
-    <div className="flex justify-center p-1 bg-green-300 rounded-sm transform scale-75">
+    <div className="flex justify-center p-1 bg-green-300 rounded-sm scale-75">
       ACTIVE
     </div>
   );
@@ -62,7 +62,7 @@ const ActiveLabel: React.VFC = () => {
 
 const PinnedLabel: React.VFC = () => {
   return (
-    <div className="flex justify-center p-1 bg-gray-300 rounded-sm transform scale-75">
+    <div className="flex justify-center p-1 bg-gray-300 rounded-sm scale-75">
       PINNED
     </div>
   );
@@ -75,7 +75,7 @@ const TimeLeftLabel: React.VFC<{ timeLeft: TimeLeft }> = ({ timeLeft }) => {
   )}:${zeroPad(timeLeft.mins)}`;
 
   return (
-    <div className="relative flex justify-center p-1 bg-green-100 rounded-sm transform scale-75 h-[26px]">
+    <div className="relative flex justify-center p-1 bg-green-100 rounded-sm scale-75 h-[26px]">
       {timeLeft.percentage > 0 && (
         <div
           className="absolute inset-y-0 left-0 h-full bg-green-300"
