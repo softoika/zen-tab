@@ -1,13 +1,11 @@
+const colors = require("tailwindcss/colors");
+
 module.exports = {
   mode: "jit",
-  purge: ["src/**/*.{js,jsx,ts,tsx}", "static/*.html"],
-  darkMode: false, // or 'media' or 'class'
+  content: ["src/**/*.{js,jsx,ts,tsx}", "static/*.html"],
   theme: {
-    extend: {},
-  },
-  variants: {
     extend: {
-      borderWidth: ["focus"],
+      green: colors.emerald,
     },
   },
   plugins: [require("@tailwindcss/forms")],
