@@ -55,10 +55,3 @@ chrome.runtime.onInstalled.addListener((details) => {
   log("onInstalled", details);
   onInitExtension();
 });
-
-chrome.management.onEnabled.addListener((info) => {
-  log("onEnabled", info);
-  if (chrome.runtime.id === info.id) {
-    onInitExtension();
-  }
-});
