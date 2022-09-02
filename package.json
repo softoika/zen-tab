@@ -15,7 +15,7 @@
     "clean": "rm -rf dist/"
   },
   "dependencies": {
-    "@tailwindcss/forms": "0.5.2",
+    "@tailwindcss/forms": "0.5.3",
     "autoprefixer": "10.4.8",
     "dayjs": "1.11.5",
     "postcss": "8.4.16",
@@ -25,9 +25,9 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "7.0.2",
-    "@types/chrome": "0.0.195",
+    "@types/chrome": "0.0.196",
     "@types/jest": "27.5.2",
-    "@types/react": "17.0.48",
+    "@types/react": "17.0.49",
     "@types/react-dom": "17.0.17",
     "@typescript-eslint/eslint-plugin": "5.35.1",
     "@typescript-eslint/parser": "5.35.1",
@@ -44,7 +44,7 @@
     "prettier": "2.7.1",
     "react-test-renderer": "17.0.2",
     "style-loader": "3.3.1",
-    "terser-webpack-plugin": "5.3.5",
+    "terser-webpack-plugin": "5.3.6",
     "ts-jest": "27.1.5",
     "ts-loader": "9.3.1",
     "tsconfig-paths-webpack-plugin": "3.5.2",

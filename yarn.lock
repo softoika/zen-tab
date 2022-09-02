@@ -621,10 +621,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@tailwindcss/forms@0.5.2":
-  version "0.5.2"
-  resolved "https://registry.npmjs.org/@tailwindcss/forms/-/forms-0.5.2.tgz"
-  integrity sha512-pSrFeJB6Bg1Mrg9CdQW3+hqZXAKsBrSG9MAfFLKy1pVA4Mb4W7C0k7mEhlmS2Dfo/otxrQOET7NJiJ9RrS563w==
+"@tailwindcss/forms@0.5.3":
+  version "0.5.3"
+  resolved "https://registry.npmjs.org/@tailwindcss/forms/-/forms-0.5.3.tgz"
+  integrity sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==
   dependencies:
     mini-svg-data-uri "^1.2.3"
 
@@ -677,10 +677,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/chrome@0.0.195":
-  version "0.0.195"
-  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.195.tgz"
-  integrity sha512-kmFh1xx7ehXoOVl6OjEBxmiYaquhxCaILjFGwPbW6xwbqzwDKCte+Mzl99aNWg3EP1B4rKVUuRm1vBsiRYks5g==
+"@types/chrome@0.0.196":
+  version "0.0.196"
+  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.196.tgz"
+  integrity sha512-LAjGIQYC0wyiYu6lVT03dBrHBfYTMsM8EmNfQ+UdZipGZe8OUiir6weoa9oQoBw3T3RLzBCp9m904T+rFtpPAg==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -809,10 +809,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@17.0.48", "@types/react@>=16.9.0", "@types/react@^17":
-  version "17.0.48"
-  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.48.tgz"
-  integrity sha512-zJ6IYlJ8cYYxiJfUaZOQee4lh99mFihBoqkOSEGV+dFi9leROW6+PgstzQ+w3gWTnUfskALtQPGHK6dYmPj+2A==
+"@types/react@*", "@types/react@17.0.49", "@types/react@>=16.9.0", "@types/react@^17":
+  version "17.0.49"
+  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.49.tgz"
+  integrity sha512-CCBPMZaPhcKkYUTqFs/hOWqKjPxhTEmnZWjlHHgIMop67DsXywf9B5Os9Hz8KSacjNOgIdnZVJamwl232uxoPg==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -4296,10 +4296,10 @@ terminal-link@^2.0.0:
     ansi-escapes "^4.2.1"
     supports-hyperlinks "^2.0.0"
 
-terser-webpack-plugin@5.3.5, terser-webpack-plugin@^5.1.3:
-  version "5.3.5"
-  resolved "https://registry.npmjs.org/terser-webpack-plugin/-/terser-webpack-plugin-5.3.5.tgz"
-  integrity sha512-AOEDLDxD2zylUGf/wxHxklEkOe2/r+seuyOWujejFrIxHf11brA1/dWQNIgXa1c6/Wkxgu7zvv0JhOWfc2ELEA==
+terser-webpack-plugin@5.3.6, terser-webpack-plugin@^5.1.3:
+  version "5.3.6"
+  resolved "https://registry.npmjs.org/terser-webpack-plugin/-/terser-webpack-plugin-5.3.6.tgz"
+  integrity sha512-kfLFk+PoLUQIbLmB1+PZDMRSZS99Mp+/MHqDNmMA6tOItzRt+Npe3E+fsMs5mfcM0wCtrrdU387UnV+vnSffXQ==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.14"
     jest-worker "^27.4.5"
