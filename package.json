@@ -21,11 +21,11 @@
     "postcss": "8.4.21",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "tailwindcss": "3.2.7"
+    "tailwindcss": "3.3.1"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "7.0.2",
-    "@types/chrome": "0.0.225",
+    "@types/chrome": "0.0.227",
     "@types/jest": "27.5.2",
     "@types/react": "17.0.53",
     "@types/react-dom": "17.0.19",
@@ -33,7 +33,7 @@
     "@typescript-eslint/parser": "5.56.0",
     "copy-webpack-plugin": "10.2.4",
     "css-loader": "6.7.3",
-    "eslint": "8.36.0",
+    "eslint": "8.37.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-jsx-a11y": "6.7.1",
     "eslint-plugin-react": "7.32.2",
@@ -51,7 +51,7 @@
     "typescript": "4.6.4",
     "webextension-polyfill": "0.8.0",
     "webextension-polyfill-ts": "0.26.0",
-    "webpack": "5.76.3",
+    "webpack": "5.77.0",
     "webpack-cli": "4.10.0"
   }
 }
