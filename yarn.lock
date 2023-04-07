@@ -681,10 +681,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/chrome@0.0.227":
-  version "0.0.227"
-  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.227.tgz"
-  integrity sha512-l1sVnf/1wZ/oNPw5X7OJMZjQlqVf3tPO50aE/aETHQRbrYhlHZkwv7lcuOWCimRSkFdHvAW4M+RIBAZACblXng==
+"@types/chrome@0.0.228":
+  version "0.0.228"
+  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.228.tgz"
+  integrity sha512-rDmyVEF+l9H+6FQYqsEGqQOjBw/uaSx6KJ6o47FwbQmPPcskmt8XlPbKjy5KeQXU3ZLiV2x45Fk4kdtRMSghfQ==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -4790,10 +4790,10 @@ webpack-sources@^3.2.3:
   resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-3.2.3.tgz"
   integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
 
-webpack@5.77.0:
-  version "5.77.0"
-  resolved "https://registry.npmjs.org/webpack/-/webpack-5.77.0.tgz"
-  integrity sha512-sbGNjBr5Ya5ss91yzjeJTLKyfiwo5C628AFjEa6WSXcZa4E+F57om3Cc8xLb1Jh0b243AWuSYRf3dn7HVeFQ9Q==
+webpack@5.78.0:
+  version "5.78.0"
+  resolved "https://registry.npmjs.org/webpack/-/webpack-5.78.0.tgz"
+  integrity sha512-gT5DP72KInmE/3azEaQrISjTvLYlSM0j1Ezhht/KLVkrqtv10JoP/RXhwmX/frrutOPuSq3o5Vq0ehR/4Vmd1g==
   dependencies:
     "@types/eslint-scope" "^3.7.3"
     "@types/estree" "^0.0.51"
