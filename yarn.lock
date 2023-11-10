@@ -809,10 +809,10 @@
   resolved "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.3.tgz"
   integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
 
-"@types/react-dom@17.0.22", "@types/react-dom@>=16.9.0":
-  version "17.0.22"
-  resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-17.0.22.tgz"
-  integrity sha512-wHt4gkdSMb4jPp1vc30MLJxoWGsZs88URfmt3FRXoOEYrrqK3I8IuZLE/uFBb4UT6MRfI0wXFu4DS7LS0kUC7Q==
+"@types/react-dom@17.0.23", "@types/react-dom@>=16.9.0":
+  version "17.0.23"
+  resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-17.0.23.tgz"
+  integrity sha512-lnJAZfMEDxfvELeeT24w4rnUYwpzUzQAOTfJQbWYnLcx8AEfz+fXJDCbowIBqNK/Bi4D6j8ovT8Qsda2OtDApA==
   dependencies:
     "@types/react" "^17"
 
@@ -823,10 +823,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@17.0.69", "@types/react@>=16.9.0", "@types/react@^17":
-  version "17.0.69"
-  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.69.tgz"
-  integrity sha512-klEeru//GhiQvXUBayz0Q4l3rKHWsBR/EUOhOeow6hK2jV7MlO44+8yEk6+OtPeOlRfnpUnrLXzGK+iGph5aeg==
+"@types/react@*", "@types/react@17.0.70", "@types/react@>=16.9.0", "@types/react@^17":
+  version "17.0.70"
+  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.70.tgz"
+  integrity sha512-yqYMK49/cnqw+T8R9/C+RNjRddYmPDGI5lKHi3bOYceQCBAh8X2ngSbZP0gnVeyvHr0T7wEgIIGKT1usNol08w==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
