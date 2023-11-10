@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "7.0.2",
-    "@types/chrome": "0.0.248",
+    "@types/chrome": "0.0.251",
     "@types/jest": "27.5.2",
     "@types/react": "17.0.69",
     "@types/react-dom": "17.0.22",
@@ -33,7 +33,7 @@
     "@typescript-eslint/parser": "5.62.0",
     "copy-webpack-plugin": "10.2.4",
     "css-loader": "6.8.1",
-    "eslint": "8.52.0",
+    "eslint": "8.53.0",
     "eslint-config-prettier": "8.10.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-react": "7.33.2",
