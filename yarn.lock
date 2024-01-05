@@ -691,10 +691,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/chrome@0.0.254":
-  version "0.0.254"
-  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.254.tgz"
-  integrity sha512-svkOGKwA+6ZZuk9xtrYun8MYpNY/9hD17rgZ19v3KunhsK1ZOKaMESw12/1AXLh1u3UPA8jQIRi2370DXv9wgw==
+"@types/chrome@0.0.256":
+  version "0.0.256"
+  resolved "https://registry.npmjs.org/@types/chrome/-/chrome-0.0.256.tgz"
+  integrity sha512-NleTQw4DNzhPwObLNuQ3i3nvX1rZ1mgnx5FNHc2KP+Cj1fgd3BrT5yQ6Xvs+7H0kNsYxCY+lxhiCwsqq3JwtEg==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -4001,10 +4001,10 @@ postcss-value-parser@^4.0.0, postcss-value-parser@^4.1.0, postcss-value-parser@^
   resolved "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
-postcss@8.4.32, postcss@^8.4.21, postcss@^8.4.23:
-  version "8.4.32"
-  resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.32.tgz"
-  integrity sha512-D/kj5JNu6oo2EIy+XL/26JEDTlIbB8hw85G8StOE6L74RQAVVP5rej6wxCNqyMbR4RkPfqvezVbPw81Ngd6Kcw==
+postcss@8.4.33, postcss@^8.4.21, postcss@^8.4.23:
+  version "8.4.33"
+  resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.33.tgz"
+  integrity sha512-Kkpbhhdjw2qQs2O2DGX+8m5OVqEcbB9HRBvuYM9pgrjEFUg30A9LmXNlTAUj4S9kgtGyrMbTzVjH7E+s5Re2yg==
   dependencies:
     nanoid "^3.3.7"
     picocolors "^1.0.0"
