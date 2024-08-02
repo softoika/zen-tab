@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@tailwindcss/forms": "0.5.7",
-    "autoprefixer": "10.4.19",
+    "autoprefixer": "10.4.20",
     "dayjs": "1.11.12",
     "postcss": "8.4.40",
     "react": "17.0.2",
