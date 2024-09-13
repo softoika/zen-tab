@@ -2165,10 +2165,10 @@ eslint-plugin-react-hooks@4.6.2:
   resolved "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.2.tgz"
   integrity sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==
 
-eslint-plugin-react@7.35.2:
-  version "7.35.2"
-  resolved "https://registry.npmjs.org/eslint-plugin-react/-/eslint-plugin-react-7.35.2.tgz"
-  integrity sha512-Rbj2R9zwP2GYNcIak4xoAMV57hrBh3hTaR0k7hVjwCQgryE/pw5px4b13EYjduOI0hfXyZhwBxaGpOTbWSGzKQ==
+eslint-plugin-react@7.36.1:
+  version "7.36.1"
+  resolved "https://registry.npmjs.org/eslint-plugin-react/-/eslint-plugin-react-7.36.1.tgz"
+  integrity sha512-/qwbqNXZoq+VP30s1d4Nc1C5GTxjJQjk4Jzs4Wq2qzxFM7dSmuG2UkIjg2USMLh3A/aVcUNrK7v0J5U1XEGGwA==
   dependencies:
     array-includes "^3.1.8"
     array.prototype.findlast "^1.2.5"
@@ -4720,10 +4720,10 @@ symbol-tree@^3.2.4:
   resolved "https://registry.npmjs.org/symbol-tree/-/symbol-tree-3.2.4.tgz"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-tailwindcss@3.4.10:
-  version "3.4.10"
-  resolved "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.10.tgz"
-  integrity sha512-KWZkVPm7yJRhdu4SRSl9d4AK2wM3a50UsvgHZO7xY77NQr2V+fIrEuoDGQcbvswWvFGbS2f6e+jC/6WJm1Dl0w==
+tailwindcss@3.4.11:
+  version "3.4.11"
+  resolved "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.11.tgz"
+  integrity sha512-qhEuBcLemjSJk5ajccN9xJFtM/h0AVCPaA6C92jNP+M2J8kX+eMJHI7R2HFKUvvAsMpcfLILMCFYSeDwpMmlUg==
   dependencies:
     "@alloc/quick-lru" "^5.2.0"
     arg "^5.0.2"
