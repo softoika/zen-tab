@@ -35,7 +35,7 @@
     "css-loader": "6.11.0",
     "eslint": "8.57.1",
     "eslint-config-prettier": "8.10.0",
-    "eslint-plugin-jsx-a11y": "6.10.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.2",
     "eslint-plugin-react-hooks": "4.6.2",
     "jest": "27.5.1",
@@ -51,7 +51,7 @@
     "typescript": "4.6.4",
     "webextension-polyfill": "0.8.0",
     "webextension-polyfill-ts": "0.26.0",
-    "webpack": "5.95.0",
+    "webpack": "5.96.1",
     "webpack-cli": "4.10.0"
   }
 }
