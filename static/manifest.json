@@ -2,14 +2,13 @@
   "name": "Zen Tab",
   "description": "The tab management tool for Chrome",
   "version": "0.0.0",
-  "manifest_version": 2,
-  "browser_action": {
+  "manifest_version": 3,
+  "action": {
     "default_popup": "popup.html"
   },
   "options_page": "options.html",
   "background": {
-    "scripts": ["background.js", "browser-polyfill.js"],
-    "persistent": false
+    "service_worker": "background.js"
   },
   "permissions": [
     "tabs",
@@ -17,8 +16,6 @@
     "unlimitedStorage",
     "alarms",
     "management",
-    "idle",
-    "chrome://favicon/*"
-  ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+    "idle"
+  ]
 }
